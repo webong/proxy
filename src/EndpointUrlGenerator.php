@@ -36,7 +36,7 @@ class EndpointUrlGenerator
             'base_url',
             config('web-proxy.base_url'),
         );
-        $payload = Context::getHidden(WebhookExecutionContextPayload::class);
+        $payload = Context::getHidden(WebhookContextKeys::EXECUTION_PAYLOAD->value);
         $routeParameters = $payload instanceof WebhookExecutionContextPayload
             ? $payload->routeParameters
             : [];

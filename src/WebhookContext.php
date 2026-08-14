@@ -28,7 +28,7 @@ final class WebhookContext
      */
     public function payload(): WebhookExecutionContextPayload
     {
-        $hidden = Context::getHidden(WebhookExecutionContextPayload::class);
+        $hidden = Context::getHidden(WebhookContextKeys::EXECUTION_PAYLOAD->value);
 
         if ($hidden instanceof WebhookExecutionContextPayload) {
             return $hidden;
@@ -74,7 +74,7 @@ final class WebhookContext
             WebhookContextKeys::BASE_URL->value => $payload->baseUrl,
             WebhookContextKeys::PATH_TEMPLATES->value => $payload->pathTemplates,
             WebhookProxyRouteDefinition::CONTEXT_KEY => $payload->routeContext,
-            WebhookExecutionContextPayload::class => $payload,
+            WebhookContextKeys::EXECUTION_PAYLOAD->value => $payload,
             WebhookDestinationOwner::CONTEXT_KEY => $payload->ownerId,
         ];
     }

@@ -13,7 +13,7 @@ final class WebhookDestinationOwner
 
     public function current(): string
     {
-        $payload = Context::getHidden(WebhookExecutionContextPayload::class);
+        $payload = Context::getHidden(WebhookContextKeys::EXECUTION_PAYLOAD->value);
         $ownerId = $payload instanceof WebhookExecutionContextPayload
             ? $payload->ownerId
             : Context::getHidden(self::CONTEXT_KEY);
