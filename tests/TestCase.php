@@ -50,8 +50,8 @@ abstract class TestCase extends Orchestra
                 'prefix' => '',
                 'foreign_key_constraints' => true,
             ],
-            'web-proxy.base_url' => 'https://proxy.example.test',
-            'web-proxy.secret' => 'internal-forwarding-secret',
+            'proxy.base_url' => 'https://proxy.example.test',
+            'proxy.secret' => 'internal-forwarding-secret',
             'webhook-client.configs' => [[
                 'name' => 'test-router',
                 'signing_secret' => '',
@@ -64,7 +64,7 @@ abstract class TestCase extends Orchestra
                 'store_attachments' => false,
                 'process_webhook_job' => ProcessWebhookJob::class,
             ]],
-            'web-proxy.targets' => [
+            'proxy.targets' => [
                 'event' => [],
                 'job' => [
                     'test-webhook-job' => TestWebhookJob::class,

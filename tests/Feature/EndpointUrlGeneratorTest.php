@@ -7,7 +7,7 @@ use Webong\WebProxy\Tests\Support\TestWebhookContextProvider;
 use Webong\WebProxy\WebhookContext;
 
 it('uses a provided path template to build a callback URL', function (): void {
-    config()->set('web-proxy.base_url', 'https://service.example.test');
+    config()->set('proxy.base_url', 'https://service.example.test');
 
     $url = app(EndpointUrlGenerator::class)->path('telegram', [
         'webhook_base_url' => 'https://service.example.test',
@@ -20,7 +20,7 @@ it('uses a provided path template to build a callback URL', function (): void {
 });
 
 it('uses the host context provider when resolving its execution payload', function (): void {
-    config()->set('web-proxy.context_provider', TestWebhookContextProvider::class);
+    config()->set('proxy.context_provider', TestWebhookContextProvider::class);
 
     $payload = app(WebhookContext::class)->payload();
 
@@ -32,7 +32,7 @@ it('uses the host context provider when resolving its execution payload', functi
 });
 
 it('does not infer a scope segment from unrelated context', function (): void {
-    config()->set('web-proxy.base_url', 'https://service.example.test');
+    config()->set('proxy.base_url', 'https://service.example.test');
 
     $url = app(EndpointUrlGenerator::class)->path('telegram', [
         'scope_id' => 'scope-123',
@@ -46,7 +46,7 @@ it('does not infer a scope segment from unrelated context', function (): void {
 });
 
 it('prefers an explicit callback base URL over package configuration', function (): void {
-    config()->set('web-proxy.base_url', 'https://proxy.example.test');
+    config()->set('proxy.base_url', 'https://proxy.example.test');
 
     $url = app(EndpointUrlGenerator::class)->path(
         'telegram',
@@ -63,7 +63,7 @@ it('prefers an explicit callback base URL over package configuration', function 
 
 it('does not fall back to an unrelated service URL', function (): void {
     config()->set([
-        'web-proxy.base_url' => null,
+        'proxy.base_url' => null,
         'app.service_url' => 'https://service.example.test',
     ]);
 

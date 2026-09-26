@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('web_proxy_endpoints', function (Blueprint $table): void {
+        Schema::create((string) config('proxy.tables.endpoints', 'endpoints'), function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('client');
             $table->string('external_id');
@@ -28,6 +28,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('web_proxy_endpoints');
+        Schema::dropIfExists((string) config('proxy.tables.endpoints', 'endpoints'));
     }
 };

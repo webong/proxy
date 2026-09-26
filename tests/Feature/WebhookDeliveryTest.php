@@ -63,7 +63,7 @@ it('signs request deliveries and reports success', function (): void {
 });
 
 it('forwards without a proxy signature when no secret is configured', function (): void {
-    config()->set('web-proxy.secret', '');
+    config()->set('proxy.secret', '');
 
     $endpoint = WebhookFixtures::endpoint(externalId: 'unsigned-delivery');
     $destination = WebhookFixtures::destination($endpoint);
@@ -94,7 +94,7 @@ it('forwards without a proxy signature when no secret is configured', function (
 });
 
 it('records and reports terminal request delivery failures', function (): void {
-    config()->set('web-proxy.log_failures', false);
+    config()->set('proxy.log_failures', false);
 
     $endpoint = WebhookFixtures::endpoint(externalId: 'failed-delivery');
     $destination = WebhookFixtures::destination($endpoint);

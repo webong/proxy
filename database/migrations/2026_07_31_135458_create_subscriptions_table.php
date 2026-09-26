@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('web_proxy_destinations', function (Blueprint $table): void {
+        Schema::create((string) config('proxy.tables.subscriptions', 'subscriptions'), function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->uuid('endpoint_id');
             $table->string('owner_id');
@@ -28,17 +28,17 @@ return new class extends Migration {
 
             $table->unique(
                 ['endpoint_id', 'owner_id', 'registration_id', 'webhook_group', 'routing_scope', 'routing_key', 'target_type'],
-                'web_proxy_destinations_registration_unique',
+                'subscriptions_registration_unique',
             );
             $table->index(
                 ['endpoint_id', 'routing_scope', 'routing_key', 'is_active'],
-                'web_proxy_destinations_routing_index',
+                'subscriptions_routing_index',
             );
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('web_proxy_destinations');
+        Schema::dropIfExists((string) config('proxy.tables.subscriptions', 'subscriptions'));
     }
 };

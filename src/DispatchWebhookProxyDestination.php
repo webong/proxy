@@ -42,7 +42,7 @@ class DispatchWebhookProxyDestination
         );
 
         $cacheKey = 'web-proxy:delivery:'.$delivery->id;
-        $ttl = max(1, (int) config('web-proxy.idempotency_ttl', 86400));
+        $ttl = max(1, (int) config('proxy.idempotency_ttl', 86400));
 
         if (! $this->cache->add($cacheKey, true, $ttl)) {
             return false;

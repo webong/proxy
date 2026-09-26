@@ -14,7 +14,7 @@ class WebProxyChannelManager extends Manager
      */
     public function getDefaultDriver(): string
     {
-        return (string) $this->config->get('web-proxy.defaults.channel', 'default');
+        return (string) $this->config->get('proxy.defaults.channel', 'default');
     }
 
     /**
@@ -33,7 +33,7 @@ class WebProxyChannelManager extends Manager
         $registries = $this->config($name)['registries'] ?? null;
 
         if ($registries === null) {
-            return [(string) $this->config->get('web-proxy.defaults.registry', 'local')];
+            return [(string) $this->config->get('proxy.defaults.registry', 'local')];
         }
 
         if (! is_array($registries)) {
@@ -73,7 +73,7 @@ class WebProxyChannelManager extends Manager
      */
     private function all(): array
     {
-        $channels = $this->config->get('web-proxy.channels', []);
+        $channels = $this->config->get('proxy.channels', []);
 
         if (! is_array($channels)) {
             throw new InvalidArgumentException('The web proxy channels configuration is invalid.');

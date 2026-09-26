@@ -11,6 +11,8 @@ use Webong\WebProxy\DestinationDefinition;
 use Webong\WebProxy\DestinationRecord;
 use Webong\WebProxy\EndpointRecord;
 use Webong\WebProxy\ProvisionedEndpoint;
+use Webong\WebProxy\ProfileDefinition;
+use Webong\WebProxy\ProfileRecord;
 use Webong\WebProxy\WebhookRoute;
 
 interface EndpointProvider extends ExecutionContext
@@ -35,6 +37,10 @@ interface EndpointProvider extends ExecutionContext
     public function registryForId(string $id): ?string;
 
     public function attach(EndpointRecord $endpoint, DestinationDefinition $definition): DestinationRecord;
+
+    public function registerProfile(EndpointRecord $endpoint, ProfileDefinition $definition): ProfileRecord;
+
+    public function profile(EndpointRecord $endpoint, string $name): ?ProfileRecord;
 
     /** @return Collection<int, DestinationRecord> */
     public function destinationsFor(EndpointRecord $endpoint, WebhookRoute $route): Collection;

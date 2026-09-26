@@ -17,8 +17,6 @@ class WebProxyEndpoint extends Model
 
     public const string REGISTRY_METADATA_KEY = '_registry';
 
-    protected $table = 'web_proxy_endpoints';
-
     protected $fillable = [
         'client',
         'external_id',
@@ -43,9 +41,20 @@ class WebProxyEndpoint extends Model
         ];
     }
 
+    public function getTable(): string
+    {
+        return (string) config('proxy.tables.endpoints', 'endpoints');
+    }
+
     /** @return HasMany<WebProxyDestination, $this> */
     public function destinations(): HasMany
     {
         return $this->hasMany(WebProxyDestination::class, 'endpoint_id');
+    }
+
+    /** @return HasMany<ProxyProfile, $this> */
+    public function profiles(): HasMany
+    {
+        return $this->hasMany(ProxyProfile::class, 'endpoint_id');
     }
 }

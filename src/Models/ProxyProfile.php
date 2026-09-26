@@ -6,24 +6,17 @@ namespace Webong\WebProxy\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * Maps an endpoint's public routing key to the registry that owns its endpoint
- * record.
- */
-class WebProxyEndpointRegistration extends Model
+class ProxyProfile extends Model
 {
     use HasUuids;
 
     protected $fillable = [
-        'owner_id',
         'endpoint_id',
-        'endpoint_key',
-        'client',
-        'registry',
-        'registry_id',
-        'callback_url',
-        'metadata',
+        'name',
+        'driver',
+        'configuration',
         'is_active',
     ];
 
@@ -31,13 +24,19 @@ class WebProxyEndpointRegistration extends Model
     protected function casts(): array
     {
         return [
+            'configuration' => 'encrypted:array',
             'is_active' => 'boolean',
-            'metadata' => 'array',
         ];
     }
 
     public function getTable(): string
     {
-        return (string) config('proxy.tables.endpoint_registrations', 'endpoint_registrations');
+        return (string) config('proxy.tables.profiles', 'profiles');
+    }
+
+    /** @return BelongsTo<WebProxyEndpoint, $this> */
+    public function endpoint(): BelongsTo
+    {
+        return $this->belongsTo(WebProxyEndpoint::class, 'endpoint_id');
     }
 }

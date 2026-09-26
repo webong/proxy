@@ -48,7 +48,7 @@ final class WebhookPathTemplates
      */
     private function receivers(): array
     {
-        $proxyChannelNames = collect(config('web-proxy.channels', []))
+        $proxyChannelNames = collect(config('proxy.channels', []))
             ->where('driver', 'webhook')
             ->pluck('name')
             ->map('strval')

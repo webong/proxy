@@ -43,14 +43,14 @@ class ForwardWebhookJob implements ShouldQueue
         public readonly array $context = [],
     ) {
         $this->deliveryId = $deliveryId ?? (string) Str::uuid();
-        $this->tries = (int) config('web-proxy.tries', 3);
-        $this->timeout = (int) config('web-proxy.job_timeout', 60);
-        $backoff = config('web-proxy.backoff', [5, 30, 120]);
+        $this->tries = (int) config('proxy.tries', 3);
+        $this->timeout = (int) config('proxy.job_timeout', 60);
+        $backoff = config('proxy.backoff', [5, 30, 120]);
         $this->backoff = is_array($backoff)
             ? array_values(array_map('intval', $backoff))
             : ((string) $backoff === '' ? [] : [(int) $backoff]);
 
-        $queue = config('web-proxy.queue_name');
+        $queue = config('proxy.queue_name');
         $this->onQueue(is_string($queue) && $queue !== '' ? $queue : config('queue.priorities.messaging'));
     }
 
@@ -133,7 +133,7 @@ class ForwardWebhookJob implements ShouldQueue
             deliveryId: $this->deliveryId,
         );
 
-        if ((bool) config('web-proxy.log_failures', true)) {
+        if ((bool) config('proxy.log_failures', true)) {
             Log::error('Web proxy delivery failed', [
                 'delivery_id' => $delivery->id,
                 'endpoint_id' => $delivery->endpointId,

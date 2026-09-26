@@ -8,6 +8,7 @@ use Webong\WebProxy\Contracts\EndpointProvider;
 use Webong\WebProxy\Models\WebProxyEndpoint;
 use Webong\WebProxy\Models\WebProxyEndpointRegistration;
 use Webong\WebProxy\Models\WebProxyDestination;
+use Webong\WebProxy\Models\ProxyProfile;
 use Closure;
 use Throwable;
 use Illuminate\Support\Collection;
@@ -166,6 +167,38 @@ class DatabaseEndpointProvider implements EndpointProvider
         );
     }
 
+    public function registerProfile(EndpointRecord $endpoint, ProfileDefinition $definition): ProfileRecord
+    {
+        $profile = ProxyProfile::query()->updateOrCreate(
+            [
+                'endpoint_id' => $endpoint->id,
+                'name' => $definition->name,
+            ],
+            [
+                'driver' => $definition->driver,
+                'configuration' => $definition->configuration,
+                'is_active' => true,
+            ],
+        );
+
+        return $this->profileRecord($profile);
+    }
+
+    public function profile(EndpointRecord $endpoint, string $name): ?ProfileRecord
+    {
+        if ($name === '') {
+            return null;
+        }
+
+        $profile = ProxyProfile::query()
+            ->where('endpoint_id', $endpoint->id)
+            ->where('name', $name)
+            ->where('is_active', true)
+            ->first();
+
+        return $profile instanceof ProxyProfile ? $this->profileRecord($profile) : null;
+    }
+
     /** @return Collection<int, DestinationRecord> */
     public function destinationsFor(EndpointRecord $endpoint, WebhookRoute $route): Collection
     {
@@ -282,6 +315,18 @@ class DatabaseEndpointProvider implements EndpointProvider
             target: (string) $destination->target,
             metadata: is_array($destination->metadata) ? $destination->metadata : [],
             is_active: (bool) $destination->is_active,
+        );
+    }
+
+    private function profileRecord(ProxyProfile $profile): ProfileRecord
+    {
+        return new ProfileRecord(
+            id: (string) $profile->getKey(),
+            endpoint_id: (string) $profile->endpoint_id,
+            name: (string) $profile->name,
+            driver: (string) $profile->driver,
+            configuration: is_array($profile->configuration) ? $profile->configuration : [],
+            is_active: (bool) $profile->is_active,
         );
     }
 }

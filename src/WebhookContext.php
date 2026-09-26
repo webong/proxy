@@ -101,7 +101,7 @@ final class WebhookContext
 
     private function contextProvider(): ?WebhookContextProvider
     {
-        $provider = config('web-proxy.context_provider');
+        $provider = config('proxy.context_provider');
 
         if (! is_string($provider) || ! is_a($provider, WebhookContextProvider::class, true)) {
             return null;

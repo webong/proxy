@@ -25,13 +25,13 @@ final class WebhookDiscovery
             throw new RuntimeException("Webhook target discovery root [{$path}] does not exist.");
         }
 
-        $configured = config('web-proxy.targets', []);
+        $configured = config('proxy.targets', []);
         $configured = is_array($configured) ? $configured : [];
         $targets = [
             'event' => is_array($configured['event'] ?? null) ? $configured['event'] : [],
             'job' => is_array($configured['job'] ?? null) ? $configured['job'] : [],
         ];
-        $routers = config('web-proxy.routers', []);
+        $routers = config('proxy.routers', []);
         $routers = is_array($routers) ? $routers : [];
 
         foreach ($this->phpFiles($path) as $file) {
@@ -87,7 +87,7 @@ final class WebhookDiscovery
         unset($typeTargets);
         ksort($targets);
         ksort($routers);
-        $output ??= base_path('bootstrap/cache/web-proxy.php');
+        $output ??= base_path('bootstrap/cache/proxy.php');
         $directory = dirname($output);
         if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
             throw new RuntimeException("Unable to create webhook discovery cache directory [{$directory}].");

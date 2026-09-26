@@ -107,7 +107,7 @@ it('filters destinations by opaque metadata', function (): void {
 });
 
 it('dispatches event and job destinations', function (): void {
-    config()->set('web-proxy.targets', [
+    config()->set('proxy.targets', [
         'event' => [PackageWebhookEvent::class => PackageWebhookEvent::class],
         'job' => [PackageWebhookJob::class => PackageWebhookJob::class],
     ]);

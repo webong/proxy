@@ -8,9 +8,26 @@ return [
     | Base URL
     |--------------------------------------------------------------------------
     */
-    'base_url' => env('WEB_PROXY_URL'),
+    'base_url' => env('PROXY_URL'),
 
-    'secret' => env('WEB_PROXY_SECRET'),
+    'secret' => env('PROXY_SECRET'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Database Tables
+    |--------------------------------------------------------------------------
+    |
+    | Override these when the registry shares a database with another
+    | application. The defaults intentionally remain generic, so a standard
+    | installation creates `endpoints` and `subscriptions`.
+    |
+    */
+    'tables' => [
+        'endpoints' => env('PROXY_ENDPOINTS_TABLE', 'endpoints'),
+        'subscriptions' => env('PROXY_SUBSCRIPTIONS_TABLE', 'subscriptions'),
+        'endpoint_registrations' => env('PROXY_ENDPOINT_REGISTRATIONS_TABLE', 'endpoint_registrations'),
+        'profiles' => env('PROXY_PROFILES_TABLE', 'profiles'),
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -55,7 +72,7 @@ return [
     ],
 
     'discovery' => [
-        'scan_on_boot' => (bool) env('WEB_PROXY_DISCOVER_ON_BOOT', false),
+        'scan_on_boot' => (bool) env('PROXY_DISCOVER_ON_BOOT', false),
     ],
 
     /*
@@ -68,8 +85,8 @@ return [
     |
     */
     'defaults' => [
-        'channel' => env('WEB_PROXY_CHANNEL', 'default'),
-        'registry' => env('WEB_PROXY_REGISTRY', 'local'),
+        'channel' => env('PROXY_CHANNEL', 'default'),
+        'registry' => env('PROXY_REGISTRY', 'local'),
     ],
 
     /*
@@ -137,27 +154,27 @@ return [
         ],
     ],
 
-    'signature_tolerance' => (int) env('WEB_PROXY_SIGNATURE_TOLERANCE', 300),
+    'signature_tolerance' => (int) env('PROXY_SIGNATURE_TOLERANCE', 300),
 
-    'connect_timeout' => (int) env('WEB_PROXY_CONNECT_TIMEOUT', 5),
+    'connect_timeout' => (int) env('PROXY_CONNECT_TIMEOUT', 5),
 
-    'timeout' => (int) env('WEB_PROXY_TIMEOUT', 15),
+    'timeout' => (int) env('PROXY_TIMEOUT', 15),
 
-    'job_timeout' => (int) env('WEB_PROXY_JOB_TIMEOUT', 60),
+    'job_timeout' => (int) env('PROXY_JOB_TIMEOUT', 60),
 
-    'idempotency_ttl' => (int) env('WEB_PROXY_IDEMPOTENCY_TTL', 86400),
+    'idempotency_ttl' => (int) env('PROXY_IDEMPOTENCY_TTL', 86400),
 
-    'queue_name' => env('WEB_PROXY_QUEUE'),
+    'queue_name' => env('PROXY_QUEUE'),
 
-    'tries' => (int) env('WEB_PROXY_TRIES', 3),
+    'tries' => (int) env('PROXY_TRIES', 3),
 
     'backoff' => array_values(
         array_filter(
-            array_map('intval', explode(',', (string) env('WEB_PROXY_BACKOFF_SECONDS', ''))),
+            array_map('intval', explode(',', (string) env('PROXY_BACKOFF_SECONDS', ''))),
             static fn (int $seconds): bool => $seconds > 0,
         ),
     ),
 
-    'log_failures' => (bool) env('WEB_PROXY_LOG_FAILURES', true),
+    'log_failures' => (bool) env('PROXY_LOG_FAILURES', true),
 
 ];

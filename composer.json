@@ -1,10 +1,11 @@
 {
-    "name": "webong/web-proxy",
+    "name": "webong/proxy",
     "description": "Webhook proxy system for scoped webhook routing and delivery",
     "type": "library",
     "license": "MIT",
     "require": {
         "php": "^8.3 || ^8.4",
+        "guzzlehttp/guzzle": "^7.10",
         "illuminate/contracts": "^12.0",
         "illuminate/support": "^12.0",
         "spatie/laravel-webhook-client": "^3.5",

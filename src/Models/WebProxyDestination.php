@@ -17,8 +17,6 @@ class WebProxyDestination extends Model
 {
     use HasUuids;
 
-    protected $table = 'web_proxy_destinations';
-
     public const string EXECUTION_CONTEXT_METADATA_KEY = '_execution_context';
 
     public const string MULTIPLE_SUBSCRIBERS_METADATA_KEY = '_allows_multiple_subscribers';
@@ -53,6 +51,11 @@ class WebProxyDestination extends Model
             'last_delivered_at' => 'immutable_datetime',
             'last_failed_at' => 'immutable_datetime',
         ];
+    }
+
+    public function getTable(): string
+    {
+        return (string) config('proxy.tables.subscriptions', 'subscriptions');
     }
 
     /** @return BelongsTo<WebProxyEndpoint, $this> */

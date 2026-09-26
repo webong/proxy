@@ -15,7 +15,7 @@ class WebProxyServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/web-proxy.php', 'web-proxy');
+        $this->mergeConfigFrom(__DIR__.'/../config/proxy.php', 'proxy');
 
         if (! $this->app->bound(WebhookProxyRouteDefinition::class)) {
             $this->app->bind(WebhookProxyRouteDefinition::class, DefinesWebhookProxyRoute::class);
@@ -36,6 +36,7 @@ class WebProxyServiceProvider extends ServiceProvider
 
         $this->app->singleton(WebProxyChannelManager::class);
         $this->app->singleton(WebProxyRegistryManager::class);
+        $this->app->singleton(GuzzleClientFactory::class);
 
         $this->app->singleton(WebhookPathTemplates::class);
 
@@ -49,24 +50,29 @@ class WebProxyServiceProvider extends ServiceProvider
         $this->registerConfiguredRouters();
 
         $this->publishes([
-            __DIR__.'/../config/web-proxy.php' => config_path('web-proxy.php'),
-        ], 'web-proxy-config');
+            __DIR__.'/../config/proxy.php' => config_path('proxy.php'),
+        ], 'proxy-config');
 
         $this->publishesMigrations([
             __DIR__.'/../database/migrations' => database_path('migrations'),
-        ], 'web-proxy-migrations');
+        ], 'proxy-migrations');
+
+        $this->publishes([
+            __DIR__.'/../database/legacy-migrations/2026_07_31_135456_adopt_legacy_registry_migrations.php'
+                => database_path('migrations/2026_07_31_135456_adopt_legacy_registry_migrations.php'),
+        ], 'proxy-legacy-migrations');
 
         $this->registerProxyRouteMacro();
     }
 
     private function discoverOnBoot(): void
     {
-        if (! (bool) config('web-proxy.discovery.scan_on_boot', false)
+        if (! (bool) config('proxy.discovery.scan_on_boot', false)
             && ! $this->app->environment(['local', 'testing'])) {
             return;
         }
 
-        $compiledPath = base_path('bootstrap/cache/web-proxy.php');
+        $compiledPath = base_path('bootstrap/cache/proxy.php');
 
         if (is_file($compiledPath)) {
             return;
@@ -77,13 +83,13 @@ class WebProxyServiceProvider extends ServiceProvider
 
     private function registerConfiguredRouters(): void
     {
-        $routers = config('web-proxy.routers', []);
+        $routers = config('proxy.routers', []);
 
         if (! is_array($routers)) {
             throw new RuntimeException('The web proxy routers configuration is invalid.');
         }
 
-        $compiledPath = base_path('bootstrap/cache/web-proxy.php');
+        $compiledPath = base_path('bootstrap/cache/proxy.php');
 
         if (is_file($compiledPath)) {
             $compiled = require $compiledPath;
@@ -210,7 +216,7 @@ class WebProxyServiceProvider extends ServiceProvider
 
     private function registerWebhookClientConfiguration(): void
     {
-        $channels = config('web-proxy.channels', []);
+        $channels = config('proxy.channels', []);
 
         if (! is_array($channels)) {
             throw new RuntimeException('The web proxy channels configuration is invalid.');
@@ -256,7 +262,7 @@ class WebProxyServiceProvider extends ServiceProvider
 
         $defaults = [
             'name' => $clientName,
-            'signing_secret' => (string) config('web-proxy.secret', null),
+            'signing_secret' => (string) config('proxy.secret', null),
             'signature_header_name' => '',
             'signature_validator' => WebhookProxySignatureValidator::class,
             'webhook_profile' => WebhookProxyProfile::class,

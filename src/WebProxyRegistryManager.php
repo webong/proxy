@@ -17,7 +17,7 @@ class WebProxyRegistryManager extends Manager
      */
     public function getDefaultDriver(): string
     {
-        return $this->config->get('web-proxy.defaults.registry', 'local');
+        return $this->config->get('proxy.defaults.registry', 'local');
     }
 
     /**
@@ -27,7 +27,7 @@ class WebProxyRegistryManager extends Manager
      */
     public function names(bool $enabledOnly = true): array
     {
-        $registries = $this->config->get('web-proxy.registries', []);
+        $registries = $this->config->get('proxy.registries', []);
 
         if (! is_array($registries)) {
             return [];
@@ -72,7 +72,7 @@ class WebProxyRegistryManager extends Manager
     /**
      * Register a registry programmatically.
      *
-     * This composes an entry under "web-proxy.registries" so a custom registry can
+     * This composes an entry under "proxy.registries" so a custom registry can
      * be declared at runtime (e.g. from a service provider), including a
      * custom driver registrar class that owns its own context handling.
      *
@@ -80,7 +80,7 @@ class WebProxyRegistryManager extends Manager
      */
     public function register(string $name, array $registry): self
     {
-        $this->config->set("web-proxy.registries.{$name}", $registry);
+        $this->config->set("proxy.registries.{$name}", $registry);
 
         return $this;
     }
@@ -88,7 +88,7 @@ class WebProxyRegistryManager extends Manager
     /** @param array<string, mixed> $provider */
     public function registerProvider(string $name, array $provider): self
     {
-        $this->config->set("web-proxy.providers.{$name}", $provider);
+        $this->config->set("proxy.providers.{$name}", $provider);
 
         return $this;
     }
@@ -104,13 +104,13 @@ class WebProxyRegistryManager extends Manager
     public function config(?string $name = null): array
     {
         $name = $name ?? $this->getDefaultDriver();
-        $defaults = $this->config->get('web-proxy', []);
+        $defaults = $this->config->get('proxy', []);
 
         if (! is_array($defaults)) {
             $defaults = [];
         }
 
-        $registry = $this->config->get("web-proxy.registries.{$name}", []);
+        $registry = $this->config->get("proxy.registries.{$name}", []);
 
         if (! is_array($registry) || $registry === []) {
             throw new InvalidArgumentException("WebProxy registry [{$name}] is not configured.");
@@ -125,7 +125,7 @@ class WebProxyRegistryManager extends Manager
     protected function createDriver(mixed $name): EndpointRegistrar
     {
         $name = (string) $name;
-        $registry = $this->config->get("web-proxy.registries.{$name}", []);
+        $registry = $this->config->get("proxy.registries.{$name}", []);
 
         if (! is_array($registry) || $registry === []) {
             throw new InvalidArgumentException("WebProxy registry [{$name}] is not configured.");
@@ -173,7 +173,7 @@ class WebProxyRegistryManager extends Manager
             throw new InvalidArgumentException("WebProxy registry [{$name}] requires a storage provider.");
         }
 
-        $provider = $this->config->get("web-proxy.providers.{$providerName}", []);
+        $provider = $this->config->get("proxy.providers.{$providerName}", []);
 
         if (! is_array($provider) || $provider === []) {
             throw new InvalidArgumentException("WebProxy provider [{$providerName}] is not configured.");
@@ -269,7 +269,7 @@ class WebProxyRegistryManager extends Manager
 
     private function isEnabled(string $registry): bool
     {
-        $configuration = $this->config->get("web-proxy.registries.{$registry}");
+        $configuration = $this->config->get("proxy.registries.{$registry}");
 
         return is_array($configuration)
             && $configuration !== []

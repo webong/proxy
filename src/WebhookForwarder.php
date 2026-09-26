@@ -22,8 +22,8 @@ final readonly class WebhookForwarder
                         ->payload($delivery->payload)
                         ->withHeaders($headers)
                         ->doNotSign()
-                        ->timeoutInSeconds((int) config('web-proxy.timeout', 15))
-                        ->maximumTries((int) config('web-proxy.tries', 3))
+                        ->timeoutInSeconds((int) config('proxy.timeout', 15))
+                        ->maximumTries((int) config('proxy.tries', 3))
                         ->dispatch();
     }
 
@@ -32,7 +32,7 @@ final readonly class WebhookForwarder
     {
         $body = json_encode($delivery->payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
         $timestamp = (string) now()->getTimestamp();
-        $secret = (string) config('web-proxy.secret');
+        $secret = (string) config('proxy.secret');
 
         $signature = null;
 

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('web_proxy_endpoint_registrations', function (Blueprint $table): void {
+        Schema::create((string) config('proxy.tables.endpoint_registrations', 'endpoint_registrations'), function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('owner_id');
             $table->uuid('endpoint_id')->nullable();
@@ -22,14 +22,14 @@ return new class extends Migration {
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->unique(['owner_id', 'endpoint_key'], 'web_proxy_endpoint_registrations_owner_key_unique');
-            $table->index(['endpoint_key'], 'web_proxy_endpoint_registrations_key_index');
-            $table->index(['endpoint_id'], 'web_proxy_endpoint_registrations_endpoint_index');
+            $table->unique(['owner_id', 'endpoint_key'], 'endpoint_registrations_owner_key_unique');
+            $table->index(['endpoint_key'], 'endpoint_registrations_key_index');
+            $table->index(['endpoint_id'], 'endpoint_registrations_endpoint_index');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('web_proxy_endpoint_registrations');
+        Schema::dropIfExists((string) config('proxy.tables.endpoint_registrations', 'endpoint_registrations'));
     }
 };

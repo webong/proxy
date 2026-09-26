@@ -28,7 +28,7 @@ final class WebhookTargetRegistry
      */
     public function all(): array
     {
-        $targets = config('web-proxy.targets', []);
+        $targets = config('proxy.targets', []);
         $compiled = $this->compiledTargets();
 
         $targets = is_array($targets) ? $targets : [];
@@ -44,7 +44,7 @@ final class WebhookTargetRegistry
      */
     private function compiledTargets(): array
     {
-        $path = base_path('bootstrap/cache/web-proxy.php');
+        $path = base_path('bootstrap/cache/proxy.php');
 
         if (! is_file($path)) {
             return [];

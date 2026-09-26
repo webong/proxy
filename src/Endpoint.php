@@ -25,6 +25,16 @@ final class Endpoint
         );
     }
 
+    public function registerProfile(ProfileDefinition $definition): ProfileRecord
+    {
+        return $this->provider->registerProfile($this->record, $definition);
+    }
+
+    public function profile(string $name): ?ProfileRecord
+    {
+        return $this->provider->profile($this->record, $name);
+    }
+
     public function callbackUrl(): string
     {
         return $this->record->callback_url;

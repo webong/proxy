@@ -9,7 +9,63 @@ use Webong\WebProxy\EndpointRecord;
 use Webong\WebProxy\EnsureEndpoint;
 use Webong\WebProxy\Models\WebProxyDestination;
 use Webong\WebProxy\Models\WebProxyEndpoint;
+use Webong\WebProxy\Models\WebProxyEndpointRegistration;
+use Webong\WebProxy\Models\ProxyProfile;
 use Webong\WebProxy\Tests\Support\WebhookFixtures;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+it('uses unprefixed configurable registry table names', function (): void {
+    expect(Schema::hasTable('endpoints'))->toBeTrue()
+        ->and(Schema::hasTable('subscriptions'))->toBeTrue()
+        ->and(Schema::hasTable('endpoint_registrations'))->toBeTrue()
+        ->and(Schema::hasTable('profiles'))->toBeTrue()
+        ->and(Schema::hasTable('web_proxy_endpoints'))->toBeFalse()
+        ->and(Schema::hasTable('web_proxy_destinations'))->toBeFalse();
+
+    config()->set('proxy.tables', [
+        'endpoints' => 'tenant_endpoints',
+        'subscriptions' => 'tenant_subscriptions',
+        'endpoint_registrations' => 'tenant_endpoint_registrations',
+        'profiles' => 'tenant_profiles',
+    ]);
+
+    expect((new WebProxyEndpoint)->getTable())->toBe('tenant_endpoints')
+        ->and((new WebProxyDestination)->getTable())->toBe('tenant_subscriptions')
+        ->and((new WebProxyEndpointRegistration)->getTable())->toBe('tenant_endpoint_registrations')
+        ->and((new ProxyProfile)->getTable())->toBe('tenant_profiles');
+});
+
+it('renames legacy prefixed registry tables during an upgrade', function (): void {
+    Schema::rename('endpoints', 'web_proxy_endpoints');
+    Schema::rename('subscriptions', 'web_proxy_destinations');
+    Schema::rename('endpoint_registrations', 'web_proxy_endpoint_registrations');
+
+    (require __DIR__.'/../../database/legacy-migrations/2026_07_31_135456_adopt_legacy_registry_migrations.php')->up();
+
+    expect(Schema::hasTable('endpoints'))->toBeTrue()
+        ->and(Schema::hasTable('subscriptions'))->toBeTrue()
+        ->and(Schema::hasTable('endpoint_registrations'))->toBeTrue()
+        ->and(Schema::hasTable('web_proxy_endpoints'))->toBeFalse()
+        ->and(Schema::hasTable('web_proxy_destinations'))->toBeFalse()
+        ->and(Schema::hasTable('web_proxy_endpoint_registrations'))->toBeFalse();
+});
+
+it('adopts legacy migration history before renamed migrations run', function (): void {
+    $legacy = '2026_07_31_135457_create_web_proxy_endpoints_table';
+    $renamed = '2026_07_31_135457_create_endpoints_table';
+
+    DB::table('migrations')->where('migration', $renamed)->delete();
+    DB::table('migrations')->insert([
+        'migration' => $legacy,
+        'batch' => 1,
+    ]);
+
+    (require __DIR__.'/../../database/legacy-migrations/2026_07_31_135456_adopt_legacy_registry_migrations.php')->up();
+
+    expect(DB::table('migrations')->where('migration', $legacy)->exists())->toBeFalse()
+        ->and(DB::table('migrations')->where('migration', $renamed)->exists())->toBeTrue();
+});
 
 it('makes an unmanaged endpoint key deterministic for its external identity', function (): void {
     $endpoint = WebhookFixtures::endpoint(
