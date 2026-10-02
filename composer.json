@@ -1,5 +1,5 @@
 {
-    "name": "webong/web-proxy",
+    "name": "webong/proxy",
     "description": "Webhook proxy system for scoped webhook routing and delivery",
     "type": "library",
     "license": "MIT",
