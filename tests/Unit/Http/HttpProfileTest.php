@@ -94,3 +94,26 @@ it('disables ambient proxies for portable direct requests', function (): void {
     $client->get('https://example.test');
     expect($seen)->toBe('');
 });
+
+it('uses the shared portable HTTP credential byte subset', function (): void {
+    $fixture = json_decode(file_get_contents(__DIR__.'/../../../spec/http-credential-cases.json'), true, flags: JSON_THROW_ON_ERROR);
+    foreach ($fixture['schemes'] as $scheme) {
+        foreach ($fixture['cases'] as $case) {
+            $data = ['version' => 1, 'proxy' => ['http' => $scheme.'://'.$case['userinfo'].'@proxy.example']];
+            if ($case['valid']) {
+                expect((new HttpProfile($data))->toArray())->toBe($data);
+            } else {
+                expect(fn () => new HttpProfile($data))->toThrow(InvalidArgumentException::class, 'C0 control');
+            }
+        }
+    }
+});
+
+it('defaults SOCKS HTTP connect timeouts to 30 seconds and preserves explicit timeouts', function (): void {
+    $data = ['version' => 1, 'proxy' => ['http' => 'socks5h://proxy.example']];
+    expect(GuzzleOptions::fromProfile(new HttpProfile($data))['connect_timeout'])->toBe(30);
+    $data['connect_timeout_seconds'] = 2.5;
+    expect(GuzzleOptions::fromProfile(new HttpProfile($data))['connect_timeout'])->toBe(2.5);
+    $data = ['version' => 1, 'proxy' => ['https' => 'http://proxy.example']];
+    expect(array_key_exists('connect_timeout', GuzzleOptions::fromProfile(new HttpProfile($data))))->toBeFalse();
+});

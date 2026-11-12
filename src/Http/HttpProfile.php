@@ -128,7 +128,7 @@ final readonly class HttpProfile implements JsonSerializable
             if (! is_string($url)) {
                 throw new InvalidArgumentException('Proxy URL must be a string.');
             }
-            ProxyUrl::parse($url);
+            ProxyUrl::parseHttp($url);
         }
 
         $hosts = array_key_exists('no_proxy', $proxy) ? $proxy['no_proxy'] : [];

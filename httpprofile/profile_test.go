@@ -54,3 +54,30 @@ func TestInvalidProgrammaticProfiles(t *testing.T) {
 		}
 	}
 }
+
+func TestPortableCredentialBytes(t *testing.T) {
+	data, err := os.ReadFile("../spec/http-credential-cases.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixture struct {
+		Schemes []string
+		Cases   []struct {
+			Name, Userinfo string
+			Valid          bool
+		}
+	}
+	if err = json.Unmarshal(data, &fixture); err != nil {
+		t.Fatal(err)
+	}
+	for _, scheme := range fixture.Schemes {
+		for _, c := range fixture.Cases {
+			t.Run(scheme+"/"+c.Name, func(t *testing.T) {
+				p := Profile{Version: 1, Proxy: &Proxy{HTTP: scheme + "://" + c.Userinfo + "@proxy.example"}}
+				if err := p.Validate(); (err == nil) != c.Valid {
+					t.Fatalf("validation: %v", err)
+				}
+			})
+		}
+	}
+}

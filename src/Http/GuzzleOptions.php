@@ -57,6 +57,10 @@ final class GuzzleOptions
         }, 'proxy_profile');
 
         $options = ['proxy' => [], 'handler' => $stack];
+        if ($hasSocks) {
+            // Match Go's default SOCKS setup budget rather than cURL's 300s default.
+            $options['connect_timeout'] = 30;
+        }
         foreach (['connect_timeout_seconds' => 'connect_timeout', 'request_timeout_seconds' => 'timeout'] as $source => $target) {
             if (isset($data[$source])) {
                 $seconds = $data[$source];

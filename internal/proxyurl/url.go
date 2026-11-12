@@ -48,3 +48,23 @@ func Address(u *url.URL) string {
 	}
 	return net.JoinHostPort(u.Hostname(), port)
 }
+
+// ParseHTTP narrows proxy credential bytes to the subset libcurl can represent.
+// Raw TCP uses Parse and retains RFC1929's binary credential support.
+func ParseHTTP(value string) (*url.URL, error) {
+	u, err := Parse(value)
+	if err != nil {
+		return nil, err
+	}
+	if u.User != nil {
+		password, _ := u.User.Password()
+		for _, field := range []string{u.User.Username(), password} {
+			for i := 0; i < len(field); i++ {
+				if field[i] < 0x20 {
+					return nil, fmt.Errorf("portable HTTP proxy credentials cannot contain C0 control bytes")
+				}
+			}
+		}
+	}
+	return u, nil
+}

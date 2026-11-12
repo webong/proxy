@@ -59,17 +59,25 @@ Go uses a separate underlying transport per request scheme whenever SOCKS is
 configured, preserving local versus remote DNS and ordinary TLS verification.
 The returned RoundTripper implements idle-connection cleanup; it is not always
 an `*http.Transport`. Custom TLS dialers are rejected for SOCKS routes; use
-`TLSClientConfig` instead, so the configured proxy cannot be bypassed. The
-HTTP adapter defaults SOCKS setup to 30 seconds when no connect timeout is given.
+`TLSClientConfig` instead, so the configured proxy cannot be bypassed. Both
+HTTP adapters default SOCKS setup to 30 seconds when no connect timeout is given.
 
 PHP's portable Guzzle adapter requires ext-curl for SOCKS and selects the cURL
 multi handler. Authenticated SOCKS HTTP requires libcurl 8.23+ and
 `CURLOPT_SOCKS5_AUTH` / `CURLAUTH_ONLY`, because older cURL releases can accept
 unauthenticated SOCKS despite supplied credentials. Unsupported runtimes fail
 before connecting. See [cURL's authentication contract](https://curl.se/libcurl/c/CURLOPT_SOCKS5_AUTH.html).
+Portable HTTP proxy credentials exclude decoded C0 control bytes (0x00–0x1F),
+which cURL cannot represent. This restriction applies in both languages and to
+all HTTP proxy schemes; raw TCP profiles retain binary RFC1929 credentials.
 The standalone PHP TCP dialer has no cURL dependency and enforces authentication
 itself. Legacy Guzzle clients retain their original native behavior.
 
 All TCP profile fixtures and `socks5-cases.json` run through both implementations.
 The latter checks literal/local/remote addresses, authentication boundaries,
 fragmentation, rejection, truncated responses, and setup timeout behavior.
+
+The schema fixture check runs independently with Python's draft-2020-12
+`jsonschema` validator (`python scripts/check_profile_schemas.py`). Schemas check
+URL escapes, SOCKS credential presence/byte limits, ports, and HTTP credential
+byte restrictions; full IP-address semantics are checked by the runtime parsers.

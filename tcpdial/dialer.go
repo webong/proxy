@@ -100,9 +100,6 @@ func (d *Dialer) DialContext(ctx context.Context, network, address string) (net.
 	if err != nil {
 		return nil, err
 	}
-	if conn == nil {
-		return nil, fmt.Errorf("TCP dialer returned no connection")
-	}
 	deadline, _ := ctx.Deadline()
 	if err = conn.SetDeadline(deadline); err != nil {
 		conn.Close()
@@ -114,8 +111,8 @@ func (d *Dialer) DialContext(ctx context.Context, network, address string) (net.
 	if !stop() {
 		<-stopped
 	}
-	if ctx.Err() != nil {
-		err = ctx.Err()
+	if setupErr := setupError(ctx); setupErr != nil {
+		err = setupErr
 	}
 	if err != nil {
 		conn.Close()
@@ -128,12 +125,12 @@ func (d *Dialer) DialContext(ctx context.Context, network, address string) (net.
 	return conn, nil
 }
 func (d *Dialer) connect(ctx context.Context, address string) (net.Conn, error) {
-	if err := ctx.Err(); err != nil {
+	if err := setupError(ctx); err != nil {
 		return nil, err
 	}
 	conn, err := d.base.DialContext(ctx, "tcp", address)
-	if ctx.Err() != nil {
-		err = ctx.Err()
+	if setupErr := setupError(ctx); setupErr != nil {
+		err = setupErr
 	}
 	if err != nil {
 		if conn != nil {
@@ -145,6 +142,17 @@ func (d *Dialer) connect(ctx context.Context, address string) (net.Conn, error) 
 		return nil, fmt.Errorf("TCP dialer returned no connection")
 	}
 	return conn, nil
+}
+
+// Network deadlines can fire before the context timer callback is scheduled.
+func setupError(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if deadline, ok := ctx.Deadline(); ok && !time.Now().Before(deadline) {
+		return context.DeadlineExceeded
+	}
+	return nil
 }
 
 func (d *Dialer) target(ctx context.Context, host string, port int) ([]byte, error) {

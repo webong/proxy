@@ -10,5 +10,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+          cache: false # The library currently has no external Go dependencies/go.sum.
       - run: go test -race ./...
       - run: go vet ./...

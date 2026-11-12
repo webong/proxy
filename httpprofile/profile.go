@@ -113,7 +113,7 @@ func (p Profile) Validate() error {
 		if value == "" {
 			continue
 		}
-		if _, err := proxyurl.Parse(value); err != nil {
+		if _, err := proxyurl.ParseHTTP(value); err != nil {
 			return err
 		}
 

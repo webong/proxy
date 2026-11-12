@@ -47,6 +47,8 @@ to `options.proxy`. `connect_timeout` and `timeout` map to portable seconds.
 `guzzle` or `http` endpoint profile through this normalizer. Portable export
 rejects unsupported settings, including zero/unbounded timeouts. SOCKS
 credentials require both username and password, each 1–255 decoded bytes.
+Portable HTTP proxy credentials reject decoded C0 control bytes (0x00–0x1F)
+across all schemes; the raw TCP API retains support for binary credentials.
 See [the TCP/SOCKS contract](tcp.md) for the new raw dialers and HTTP backend
 requirements, including authenticated PHP HTTP cURL compatibility.
 

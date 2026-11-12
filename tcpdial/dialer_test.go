@@ -95,6 +95,9 @@ func TestConformance(t *testing.T) {
 			}
 			conn, err := d.DialContext(context.Background(), "tcp", net.JoinHostPort(c.Host, "443"))
 			if !c.Success {
+				if c.Name == "timeout" && !errors.Is(err, context.DeadlineExceeded) {
+					t.Fatalf("setup timeout not classified: %v", err)
+				}
 				if err == nil {
 					conn.Close()
 					t.Fatal("expected failure")

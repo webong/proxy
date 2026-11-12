@@ -32,4 +32,19 @@ final class ProxyUrl
 
         return $parts;
     }
+
+    /** Portable HTTP must reject credential bytes cURL's URL parser cannot represent. */
+    public static function parseHttp(string $value): array
+    {
+        $parts = self::parse($value);
+        if (isset($parts['user'])) {
+            foreach ([$parts['user'], $parts['pass'] ?? ''] as $field) {
+                if (preg_match('/[\x00-\x1f]/', rawurldecode($field))) {
+                    throw new InvalidArgumentException('Portable HTTP proxy credentials cannot contain C0 control bytes.');
+                }
+            }
+        }
+
+        return $parts;
+    }
 }

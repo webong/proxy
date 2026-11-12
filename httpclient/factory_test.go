@@ -375,3 +375,23 @@ func TestSOCKSHTTPLocalDNSUsesIPFrame(t *testing.T) {
 		t.Fatalf("local DNS was sent to proxy: %+v", record)
 	}
 }
+
+func TestDefaultSOCKSConnectBudget(t *testing.T) {
+	var reached atomic.Bool
+	base := &http.Transport{DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
+		reached.Store(true)
+		deadline, ok := ctx.Deadline()
+		if !ok || time.Until(deadline) > 30*time.Second || time.Until(deadline) < 29*time.Second {
+			t.Error("expected default 30s SOCKS setup budget")
+		}
+		return nil, errors.New("fixture stops before opening a socket")
+	}}
+	client, err := New(httpprofile.Profile{Version: 1, Proxy: &httpprofile.Proxy{HTTP: "socks5h://proxy.example"}}, base)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseIdleConnections()
+	if _, err = client.Get("http://unresolved.example"); err == nil || !reached.Load() {
+		t.Fatal("fixture did not run")
+	}
+}
