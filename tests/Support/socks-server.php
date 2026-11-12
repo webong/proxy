@@ -30,13 +30,16 @@ function sendBytes($socket, string $bytes, bool $fragment = false): void {
 }
 try {
     if (! in_array($scenario['mode'] ?? '', ['direct', 'http-direct'], true)) {
-        $record['greeting'] = bin2hex(take($socket, 3));
+        $greetingHeader = take($socket, 2);
+        $record['greeting'] = bin2hex($greetingHeader.take($socket, ord($greetingHeader[1])));
         if ($scenario['stall'] ?? false) { usleep(150000); throw new RuntimeException('Stall complete.'); }
         $greeting = hex2bin($scenario['greeting']);
         sendBytes($socket, $greeting, $scenario['fragment'] ?? false);
         $expected = ($scenario['credentials'] ?? false) ? '0502' : '0500';
-        if (bin2hex($greeting) !== $expected) { throw new RuntimeException('Greeting rejected.'); }
-        if ($scenario['credentials'] ?? false) {
+        $downgrade = ($scenario['allow_downgrade'] ?? false)
+            && ($scenario['credentials'] ?? false) && bin2hex($greeting) === '0500';
+        if (bin2hex($greeting) !== $expected && ! $downgrade) { throw new RuntimeException('Greeting rejected.'); }
+        if (($scenario['credentials'] ?? false) && ! $downgrade) {
             $header = take($socket, 2);
             $record['auth_version'] = ord($header[0]);
             $record['username'] = take($socket, ord($header[1]));

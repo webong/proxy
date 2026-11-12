@@ -176,11 +176,33 @@ it('rejects malicious no-auth selection in authenticated Guzzle SOCKS', function
     if (! extension_loaded('curl') || version_compare(curl_version()['version'], '8.23.0', '<')) {
         $this->markTestSkipped('Mandatory SOCKS HTTP authentication requires libcurl 8.23+.');
     }
-    withSocksFixture(['greeting' => '0500', 'credentials' => true], function (string $address): void {
+    $scenario = [
+        'mode' => 'http', 'greeting' => '0500', 'credentials' => true,
+        'allow_downgrade' => true, 'reply' => '05000001000000000000', 'success' => true,
+    ];
+    $record = withSocksFixture($scenario, function (string $address): void {
         $profile = new HttpProfile(['version' => 1, 'proxy' => ['http' => 'socks5h://user:pass@'.$address], 'request_timeout_seconds' => 2]);
         $client = new GuzzleHttp\Client(GuzzleOptions::fromProfile($profile));
         expect(fn () => $client->get('http://unresolved.example/'))->toThrow(GuzzleHttp\Exception\TransferException::class);
     });
+    // The peer remains willing to complete CONNECT and return HTTP 204. A client
+    // accepting no-auth would succeed, so a disconnect alone cannot mask a bug.
+    expect($record)->not->toHaveKey('command')->not->toHaveKey('request');
+    expect($record['greeting'])->toBe('050102');
+
+    // Negative control: deliberately remove CURLAUTH_ONLY at the terminal handler.
+    // The same malicious peer must then be able to complete a successful request.
+    $control = withSocksFixture($scenario, function (string $address): void {
+        $native = new GuzzleHttp\Handler\CurlMultiHandler();
+        $relaxed = static function ($request, array $options) use ($native) {
+            $options['curl'][CURLOPT_SOCKS5_AUTH] = CURLAUTH_BASIC;
+            return $native($request, $options);
+        };
+        $profile = new HttpProfile(['version' => 1, 'proxy' => ['http' => 'socks5h://user:pass@'.$address], 'request_timeout_seconds' => 2]);
+        $client = new GuzzleHttp\Client(GuzzleOptions::fromProfile($profile, $relaxed));
+        expect($client->get('http://unresolved.example/')->getStatusCode())->toBe(204);
+    });
+    expect($control['command'])->toBe('050100')->and($control['request'])->toBe('GET / HTTP/1.1');
 });
 
 it('carries HTTPS through the SOCKS tunnel', function (): void {

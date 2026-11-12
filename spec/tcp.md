@@ -81,3 +81,8 @@ The schema fixture check runs independently with Python's draft-2020-12
 `jsonschema` validator (`python scripts/check_profile_schemas.py`). Schemas check
 URL escapes, SOCKS credential presence/byte limits, ports, and HTTP credential
 byte restrictions; full IP-address semantics are checked by the runtime parsers.
+
+Mandatory PHP HTTP authentication is also verified in the isolated, pinned
+[PHP/libcurl 8.23 runtime](../tests/runtime/README.md). Its CI job runs the full
+suite with `--fail-on-skipped`; the downgrade test includes a deliberately
+relaxed client to prove that its malicious proxy can otherwise return HTTP 204.

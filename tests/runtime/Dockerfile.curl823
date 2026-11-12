@@ -1,0 +1,28 @@
+# Isolated verification runtime; the host PHP installation stays unchanged.
+FROM php:8.5-cli-trixie@sha256:50956f094e90a716d43bea28087d447555ad80510e386ab8c9c10d8c70d781a9
+
+ARG CURL_VERSION=8.23.0
+ARG CURL_SHA256=8dadd7d2536a314f982ad05a651b713f426bf7d02cc2c76cffb9796f2218e6c5
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential pkg-config libssl-dev xz-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl --fail --silent --show-error --location \
+        "https://curl.se/download/curl-${CURL_VERSION}.tar.xz" -o /tmp/curl.tar.xz \
+    && echo "${CURL_SHA256}  /tmp/curl.tar.xz" | sha256sum --check --strict \
+    && mkdir /tmp/curl-build \
+    && tar -xf /tmp/curl.tar.xz -C /tmp/curl-build --strip-components=1 \
+    && cd /tmp/curl-build \
+    && ./configure --prefix=/opt/proxy-curl --with-openssl \
+        --enable-versioned-symbols --disable-static --disable-docs \
+        --without-libpsl --without-libidn2 --without-brotli --without-zstd --without-nghttp2 \
+    && make -j2 \
+    && make install \
+    && rm -rf /tmp/curl-build /tmp/curl.tar.xz
+
+# PHP is dynamically linked to libcurl on this official image. Use the isolated
+# library for the test process and its fixture children, without replacing apt's files.
+ENV LD_LIBRARY_PATH=/opt/proxy-curl/lib
+
+RUN php -r 'if (!extension_loaded("curl") || version_compare(curl_version()["version"], "8.23.0", "<") || !defined("CURLOPT_SOCKS5_AUTH") || !defined("CURLAUTH_ONLY")) { throw new RuntimeException("Mandatory SOCKS authentication runtime unavailable"); } echo "PHP ",PHP_VERSION," / libcurl ",curl_version()["version"],PHP_EOL;'
