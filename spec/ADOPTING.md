@@ -95,7 +95,7 @@ Private CA paths/pools stay local runtime configuration and are not exported to
 another host. Exported JSON may contain proxy credentials; the existing PHP
 registry encrypts stored configuration, but JSON export itself is plain data.
 
-## Consumer handoff (Gateway remains unchanged)
+## Consumer integration
 
 The first consumer slice can use PHP normalization/export and Go HTTP client
 creation. Retain separately carried headers, native TLS policy, destination and

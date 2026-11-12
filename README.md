@@ -200,8 +200,7 @@ must honor their context; legacy `Dial` and `DialTLS` are rejected with a connec
 it uses package-owned standard transport defaults, independent of later changes
 to `http.DefaultTransport`. Missing timeouts use the underlying
 transport defaults and no overall request deadline. Caller-supplied clients own
-redirect and destination authorization policies. No queue, registry persistence,
-or Gateway dependency is included in the Go library.
+redirect and destination authorization policies. No queue or registry persistence is included in the Go library.
 
 Run the Go checks with `go test -race ./...` and `go vet ./...`.
 
@@ -313,4 +312,3 @@ n, source, err := udp.ReadFrom(buffer)
 Omit `proxy` for direct UDP. Raw UDP authentication needs no cURL extension.
 The [UDP contract](spec/udp.md) explains DNS modes, IPv6 bindings, payload limits,
 control-connection lifetime, source filtering, and unsupported SOCKS fragmentation.
-Gateway does not consume these transport libraries yet.
