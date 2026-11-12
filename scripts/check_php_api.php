@@ -16,7 +16,31 @@ use Webong\Proxy\Udp\UdpDialer;
 use Webong\Proxy\Udp\UdpException;
 use Webong\Proxy\Udp\UdpProfile;
 
-require __DIR__.'/../vendor/autoload.php';
+// Inspect package signatures without booting Laravel or requiring a vendor
+// tree built for this PHP minor. Dependency type names remain qualified strings.
+spl_autoload_register(static function (string $class): void {
+    $prefix = 'Webong\\Proxy\\';
+    if (! str_starts_with($class, $prefix)) {
+        return;
+    }
+    $path = __DIR__.'/../src/'.str_replace('\\', '/', substr($class, strlen($prefix))).'.php';
+    if (is_file($path)) {
+        require $path;
+    }
+});
+
+// PHP 8.5 resolves self to a class name in Reflection while older minors may
+// preserve the keyword. Freeze its meaning rather than that runtime spelling.
+function proxyContractType(?ReflectionType $type, ReflectionClass $declaring): string
+{
+    if ($type instanceof ReflectionNamedType && in_array($type->getName(), ['self', 'parent'], true)) {
+        $resolved = $type->getName() === 'self' ? $declaring->getName() : $declaring->getParentClass()->getName();
+
+        return ($type->allowsNull() ? '?' : '').$resolved;
+    }
+
+    return (string) $type;
+}
 
 // Only the supported transport surface is frozen. Connection wire helpers and
 // UdpAssociation's @internal constructor/resolve method are implementation details.
@@ -43,7 +67,7 @@ foreach ($classes as $class) {
     $entry = ['final' => $reflection->isFinal(), 'readonly' => $reflection->isReadOnly(), 'parent' => $parent ? $parent->getName() : null, 'interfaces' => $reflection->getInterfaceNames(), 'properties' => [], 'constants' => [], 'methods' => []];
     sort($entry['interfaces']);
     foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-        $entry['properties'][$property->getName()] = ['type' => (string) $property->getType(), 'readonly' => $property->isReadOnly(), 'static' => $property->isStatic()];
+        $entry['properties'][$property->getName()] = ['type' => proxyContractType($property->getType(), $property->getDeclaringClass()), 'readonly' => $property->isReadOnly(), 'static' => $property->isStatic()];
     }
     foreach ($reflection->getReflectionConstants(ReflectionClassConstant::IS_PUBLIC) as $constant) {
         $entry['constants'][$constant->getName()] = $constant->getValue();
@@ -59,9 +83,9 @@ foreach ($classes as $class) {
         }
         $parameters = [];
         foreach ($method->getParameters() as $parameter) {
-            $parameters[] = ['name' => $parameter->getName(), 'type' => (string) $parameter->getType(), 'optional' => $parameter->isOptional(), 'variadic' => $parameter->isVariadic(), 'by_reference' => $parameter->isPassedByReference(), 'default' => $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null];
+            $parameters[] = ['name' => $parameter->getName(), 'type' => proxyContractType($parameter->getType(), $method->getDeclaringClass()), 'optional' => $parameter->isOptional(), 'variadic' => $parameter->isVariadic(), 'by_reference' => $parameter->isPassedByReference(), 'default' => $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null];
         }
-        $entry['methods'][$method->getName()] = ['static' => $method->isStatic(), 'return_type' => (string) $method->getReturnType(), 'parameters' => $parameters];
+        $entry['methods'][$method->getName()] = ['static' => $method->isStatic(), 'return_type' => proxyContractType($method->getReturnType(), $method->getDeclaringClass()), 'parameters' => $parameters];
     }
     foreach (['properties', 'constants', 'methods'] as $key) {
         ksort($entry[$key]);
@@ -70,9 +94,17 @@ foreach ($classes as $class) {
 }
 ksort($api);
 $path = __DIR__.'/../spec/api/php-v0.3.json';
-if (in_array('--write', $argv, true)) {
+if (in_array('--dump', $argv, true)) {
+    echo json_encode($api, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR)."\n";
+} elseif (in_array('--write', $argv, true)) {
     file_put_contents($path, json_encode($api, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR)."\n");
 } elseif ($api !== json_decode(file_get_contents($path), true, flags: JSON_THROW_ON_ERROR)) {
+    $expected = json_decode(file_get_contents($path), true, flags: JSON_THROW_ON_ERROR);
+    foreach (array_unique(array_merge(array_keys($api), array_keys($expected))) as $class) {
+        if (($api[$class] ?? null) !== ($expected[$class] ?? null)) {
+            fwrite(STDERR, 'Changed API: '.$class."\n");
+        }
+    }
     fwrite(STDERR, "Public PHP API changed; review spec/CONTRACT.md before updating spec/api/php-v0.3.json.\n");
     exit(1);
 } else {

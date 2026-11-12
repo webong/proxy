@@ -99,7 +99,9 @@ consumer integration.
 Normal checks are `go test -race ./...`, `go vet ./...`, `composer test`, and
 `python scripts/check_profile_schemas.py` (Python requires `jsonschema>=4,<5`).
 Go source snapshots exclude implementation fields, bodies and error strings.
-PHP snapshots exclude PHP runtime Exception methods and `@internal` APIs.
+PHP snapshots exclude PHP runtime Exception methods and `@internal` APIs. The
+standalone guard uses package-only autoloading and normalizes Reflection
+`self`/`parent` spelling across PHP minors; late-bound `static` remains distinct.
 The external consumer tests supplement snapshots with error/interface and
 composition checks; snapshots cannot prove runtime behavior or complete ABI
 compatibility by themselves.
