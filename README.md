@@ -1,7 +1,7 @@
 # Proxy
 
 `webong/proxy` is a Laravel package for registry-backed webhook endpoints and
-outbound client profiles. The v0.3.0 candidate also provides portable PHP/Go
+outbound client profiles. Version v0.3.0 also provides portable PHP/Go
 HTTP clients, TCP dialers and UDP associations; its wire profiles retain
 `version: 1`, independently of the package version. An endpoint is a durable network identity: it
 can receive and route webhooks through subscriptions, and it can own named
@@ -207,9 +207,10 @@ Run the Go checks with `go test -race ./...` and `go vet ./...`.
 
 ## TCP dialers and SOCKS5
 
-The v0.3.0 transport candidate is frozen for readiness checks on this branch. See [the public contract](spec/CONTRACT.md)
-and [adoption guide](spec/ADOPTING.md) before integration. No v0.3 release
-has been published from this experimental branch.
+The v0.3.0 transport contract is frozen for its patch line. See [the public
+contract](spec/CONTRACT.md), [adoption guide](spec/ADOPTING.md), and
+[release notes](CHANGELOG.md). Package v0.3.0 retains wire `version: 1`;
+it does not declare a package v1 API.
 
 Both libraries now provide direct TCP, SOCKS5 CONNECT, and HTTP/HTTPS CONNECT dialers.
 For HTTP CONNECT use `http://user:password@proxy.example:8080` in a TCP profile;
@@ -312,4 +313,4 @@ n, source, err := udp.ReadFrom(buffer)
 Omit `proxy` for direct UDP. Raw UDP authentication needs no cURL extension.
 The [UDP contract](spec/udp.md) explains DNS modes, IPv6 bindings, payload limits,
 control-connection lifetime, source filtering, and unsupported SOCKS fragmentation.
-Gateway does not consume these experimental libraries yet.
+Gateway does not consume these transport libraries yet.

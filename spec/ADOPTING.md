@@ -1,4 +1,4 @@
-# Adopting the v0.3.0 transport candidate
+# Adopting Proxy v0.3.0
 
 ## Why this guide exists
 
@@ -18,8 +18,8 @@ adopting these v0.3 transport APIs.
 The portable transport APIs are additions to the existing PHP package. Keep using
 `GuzzleClientFactory::make()` / `options()` for native, registry-backed Guzzle
 configuration. Those methods keep the `guzzle` driver and native option behavior.
-The Go module and portable HTTP/TCP/UDP APIs were added on the experimental branch;
-they are not present in the existing v0.2.1 tag.
+The Go module and portable HTTP/TCP/UDP APIs were developed on the experimental branch and first released in v0.3.0;
+they are not present in the v0.2.1 tag.
 
 To export connection settings, use `GuzzleClientFactory::profile()` (active
 `guzzle` or `http` driver) or `HttpProfileNormalizer::normalize()`. The normalizer

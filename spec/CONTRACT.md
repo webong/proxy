@@ -1,7 +1,7 @@
-# Proxy v0.3.0 candidate contract
+# Proxy v0.3.0 public contract
 
-Target package version: **v0.3.0**. Contract revision: **1**. Status: **frozen for candidate validation on the
-experimental branch**, not a published release or a v1 API commitment. This contract
+Package release: **v0.3.0**. Contract revision: **1**. Status: **frozen for the
+v0.3 patch line**. This pre-1.0 release does not declare a v1 API commitment. This contract
 covers the transport work introduced after `v0.2.1`. It does not rename or replace
 the existing Laravel registry/webhook APIs. See [adoption guide](ADOPTING.md) and
 [readiness evidence](READINESS.md).
@@ -23,7 +23,7 @@ and methods of the internal types exposed through public Address/ReplyError
 aliases; their internal import path is not a consumer API.
 
 Subclassing the shared PHP SocketProfile outside the package is not covered by
-this candidate contract; its protected hooks support the built-in profile types.
+this v0.3 contract; its protected hooks support the built-in profile types.
 
 The supported PHP classes are `Http\HttpProfile`, `Http\HttpProfileNormalizer`,
 `Http\GuzzleOptions`, `Connection\SocketProfile`, the public TCP/UDP profiles and
@@ -44,7 +44,7 @@ package release is v0.3.0.** A future v1 public contract is explicitly deferred.
   explicit nulls remain invalid. New wire fields or incompatible values require
   a new wire version/schema; do not silently extend this strict v1 shape.
 - Source signatures, public field types, PHP named-argument names, defaults and
-  ownership guarantees are frozen for the v0.3 candidate and its patch line.
+  ownership guarantees are frozen for v0.3 and its patch line.
   Removing/changing them requires a new minor candidate (such as v0.4) and a
   migration plan; this pre-1.0 policy does not promise a v1 stable API. Additive APIs require explicit review
   and an approved snapshot update; ordinary refactors must leave baselines alone.
@@ -120,5 +120,6 @@ php scripts/check_php_api.php --write
 Review the resulting diff. Never update a v1 schema digest to bypass a breaking
 wire change; introduce the next schema version instead. No automatic baseline
 regeneration runs in CI. Consumers should pin the reviewed readiness commit and
-commit their dependency lockfiles. A future tagged release must point to a head
-that passed the full readiness checks; this freeze does not publish one.
+commit their dependency lockfiles. Tagged releases must point to a head that passed the full readiness checks.
+The v0.3.0 tag is the immutable package identity; consumers should also retain
+the resolved commit in their dependency lockfiles.

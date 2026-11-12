@@ -1,9 +1,9 @@
 # Proxy-only readiness
 
-The v0.3.0 transport candidate is frozen by [CONTRACT.md](CONTRACT.md); API changes and
-opt-in adoption are documented in [ADOPTING.md](ADOPTING.md). This branch
-contains a consumer-ready candidate, not a published release or v1 API declaration.
-Use the final reviewed commit SHA as the immutable handoff until release tagging.
+The v0.3.0 transport contract is frozen by [CONTRACT.md](CONTRACT.md); API changes and
+opt-in adoption are documented in [ADOPTING.md](ADOPTING.md). The v0.3.0 tag identifies the reviewed release. It remains a pre-1.0 public API,
+with patch-line compatibility as defined in the contract. Consumers should retain
+the resolved commit SHA in their dependency lockfiles.
 
 The automated gate comprises:
 
