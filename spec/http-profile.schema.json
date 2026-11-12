@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Portable HTTP profile v1",
+  "type": "object",
+  "required": [
+    "version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "connect_timeout_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 300
+    },
+    "request_timeout_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 300
+    },
+    "proxy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "http": {
+          "type": "string",
+          "pattern": "^https?://(?:[A-Za-z0-9._~!$&'()*+,;=:%-]*@)?(?:\\[[0-9A-Fa-f:.]+\\]|[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.?)(?::[0-9]{1,5})?/?$"
+        },
+        "https": {
+          "type": "string",
+          "pattern": "^https?://(?:[A-Za-z0-9._~!$&'()*+,;=:%-]*@)?(?:\\[[0-9A-Fa-f:.]+\\]|[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.?)(?::[0-9]{1,5})?/?$"
+        },
+        "no_proxy": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(\\*|\\.?[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)*)$"
+          }
+        }
+      }
+    }
+  }
+}

@@ -7,6 +7,8 @@ namespace Webong\Proxy;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use InvalidArgumentException;
+use Webong\Proxy\Http\HttpProfile;
+use Webong\Proxy\Http\HttpProfileNormalizer;
 
 final class GuzzleClientFactory
 {
@@ -42,6 +44,20 @@ final class GuzzleClientFactory
         }
 
         return $options;
+    }
+
+    /** Resolve a legacy endpoint profile into the strict, portable HTTP contract. */
+    public function profile(Endpoint $endpoint, string $profile): HttpProfile
+    {
+        $record = $endpoint->profile($profile);
+        if ($record === null) {
+            throw new InvalidArgumentException("Proxy profile [{$profile}] is not registered for endpoint [{$endpoint->record->endpoint_key}].");
+        }
+        if (! in_array($record->driver, ['guzzle', 'http'], true)) {
+            throw new InvalidArgumentException("Proxy profile [{$profile}] does not use an HTTP-compatible driver.");
+        }
+
+        return (new HttpProfileNormalizer())->normalize($record->configuration);
     }
 
     private function validateProxy(mixed $proxy, string $profile): void

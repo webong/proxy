@@ -151,3 +151,53 @@ not included in `proxy-migrations`.
 ```bash
 composer test
 ```
+
+## Portable HTTP profiles (PHP and Go)
+
+Proxy now includes a versioned HTTP connection profile shared by both libraries.
+See [the profile contract](spec/README.md) for supported settings and validation.
+The existing Laravel registry and webhook APIs remain in their current locations.
+Existing `GuzzleClientFactory::make` and `options` preserve Guzzle-only behavior.
+Use `$factory->profile($endpoint, 'partner-api')` to explicitly normalize an
+endpoint profile for portable export; unsupported portable settings are rejected.
+The PHP classes under `Webong\Proxy\Http` do not require a Laravel application.
+
+```php
+use Webong\Proxy\Http\HttpProfileNormalizer;
+use Webong\Proxy\Http\GuzzleOptions;
+
+$profile = (new HttpProfileNormalizer())->normalize([
+    'proxy' => ['https' => 'http://proxy.example.test:8080'],
+    'options' => ['connect_timeout' => 5, 'timeout' => 15],
+]);
+$json = $profile->toJson();
+$client = new \GuzzleHttp\Client(GuzzleOptions::fromProfile($profile));
+```
+
+The Go module is `github.com/webong/proxy`:
+
+```go
+import (
+    "github.com/webong/proxy/httpprofile"
+    "github.com/webong/proxy/httpclient"
+)
+
+profile, err := httpprofile.Parse(profileJSON)
+if err != nil { return err }
+client, err := httpclient.New(profile, nil)
+if err != nil { return err }
+defer client.CloseIdleConnections()
+// Reuse client for requests made with this profile.
+```
+
+`httpclient.New` clones an optional base `*http.Transport`, preserving its TLS
+settings and dialer. Connect deadlines wrap supplied context-aware dialers, including TLS dialers.
+The adapters round positive deadlines up to milliseconds. Custom Go dialers
+must honor their context; legacy `Dial` and `DialTLS` are rejected with a connect timeout. With a nil base,
+it uses package-owned standard transport defaults, independent of later changes
+to `http.DefaultTransport`. Missing timeouts use the underlying
+transport defaults and no overall request deadline. Caller-supplied clients own
+redirect and destination authorization policies. No queue, registry persistence,
+or Gateway dependency is included in the Go library.
+
+Run the Go checks with `go test -race ./...` and `go vet ./...`.
