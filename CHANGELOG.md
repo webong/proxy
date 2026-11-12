@@ -19,5 +19,3 @@ CONNECT are outside this release. Authenticated PHP SOCKS HTTP needs libcurl 8.2
 See [the public contract](spec/CONTRACT.md) for all supported limits and
 [the adoption guide](spec/ADOPTING.md) for optional use and earlier experimental
 API adjustments. Package v0.3.0 is distinct from the unchanged JSON `version: 1`.
-
-Gateway integration is not included.

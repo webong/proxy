@@ -1,4 +1,4 @@
-# Proxy-only readiness
+# Release readiness
 
 The v0.3.0 transport contract is frozen by [CONTRACT.md](CONTRACT.md); API changes and
 opt-in adoption are documented in [ADOPTING.md](ADOPTING.md). The v0.3.0 tag identifies the reviewed release. It remains a pre-1.0 public API,
@@ -22,15 +22,14 @@ The automated gate comprises:
 Run the same checks locally using `make readiness`. It requires Composer vendor
 dependencies, Go, Python with `jsonschema>=4,<5`, and Docker with the
 `proxy-curl823` image built from `tests/runtime/Dockerfile.curl823`. It does not
-install dependencies, change host PHP, publish a release, or touch Gateway.
+install dependencies, change host PHP, or publish a release.
 The host PHP suite may skip only the known authenticated SOCKS HTTP test on an
 older cURL; the mandatory isolated run permits no skips.
 
 Consumer policy composition tests prove that request headers, redirect rejection
 and the supplied Go destination dialer remain caller-owned. They do not certify
-Gateway's own policy implementation or deployed environment. Gateway source,
-dependencies and deployment remain untouched. Actual Gateway adoption still
-needs its separate end-to-end integration and rollout verification.
+a consuming application's policy implementation or deployed environment. Each
+consumer needs separate end-to-end integration and rollout verification.
 
 A release/handoff is ready only when the exact candidate head has all these CI
 jobs green, the API/schema baselines are reviewed, and the working tree is clean.
