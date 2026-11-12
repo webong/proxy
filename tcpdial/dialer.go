@@ -3,6 +3,8 @@ package tcpdial
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io"
 	"math"
@@ -24,10 +26,11 @@ type Resolver interface {
 	LookupIPAddr(context.Context, string) ([]net.IPAddr, error)
 }
 type Dialer struct {
-	profile  Profile
-	proxy    *url.URL
-	base     ContextDialer
-	resolver Resolver
+	profile    Profile
+	proxy      *url.URL
+	base       ContextDialer
+	resolver   Resolver
+	proxyRoots *x509.CertPool
 }
 
 var ErrProtocol = socks5.ErrProtocol
@@ -37,7 +40,7 @@ type ReplyError = socks5.ReplyError
 
 // New snapshots configuration. A custom base sees the proxy hop for proxied traffic;
 // it cannot authorize a remotely resolved destination. Custom dependencies must honor context.
-func New(profile Profile, base ContextDialer, resolver Resolver) (*Dialer, error) {
+func New(profile Profile, base ContextDialer, resolver Resolver, options ...Option) (*Dialer, error) {
 	if err := profile.Validate(); err != nil {
 		return nil, err
 	}
@@ -48,6 +51,14 @@ func New(profile Profile, base ContextDialer, resolver Resolver) (*Dialer, error
 		resolver = net.DefaultResolver
 	}
 	d := &Dialer{profile: profile, base: base, resolver: resolver}
+	for _, option := range options {
+		if option == nil {
+			return nil, fmt.Errorf("nil TCP dialer option")
+		}
+		if err := option(d); err != nil {
+			return nil, err
+		}
+	}
 	if profile.Proxy != "" {
 		d.proxy, _ = proxyurl.Parse(profile.Proxy)
 	}
@@ -88,17 +99,20 @@ func (d *Dialer) DialContext(ctx context.Context, network, address string) (net.
 		return d.connect(ctx, net.JoinHostPort(host, strconv.Itoa(port)))
 	}
 	var target []byte
-	if d.proxy.Scheme != "http" {
+	if proxyurl.IsSOCKS(d.proxy) {
 		target, err = d.target(ctx, host, port)
 	}
 	if err != nil {
 		return nil, err
 	}
 	hop := proxyurl.Address(d.proxy)
-	if d.proxy.Scheme == "http" {
+	if !proxyurl.IsSOCKS(d.proxy) {
 		p := d.proxy.Port()
 		if p == "" {
 			p = "80"
+			if d.proxy.Scheme == "https" {
+				p = "443"
+			}
 		}
 		hop = net.JoinHostPort(d.proxy.Hostname(), p)
 	}
@@ -112,10 +126,17 @@ func (d *Dialer) DialContext(ctx context.Context, network, address string) (net.
 		return nil, err
 	}
 	stopped := make(chan struct{})
-	stop := context.AfterFunc(ctx, func() { conn.Close(); close(stopped) })
-	if d.proxy.Scheme == "http" {
+	// Capture the raw hop: cancellation must not race with replacing conn by TLS.
+	raw := conn
+	stop := context.AfterFunc(ctx, func() { raw.Close(); close(stopped) })
+	if d.proxy.Scheme == "https" {
+		secure := tls.Client(raw, &tls.Config{RootCAs: d.proxyRoots, ServerName: d.proxy.Hostname(), MinVersion: tls.VersionTLS12, NextProtos: []string{"http/1.1"}})
+		err = secure.HandshakeContext(ctx)
+		conn = secure
+	}
+	if err == nil && !proxyurl.IsSOCKS(d.proxy) {
 		err = d.connectHandshake(conn, net.JoinHostPort(host, strconv.Itoa(port)))
-	} else {
+	} else if err == nil {
 		err = d.handshake(conn, target)
 	}
 	if !stop() {
@@ -125,11 +146,11 @@ func (d *Dialer) DialContext(ctx context.Context, network, address string) (net.
 		err = setupErr
 	}
 	if err != nil {
-		conn.Close()
+		raw.Close()
 		return nil, err
 	}
 	if err = conn.SetDeadline(time.Time{}); err != nil {
-		conn.Close()
+		raw.Close()
 		return nil, err
 	}
 	return conn, nil

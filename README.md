@@ -206,11 +206,18 @@ Run the Go checks with `go test -race ./...` and `go vet ./...`.
 
 These transport APIs are experimental on this branch.
 
-Both libraries now provide direct TCP, SOCKS5 CONNECT, and HTTP CONNECT dialers.
+Both libraries now provide direct TCP, SOCKS5 CONNECT, and HTTP/HTTPS CONNECT dialers.
 For HTTP CONNECT use `http://user:password@proxy.example:8080` in a TCP profile;
 credentials are optional, Basic authentication is supported, and the proxy resolves
-the target hostname. HTTPS proxy hops are not supported by these raw dialers. `socks5://`
-resolves destination names locally; `socks5h://` resolves them at the proxy.
+the target hostname.
+
+Use `https://` to secure the proxy hop (default port 443); certificate and
+hostname verification are always enabled. Private CAs use Go's
+`tcpdial.WithProxyRootCAs(roots)` or PHP's `proxyCaFile` constructor argument.
+Go supports nesting target TLS inside this tunnel; the PHP native stream API
+provides the proxy TLS layer only. See the TCP contract for that limitation.
+
+`socks5://` resolves destination names locally; `socks5h://` resolves them at the proxy.
 Both support IPv4, IPv6, and optional username/password authentication.
 
 ```php

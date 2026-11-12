@@ -8,6 +8,7 @@ use Closure;
 use InvalidArgumentException;
 use Throwable;
 use Webong\Proxy\Connection\HttpConnectSession;
+use Webong\Proxy\Connection\ProxyTlsSession;
 use Webong\Proxy\Connection\ProxyUrl;
 use Webong\Proxy\Connection\SocketAddress;
 use Webong\Proxy\Connection\Socks5Session;
@@ -20,12 +21,16 @@ final class TcpDialer
     private readonly ?Closure $resolver;
 
     /**
+     * HTTPS proxy connectors return plain TCP; proxyCaFile supplies private trust roots.
      * Optional connector: (string $host, int $port, float $remainingSeconds): resource.
      * Optional resolver: (string $host, float $remainingSeconds): list<string> IP addresses.
      * Blocking PHP DNS and user callbacks cannot be preempted; overruns fail after return.
      */
-    public function __construct(private readonly TcpProfile $profile, ?callable $connector = null, ?callable $resolver = null)
+    public function __construct(private readonly TcpProfile $profile, ?callable $connector = null, ?callable $resolver = null, private readonly ?string $proxyCaFile = null)
     {
+        if ($proxyCaFile === '') {
+            throw new InvalidArgumentException('Proxy CA file must not be empty.');
+        }
         $this->connector = $connector === null ? null : Closure::fromCallable($connector);
         $this->resolver = $resolver === null ? null : Closure::fromCallable($resolver);
     }
@@ -42,9 +47,11 @@ final class TcpDialer
         $timeout = ceil(($settings['connect_timeout_seconds'] ?? 10) * 1000) / 1000;
         $deadline = hrtime(true) / 1e9 + $timeout;
         $proxy = isset($settings['proxy']) ? ProxyUrl::parse($settings['proxy']) : null;
-        $target = $proxy === null || $proxy['scheme'] === 'http' ? '' : $this->target($host, $port, $proxy['scheme'], $deadline);
+        $target = $proxy === null || in_array($proxy['scheme'], ['http', 'https'], true) ? '' : $this->target($host, $port, $proxy['scheme'], $deadline);
         $hop = $proxy === null ? $host : trim($proxy['host'], '[]');
-        $hopPort = $proxy === null ? $port : ($proxy['port'] ?? ($proxy['scheme'] === 'http' ? 80 : 1080));
+        $hopPort = $proxy === null ? $port : ($proxy['port'] ?? match ($proxy['scheme']) {
+            'http' => 80, 'https' => 443, default => 1080
+        });
         $remaining = $this->remaining($deadline);
         $stream = $this->connector !== null
             ? ($this->connector)($hop, $hopPort, $remaining)
@@ -58,7 +65,10 @@ final class TcpDialer
                 if (! stream_set_blocking($stream, false)) {
                     throw new DialException('Unable to configure TCP stream.');
                 }
-                if ($proxy['scheme'] === 'http') {
+                if ($proxy['scheme'] === 'https') {
+                    ProxyTlsSession::connect($stream, $hop, $deadline, $this->proxyCaFile);
+                }
+                if (in_array($proxy['scheme'], ['http', 'https'], true)) {
                     HttpConnectSession::connect($stream, $proxy, $host, $port, $deadline);
                 } else {
                     $this->handshake($stream, $proxy, $target, $deadline);

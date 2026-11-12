@@ -8,5 +8,5 @@ use Webong\Proxy\Connection\SocketProfile;
 
 final readonly class TcpProfile extends SocketProfile
 {
-    protected const PROXY_SCHEMES = ['socks5', 'socks5h', 'http'];
+    protected const PROXY_SCHEMES = ['socks5', 'socks5h', 'http', 'https'];
 }

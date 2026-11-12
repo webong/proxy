@@ -66,7 +66,7 @@ func (p Profile) validate(tcp bool) error {
 		if err != nil {
 			return err
 		}
-		if tcp && u.Scheme == "http" {
+		if tcp && (u.Scheme == "http" || u.Scheme == "https") {
 			return proxyurl.ValidateConnectCredentials(u)
 		}
 		if !proxyurl.IsSOCKS(u) {

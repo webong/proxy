@@ -14,8 +14,8 @@ PHP `Webong\Proxy\Tcp\TcpProfile` and Go `tcpdial.Profile` share
 Omit `proxy` for direct TCP. A proxy uses `socks5` (resolve the destination
 locally) or `socks5h` (send its hostname to the proxy). Literal IP addresses never
 require DNS. The proxy hop itself is resolved locally in both modes. Missing
-SOCKS ports default to 1080. HTTP CONNECT is supported with `http://` proxy URLs
-(default port 80); SOCKS BIND remains unsupported.
+SOCKS ports default to 1080. HTTP CONNECT is supported with `http://` (port 80) and
+`https://` (port 443) proxy URLs; SOCKS BIND remains unsupported.
 [UDP ASSOCIATE](udp.md) is provided by separate owning UDP associations. Only Go's `tcp` network is accepted;
 service names and scoped IPv6 addresses are outside the destination contract.
 PHP takes an unbracketed IP/hostname and an integer port; Go takes host:port
@@ -54,7 +54,7 @@ changes it. PHP does not provide Go-style context cancellation.
 
 ## Raw HTTP CONNECT
 
-Use `http://proxy.example:8080` in a TCP profile to open an HTTP/1.1 CONNECT
+Use `http://proxy.example:8080` or `https://proxy.example:8443` in a TCP profile to open an HTTP/1.1 CONNECT
 tunnel. The destination authority (hostname or bracketed IPv6 plus numeric port)
 is sent to the proxy; target DNS is performed by that proxy, without invoking the
 local destination resolver. The connector sees the proxy hop. UDP profiles still
@@ -95,14 +95,57 @@ terminator belong to the returned raw connection and are preserved.
 The existing setup timeout covers connecting, sending CONNECT, and reading the
 response; Go context cancellation closes an in-progress handshake. Successful
 tunnels have setup deadlines cleared. Callers own subsequent TLS and I/O.
-TLS to the HTTP proxy itself (`https://`), HTTP/2 CONNECT, extended CONNECT,
-and CONNECT-UDP are not supported by these raw dialers. HTTP proxy credentials
+HTTP/2 CONNECT, extended CONNECT, and CONNECT-UDP are not supported by these
+raw dialers. Plain HTTP proxy credentials
 and tunneled plaintext require deployment-level protection; Basic is not encryption.
 Raw HTTP CONNECT in PHP uses streams and does not require cURL.
 
 `http-connect-cases.json` runs against independent PHP and Go loopback peers,
 covering authentication, status/header validation, fragmented responses,
 coalesced tunnel data, deadline clearing, and setup failures.
+
+## HTTPS proxy TLS
+
+`https://` establishes verified TLS to the proxy before sending CONNECT or
+credentials. Both dialers require TLS 1.2 or newer, check the proxy certificate
+chain, expiry and hostname/IP, and send DNS SNI for the proxy hostname. A trailing
+DNS root dot is omitted for TLS identity/SNI; mapped IPv6 identities normalize
+to IPv4. The destination hostname is not used for proxy certificate verification. ALPN offers HTTP/1.1 only; proxies with
+no ALPN also work. No verification-disable option is provided.
+
+System trust is used by default. Private proxy CAs are runtime configuration,
+outside portable JSON profiles:
+
+```go
+dialer, err := tcpdial.New(profile, nil, nil, tcpdial.WithProxyRootCAs(roots))
+// roots is an *x509.CertPool; New clones it. Omit the option for system roots.
+```
+
+```php
+$dialer = new TcpDialer($profile, proxyCaFile: '/etc/my-app/proxy-ca.pem');
+```
+
+PHP requires ext-openssl for HTTPS proxy hops; raw HTTP/SOCKS still needs no
+cURL. A custom connector/dialer must return a plain TCP connection to the proxy;
+Proxy performs the TLS handshake itself. The setup budget covers TCP, TLS, and
+CONNECT as one operation. Cancellation/failure closes the raw hop without waiting
+for TLS shutdown. The established connection is reused for tunnel I/O, with setup
+deadlines cleared. Go returns a `*tls.Conn` for HTTPS proxy tunnels; its native
+TLS shutdown behavior applies when the caller closes it.
+
+Proxy-hop TLS protects the connection to the proxy. It does not add end-to-end
+TLS to the target. Go callers can wrap the tunnel with another `tls.Client`;
+this nested TLS is tested. PHP returns a native TLS stream and does not provide
+a second TLS layer inside it: re-enabling crypto on that stream is not a target
+TLS adapter. Use the HTTP/Guzzle adapter for HTTPS requests through an HTTPS
+proxy, or a stream transport that supports nested TLS for another target protocol.
+This limitation does not affect binary/plain application traffic in the tunnel.
+
+UDP and shared socket profiles remain SOCKS-only. HTTPS profiles use the same
+Basic credential rules and CONNECT parsing limits as HTTP profiles. Loopback
+suites test both schemes, private/system trust rejection, hostname mismatch,
+expired certificates, IPv4/IPv6 hops, stalled TLS, SNI/ALPN, credential ordering,
+and Go cancellation/nested TLS.
 
 ## HTTP adapters
 

@@ -7,7 +7,14 @@ use Webong\Proxy\Tcp\TcpDialer;
 use Webong\Proxy\Tcp\TcpProfile;
 
 $connectCases = json_decode(file_get_contents(__DIR__.'/../../../spec/http-connect-cases.json'), true, flags: JSON_THROW_ON_ERROR);
-dataset('HTTP CONNECT', array_combine(array_column($connectCases, 'name'), array_map(fn ($case) => [$case], $connectCases)));
+$datasets = [];
+foreach (['http', 'https'] as $scheme) {
+    foreach ($connectCases as $case) {
+        $case['proxy_scheme'] = $scheme;
+        $datasets[$scheme.'/'.$case['name']] = [$case];
+    }
+}
+dataset('HTTP CONNECT', $datasets);
 it('conforms to shared HTTP CONNECT scenarios', function (array $case): void {
     $process = proc_open([PHP_BINARY, __DIR__.'/../../Support/connect-server.php', base64_encode(json_encode($case, JSON_THROW_ON_ERROR))], [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
     fclose($pipes[0]);
@@ -15,10 +22,10 @@ it('conforms to shared HTTP CONNECT scenarios', function (array $case): void {
     try {
         $address = trim(fgets($pipes[1]));
         $credentials = isset($case['credentials']) ? $case['credentials'].'@' : '';
-        $profile = new TcpProfile(['version' => 1, 'proxy' => 'http://'.$credentials.$address, 'connect_timeout_seconds' => (($case['stall'] ?? false) || ($case['deadline_cleared'] ?? false)) ? .03 : 1]);
+        $profile = new TcpProfile(['version' => 1, 'proxy' => $case['proxy_scheme'].'://'.$credentials.$address, 'connect_timeout_seconds' => ($case['stall'] ?? false) ? .03 : (($case['deadline_cleared'] ?? false) ? .25 : 1)]);
         $dialer = new TcpDialer($profile, resolver: static function (): never {
             throw new RuntimeException('CONNECT must not resolve the target locally.');
-        });
+        }, proxyCaFile: __DIR__.'/../../fixtures/tls/ca.pem');
         if ($case['success']) {
             $stream = $dialer->dial($case['host'], $case['port']);
             try {
@@ -29,7 +36,7 @@ it('conforms to shared HTTP CONNECT scenarios', function (array $case): void {
                 }
                 expect($banner)->toBe("banner\0");
                 if ($case['deadline_cleared'] ?? false) {
-                    usleep(60000);
+                    usleep(300000);
                 }
                 fwrite($stream, 'ping');
                 expect(fread($stream, 4))->toBe('ping');

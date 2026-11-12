@@ -25,7 +25,7 @@ readonly class SocketProfile implements JsonSerializable
             if (! in_array($parts['scheme'], static::PROXY_SCHEMES, true)) {
                 throw new InvalidArgumentException('Unsupported socket proxy scheme.');
             }
-            if ($parts['scheme'] === 'http') {
+            if (in_array($parts['scheme'], ['http', 'https'], true)) {
                 ProxyUrl::validateConnectCredentials($parts);
             }
         }
