@@ -220,3 +220,41 @@ func TestConnectRejectionStatusIsSafe(t *testing.T) {
 		t.Fatalf("unsafe rejection error: %v", err)
 	}
 }
+
+func TestConnectProtocolErrorsAreSpecificAndPreserveEOF(t *testing.T) {
+	for _, test := range []struct {
+		name, response string
+		eof            bool
+	}{
+		{"malformed-status", "SOCKS5 is not HTTP\r\n\r\n", false},
+		{"malformed-header", "HTTP/1.1 200 OK\r\nBad Header: x\r\n\r\n", false},
+		{"bare-lf", "HTTP/1.1 200 OK\n\n", false},
+		{"truncated-status", "HTTP/1.1 20", true},
+		{"truncated-headers", "HTTP/1.1 200 OK\r\nX: incomplete", true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			local, peer := net.Pipe()
+			defer peer.Close()
+			d, _ := New(Profile{Version: 1, Proxy: "http://proxy.example"}, baseFunc(func(context.Context, string, string) (net.Conn, error) { return local, nil }), nil)
+			go func() {
+				defer peer.Close()
+				request := ""
+				var b [1]byte
+				for !strings.HasSuffix(request, "\r\n\r\n") {
+					if _, err := io.ReadFull(peer, b[:]); err != nil {
+						return
+					}
+					request += string(b[:])
+				}
+				peer.Write([]byte(test.response))
+			}()
+			_, err := d.DialContext(context.Background(), "tcp", "target.example:443")
+			if !errors.Is(err, ErrConnectProtocol) || errors.Is(err, ErrProtocol) || strings.Contains(err.Error(), "SOCKS") {
+				t.Fatalf("wrong protocol error: %v", err)
+			}
+			if test.eof && !errors.Is(err, io.EOF) {
+				t.Fatalf("truncation lost EOF: %v", err)
+			}
+		})
+	}
+}

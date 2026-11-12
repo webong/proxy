@@ -246,6 +246,11 @@ defer conn.Close()
 // Set application deadlines and perform the application protocol here.
 ```
 
+Go callers that previously passed `socketprofile.Profile` into `tcpdial.New`
+should convert with `tcpdial.Profile(sharedProfile)`, or construct a
+`tcpdial.Profile` directly. TCP profiles now validate HTTP CONNECT independently
+of the shared SOCKS-only UDP profile.
+
 The HTTP profile adapters also accept SOCKS proxy URLs. PHP SOCKS HTTP requires
 ext-curl; mandatory authenticated SOCKS HTTP additionally requires libcurl 8.23+.
 The raw PHP TCP dialer supports authentication without cURL. Read the

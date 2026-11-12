@@ -1,4 +1,4 @@
-# TCP and SOCKS5 profiles
+# TCP, SOCKS5, and HTTP CONNECT profiles
 
 PHP `Webong\Proxy\Tcp\TcpProfile` and Go `tcpdial.Profile` share
 `tcp-profile.schema.json`. The exact fields are:
@@ -60,7 +60,17 @@ is sent to the proxy; target DNS is performed by that proxy, without invoking th
 local destination resolver. The connector sees the proxy hop. UDP profiles still
 accept only SOCKS proxies; TCP and UDP now have separate fixture directories.
 Go `tcpdial.Profile` has the same fields as `socketprofile.Profile` but is a
-separate type with TCP-specific parsing and validation.
+separate type with TCP-specific parsing and validation. Code passing a shared
+profile to `tcpdial.New` must now explicitly convert it:
+
+```go
+shared := socketprofile.Profile{Version: 1}
+dialer, err := tcpdial.New(tcpdial.Profile(shared), nil, nil)
+```
+
+Use `tcpdial.Profile` / `tcpdial.Parse` directly for new TCP code. Converting a
+TCP profile back to a shared/UDP profile does not permit HTTP proxies there;
+shared and UDP validation remain SOCKS-only.
 
 Optional URL credentials are percent-decoded and sent preemptively as Basic
 `Proxy-Authorization`. Supply both username and password; the username must
@@ -76,7 +86,9 @@ Up to eight informational responses are accepted, excluding 101. Response
 headers across all responses are bounded to 32,768 bytes. Malformed/truncated
 responses, folded fields, bare LF, invalid control bytes, and non-2xx final
 statuses fail and close the connection. Go returns `*ConnectError` for rejected
-statuses; PHP uses the status as `DialException`'s code. Errors do not include
+statuses; malformed/truncated responses match `ErrConnectProtocol` (truncated
+responses also retain `io.EOF` / `io.ErrUnexpectedEOF`). `ErrProtocol` remains
+the SOCKS5 error sentinel. PHP uses the status as `DialException`'s code. Errors do not include
 credentials or untrusted response text. Bytes following the successful header
 terminator belong to the returned raw connection and are preserved.
 

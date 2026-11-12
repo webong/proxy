@@ -2,6 +2,7 @@ package tcpdial
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -9,6 +10,9 @@ import (
 	"strconv"
 	"strings"
 )
+
+// ErrConnectProtocol identifies malformed or truncated HTTP CONNECT responses.
+var ErrConnectProtocol = errors.New("invalid HTTP CONNECT response")
 
 // ConnectError reports a rejected tunnel without exposing proxy credentials or
 // untrusted response text. No response body is consumed or redirects followed.
@@ -39,7 +43,7 @@ func (d *Dialer) connectHandshake(conn net.Conn, authority string) error {
 			return err
 		}
 		if !statusLine.MatchString(line) || !validConnectValue(line[13:]) {
-			return fmt.Errorf("%w: invalid HTTP CONNECT status", ErrProtocol)
+			return fmt.Errorf("%w: invalid HTTP CONNECT status", ErrConnectProtocol)
 		}
 		status, _ := strconv.Atoi(line[9:12])
 		for {
@@ -52,7 +56,7 @@ func (d *Dialer) connectHandshake(conn net.Conn, authority string) error {
 			}
 			name, value, found := strings.Cut(line, ":")
 			if !found || !headerName.MatchString(name) || !validConnectValue(value) {
-				return fmt.Errorf("%w: invalid HTTP CONNECT header", ErrProtocol)
+				return fmt.Errorf("%w: invalid HTTP CONNECT header", ErrConnectProtocol)
 			}
 		}
 		if status >= 100 && status < 200 && status != 101 && interim < 8 {
@@ -70,18 +74,21 @@ func connectLine(r io.Reader, budget *int) (string, error) {
 	for *budget > 0 {
 		*budget--
 		if _, err := io.ReadFull(r, b[:]); err != nil {
+			if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
+				return "", fmt.Errorf("%w: %w", ErrConnectProtocol, err)
+			}
 			return "", err
 		}
 		line.WriteByte(b[0])
 		if b[0] == '\n' {
 			value := line.String()
 			if len(value) < 2 || value[len(value)-2] != '\r' {
-				return "", fmt.Errorf("%w: invalid HTTP CONNECT line ending", ErrProtocol)
+				return "", fmt.Errorf("%w: invalid HTTP CONNECT line ending", ErrConnectProtocol)
 			}
 			return value[:len(value)-2], nil
 		}
 	}
-	return "", fmt.Errorf("%w: HTTP CONNECT headers exceed 32768 bytes", ErrProtocol)
+	return "", fmt.Errorf("%w: HTTP CONNECT headers exceed 32768 bytes", ErrConnectProtocol)
 }
 
 // HTTP field values and reason phrases are octets, not necessarily UTF-8.
