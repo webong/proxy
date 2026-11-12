@@ -64,7 +64,7 @@ $api = [];
 foreach ($classes as $class) {
     $reflection = new ReflectionClass($class);
     $parent = $reflection->getParentClass();
-    $entry = ['final' => $reflection->isFinal(), 'readonly' => $reflection->isReadOnly(), 'parent' => $parent ? $parent->getName() : null, 'interfaces' => $reflection->getInterfaceNames(), 'properties' => [], 'constants' => [], 'methods' => []];
+    $entry = ['abstract' => $reflection->isAbstract(), 'final' => $reflection->isFinal(), 'readonly' => $reflection->isReadOnly(), 'parent' => $parent ? $parent->getName() : null, 'interfaces' => $reflection->getInterfaceNames(), 'properties' => [], 'constants' => [], 'methods' => []];
     sort($entry['interfaces']);
     foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
         $entry['properties'][$property->getName()] = ['type' => proxyContractType($property->getType(), $property->getDeclaringClass()), 'readonly' => $property->isReadOnly(), 'static' => $property->isStatic()];
@@ -85,7 +85,7 @@ foreach ($classes as $class) {
         foreach ($method->getParameters() as $parameter) {
             $parameters[] = ['name' => $parameter->getName(), 'type' => proxyContractType($parameter->getType(), $method->getDeclaringClass()), 'optional' => $parameter->isOptional(), 'variadic' => $parameter->isVariadic(), 'by_reference' => $parameter->isPassedByReference(), 'default' => $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null];
         }
-        $entry['methods'][$method->getName()] = ['static' => $method->isStatic(), 'return_type' => proxyContractType($method->getReturnType(), $method->getDeclaringClass()), 'parameters' => $parameters];
+        $entry['methods'][$method->getName()] = ['abstract' => $method->isAbstract(), 'final' => $method->isFinal(), 'returns_reference' => $method->returnsReference(), 'static' => $method->isStatic(), 'return_type' => proxyContractType($method->getReturnType(), $method->getDeclaringClass()), 'parameters' => $parameters];
     }
     foreach (['properties', 'constants', 'methods'] as $key) {
         ksort($entry[$key]);

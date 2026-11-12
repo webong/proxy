@@ -208,7 +208,7 @@ Run the Go checks with `go test -race ./...` and `go vet ./...`.
 ## TCP dialers and SOCKS5
 
 The v0.3.0 transport candidate is frozen for readiness checks on this branch. See [the public contract](spec/CONTRACT.md)
-and [migration guide](spec/MIGRATION.md) before integration. No v0.3 release
+and [adoption guide](spec/ADOPTING.md) before integration. No v0.3 release
 has been published from this experimental branch.
 
 Both libraries now provide direct TCP, SOCKS5 CONNECT, and HTTP/HTTPS CONNECT dialers.

@@ -1,5 +1,6 @@
 {
     "Webong\\Proxy\\Connection\\SocketProfile": {
+        "abstract": false,
         "final": false,
         "readonly": true,
         "parent": null,
@@ -16,6 +17,9 @@
         "constants": [],
         "methods": {
             "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "",
                 "parameters": [
@@ -32,6 +36,9 @@
                 ]
             },
             "fromArray": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "static",
                 "parameters": [
@@ -46,6 +53,9 @@
                 ]
             },
             "fromJson": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "static",
                 "parameters": [
@@ -60,16 +70,25 @@
                 ]
             },
             "jsonSerialize": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "array",
                 "parameters": []
             },
             "toArray": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "array",
                 "parameters": []
             },
             "toJson": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "string",
                 "parameters": []
@@ -77,6 +96,7 @@
         }
     },
     "Webong\\Proxy\\GuzzleClientFactory": {
+        "abstract": false,
         "final": true,
         "readonly": false,
         "parent": null,
@@ -85,6 +105,9 @@
         "constants": [],
         "methods": {
             "make": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "GuzzleHttp\\ClientInterface",
                 "parameters": [
@@ -107,6 +130,9 @@
                 ]
             },
             "options": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "array",
                 "parameters": [
@@ -129,6 +155,9 @@
                 ]
             },
             "profile": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "Webong\\Proxy\\Http\\HttpProfile",
                 "parameters": [
@@ -153,6 +182,7 @@
         }
     },
     "Webong\\Proxy\\Http\\GuzzleOptions": {
+        "abstract": false,
         "final": true,
         "readonly": false,
         "parent": null,
@@ -161,6 +191,9 @@
         "constants": [],
         "methods": {
             "fromProfile": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "array",
                 "parameters": [
@@ -185,6 +218,7 @@
         }
     },
     "Webong\\Proxy\\Http\\HttpProfile": {
+        "abstract": false,
         "final": true,
         "readonly": true,
         "parent": null,
@@ -201,6 +235,9 @@
         "constants": [],
         "methods": {
             "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "",
                 "parameters": [
@@ -217,6 +254,9 @@
                 ]
             },
             "fromArray": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "Webong\\Proxy\\Http\\HttpProfile",
                 "parameters": [
@@ -231,6 +271,9 @@
                 ]
             },
             "fromJson": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "Webong\\Proxy\\Http\\HttpProfile",
                 "parameters": [
@@ -245,11 +288,17 @@
                 ]
             },
             "jsonSerialize": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "array",
                 "parameters": []
             },
             "proxyFor": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "?string",
                 "parameters": [
@@ -272,11 +321,17 @@
                 ]
             },
             "toArray": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "array",
                 "parameters": []
             },
             "toJson": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "string",
                 "parameters": []
@@ -284,6 +339,7 @@
         }
     },
     "Webong\\Proxy\\Http\\HttpProfileNormalizer": {
+        "abstract": false,
         "final": true,
         "readonly": false,
         "parent": null,
@@ -292,6 +348,9 @@
         "constants": [],
         "methods": {
             "normalize": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "Webong\\Proxy\\Http\\HttpProfile",
                 "parameters": [
@@ -308,6 +367,7 @@
         }
     },
     "Webong\\Proxy\\Tcp\\DialException": {
+        "abstract": false,
         "final": true,
         "readonly": false,
         "parent": "RuntimeException",
@@ -320,6 +380,7 @@
         "methods": []
     },
     "Webong\\Proxy\\Tcp\\TcpDialer": {
+        "abstract": false,
         "final": true,
         "readonly": false,
         "parent": null,
@@ -328,6 +389,9 @@
         "constants": [],
         "methods": {
             "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "",
                 "parameters": [
@@ -366,6 +430,9 @@
                 ]
             },
             "dial": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "",
                 "parameters": [
@@ -390,6 +457,7 @@
         }
     },
     "Webong\\Proxy\\Tcp\\TcpProfile": {
+        "abstract": false,
         "final": true,
         "readonly": true,
         "parent": "Webong\\Proxy\\Connection\\SocketProfile",
@@ -406,6 +474,9 @@
         "constants": [],
         "methods": {
             "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "",
                 "parameters": [
@@ -422,6 +493,9 @@
                 ]
             },
             "fromArray": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "static",
                 "parameters": [
@@ -436,6 +510,9 @@
                 ]
             },
             "fromJson": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "static",
                 "parameters": [
@@ -450,16 +527,25 @@
                 ]
             },
             "jsonSerialize": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "array",
                 "parameters": []
             },
             "toArray": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "array",
                 "parameters": []
             },
             "toJson": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "string",
                 "parameters": []
@@ -467,6 +553,7 @@
         }
     },
     "Webong\\Proxy\\Udp\\Datagram": {
+        "abstract": false,
         "final": true,
         "readonly": true,
         "parent": null,
@@ -491,6 +578,9 @@
         "constants": [],
         "methods": {
             "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "",
                 "parameters": [
@@ -523,6 +613,7 @@
         }
     },
     "Webong\\Proxy\\Udp\\Socks5Datagram": {
+        "abstract": false,
         "final": true,
         "readonly": false,
         "parent": null,
@@ -533,6 +624,9 @@
         },
         "methods": {
             "decode": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "?Webong\\Proxy\\Udp\\Datagram",
                 "parameters": [
@@ -547,6 +641,9 @@
                 ]
             },
             "encode": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "string",
                 "parameters": [
@@ -577,6 +674,9 @@
                 ]
             },
             "maxPayloadSize": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "int",
                 "parameters": [
@@ -601,6 +701,7 @@
         }
     },
     "Webong\\Proxy\\Udp\\UdpAssociation": {
+        "abstract": false,
         "final": true,
         "readonly": false,
         "parent": null,
@@ -609,26 +710,41 @@
         "constants": [],
         "methods": {
             "__destruct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "",
                 "parameters": []
             },
             "close": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "void",
                 "parameters": []
             },
             "isClosed": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "bool",
                 "parameters": []
             },
             "localAddress": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "array",
                 "parameters": []
             },
             "receive": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "Webong\\Proxy\\Udp\\Datagram",
                 "parameters": [
@@ -643,6 +759,9 @@
                 ]
             },
             "sendTo": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "int",
                 "parameters": [
@@ -683,6 +802,7 @@
         }
     },
     "Webong\\Proxy\\Udp\\UdpDialer": {
+        "abstract": false,
         "final": true,
         "readonly": false,
         "parent": null,
@@ -691,6 +811,9 @@
         "constants": [],
         "methods": {
             "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "",
                 "parameters": [
@@ -721,6 +844,9 @@
                 ]
             },
             "open": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "Webong\\Proxy\\Udp\\UdpAssociation",
                 "parameters": [
@@ -745,6 +871,7 @@
         }
     },
     "Webong\\Proxy\\Udp\\UdpException": {
+        "abstract": false,
         "final": true,
         "readonly": false,
         "parent": "RuntimeException",
@@ -757,6 +884,7 @@
         "methods": []
     },
     "Webong\\Proxy\\Udp\\UdpProfile": {
+        "abstract": false,
         "final": true,
         "readonly": true,
         "parent": "Webong\\Proxy\\Connection\\SocketProfile",
@@ -773,6 +901,9 @@
         "constants": [],
         "methods": {
             "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "",
                 "parameters": [
@@ -789,6 +920,9 @@
                 ]
             },
             "fromArray": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "static",
                 "parameters": [
@@ -803,6 +937,9 @@
                 ]
             },
             "fromJson": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": true,
                 "return_type": "static",
                 "parameters": [
@@ -817,16 +954,25 @@
                 ]
             },
             "jsonSerialize": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "array",
                 "parameters": []
             },
             "toArray": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "array",
                 "parameters": []
             },
             "toJson": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
                 "static": false,
                 "return_type": "string",
                 "parameters": []

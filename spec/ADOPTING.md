@@ -1,6 +1,19 @@
-# Migrating to the v0.3.0 transport candidate
+# Adopting the v0.3.0 transport candidate
 
-## From released v0.2.1
+## Why this guide exists
+
+This is an adoption guide, **not a database migration**. The readiness work adds
+no database migrations and requires no stored-profile conversion. Existing
+v0.2.1 users may continue using the legacy registry and Guzzle API unchanged.
+The new transports are opt-in additions. The experimental adjustment list below
+only applies if you already used the unreleased transport APIs from an earlier
+commit of this branch; it is not a breaking upgrade requirement for v0.2.1.
+
+The README's historical `webong/web-proxy` table-rename instructions already
+existed in v0.2.1. They apply only to that older package-name transition, not to
+adopting these v0.3 transport APIs.
+
+## Optional adoption from released v0.2.1
 
 The portable transport APIs are additions to the existing PHP package. Keep using
 `GuzzleClientFactory::make()` / `options()` for native, registry-backed Guzzle
@@ -32,7 +45,7 @@ rules now fail portable validation. Omitted HTTP timeouts keep backend defaults;
 omitted raw setup timeouts use 10 seconds. Portable clients do not inherit proxy
 environment variables.
 
-## From earlier experimental commits
+## Only for consumers of earlier experimental commits
 
 1. **TCP profile identity:** `tcpdial.Profile` is now an alias of
    `socketprofile.TCPProfile`, not `socketprofile.Profile`. Convert an existing

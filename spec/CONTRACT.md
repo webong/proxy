@@ -3,7 +3,7 @@
 Target package version: **v0.3.0**. Contract revision: **1**. Status: **frozen for candidate validation on the
 experimental branch**, not a published release or a v1 API commitment. This contract
 covers the transport work introduced after `v0.2.1`. It does not rename or replace
-the existing Laravel registry/webhook APIs. See [migration](MIGRATION.md) and
+the existing Laravel registry/webhook APIs. See [adoption guide](ADOPTING.md) and
 [readiness evidence](READINESS.md).
 
 ## Authoritative surface
@@ -99,7 +99,11 @@ consumer integration.
 Normal checks are `go test -race ./...`, `go vet ./...`, `composer test`, and
 `python scripts/check_profile_schemas.py` (Python requires `jsonschema>=4,<5`).
 Go source snapshots exclude implementation fields, bodies and error strings.
-PHP snapshots exclude PHP runtime Exception methods and `@internal` APIs. The
+They record exported variable names; exact public error-variable types are
+frozen by pointer-to-error assertions in the external consumer tests. Both
+checks are required; the AST snapshot alone is not a semantic type checker.
+PHP snapshots include class/method modifiers and reference returns, and exclude
+PHP runtime Exception methods and `@internal` APIs. The
 standalone guard uses package-only autoloading and normalizes Reflection
 `self`/`parent` spelling across PHP minors; late-bound `static` remains distinct.
 The external consumer tests supplement snapshots with error/interface and

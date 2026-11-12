@@ -32,6 +32,18 @@ var (
 	_ error          = udpdial.ErrProtocol
 )
 
+// Keep the public sentinel variables typed as error, not merely assignable to
+// error. A concrete error pointer also satisfies error but changes source API.
+var (
+	_ *error = &tcpdial.ErrConnectProtocol
+	_ *error = &tcpdial.ErrProtocol
+	_ *error = &tcpdial.ErrAuthentication
+	_ *error = &udpdial.ErrMessageTooLarge
+	_ *error = &udpdial.ErrFragment
+	_ *error = &udpdial.ErrAuthentication
+	_ *error = &udpdial.ErrProtocol
+)
+
 func TestPublicProfileAndSocketComposition(t *testing.T) {
 	shared := socketprofile.Profile{Version: 1}
 	if _, err := tcpdial.New(tcpdial.Profile(shared), nil, nil); err != nil {

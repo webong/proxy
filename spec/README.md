@@ -1,7 +1,7 @@
 # Portable HTTP profile v1
 
 The [v0.3 candidate contract](CONTRACT.md) defines compatibility and the
-[migration guide](MIGRATION.md) documents released and experimental API changes.
+[adoption guide](ADOPTING.md) documents released and experimental API changes.
 
 `http-profile.schema.json` describes the language-neutral connection settings.
 The `version` field is mandatory and currently must be `1`. Unknown fields and
