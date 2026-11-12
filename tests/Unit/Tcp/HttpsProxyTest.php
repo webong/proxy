@@ -114,3 +114,54 @@ it('exposes the native PHP single TLS layer limitation', function (): void {
     });
     expect($record['request'])->toContain('CONNECT target.test:9000 HTTP/1.1');
 });
+
+it('does not inherit connector trust sources', function (string $mode): void {
+    $ca = __DIR__.'/../../fixtures/tls/ca.pem';
+    $directory = sys_get_temp_dir().'/proxy-ca-context-'.bin2hex(random_bytes(8));
+    mkdir($directory, 0700);
+    $hash = openssl_x509_parse(file_get_contents($ca))['hash'];
+    copy($ca, $directory.'/'.$hash.'.0');
+    try {
+        $record = withHttpsProxyPeer(['success' => false], function (string $address) use ($mode, $ca, $directory): void {
+            $stream = null;
+            $connector = static function (string $host, int $port, float $remaining) use ($mode, $address, $ca, $directory, &$stream) {
+                $context = stream_context_create(['ssl' => match ($mode) {
+                    'cafile' => ['cafile' => $ca],
+                    'cafile-zero' => ['cafile' => '0'],
+                    'capath-zero' => ['capath' => '0'],
+                    default => ['capath' => $directory],
+                }]);
+
+                return $stream = stream_socket_client('tcp://'.$address, $errno, $error, $remaining, STREAM_CLIENT_CONNECT, $context);
+            };
+            $explicitCa = $mode === 'explicit-file-and-capath' ? __DIR__.'/../../fixtures/tls/expired.pem' : null;
+            $dialer = new TcpDialer(new TcpProfile(['version' => 1, 'proxy' => 'https://user:pass@proxy.test']), connector: $connector, proxyCaFile: $explicitCa);
+            expect(fn () => $dialer->dial('target.test', 9000))->toThrow(DialException::class, $explicitCa === null ? 'trust must be configured through proxyCaFile' : 'TLS handshake failed');
+            expect(is_resource($stream))->toBeFalse();
+        });
+        expect($record['request'])->toBe('');
+    } finally {
+        unlink($directory.'/'.$hash.'.0');
+        rmdir($directory);
+    }
+})->with(['cafile', 'capath', 'cafile-zero', 'capath-zero', 'explicit-file-and-capath']);
+
+it('uses explicit proxy CA trust instead of a connector CA file', function (): void {
+    $record = withHttpsProxyPeer(['success' => true], function (string $address): void {
+        $connector = static function (string $host, int $port, float $remaining) use ($address) {
+            $context = stream_context_create(['ssl' => ['cafile' => __DIR__.'/../../fixtures/tls/expired.pem', 'capath' => __DIR__.'/missing-ca-directory']]);
+
+            return stream_socket_client('tcp://'.$address, $errno, $error, $remaining, STREAM_CLIENT_CONNECT, $context);
+        };
+        $dialer = new TcpDialer(new TcpProfile(['version' => 1, 'proxy' => 'https://proxy.test']), connector: $connector, proxyCaFile: __DIR__.'/../../fixtures/tls/ca.pem');
+        $stream = $dialer->dial('target.test', 9000);
+        try {
+            expect(stream_get_contents($stream, 7))->toBe("banner\0");
+            fwrite($stream, 'ping');
+            expect(stream_get_contents($stream, 4))->toBe('ping');
+        } finally {
+            fclose($stream);
+        }
+    });
+    expect($record['request'])->toContain('CONNECT target.test:9000 HTTP/1.1');
+});

@@ -113,7 +113,15 @@ DNS root dot is omitted for TLS identity/SNI; mapped IPv6 identities normalize
 to IPv4. The destination hostname is not used for proxy certificate verification. ALPN offers HTTP/1.1 only; proxies with
 no ALPN also work. No verification-disable option is provided.
 
-System trust is used by default. Private proxy CAs are runtime configuration,
+System trust is used by default. In PHP this includes the configured
+`openssl.cafile` / `openssl.capath` and native OpenSSL defaults. A connector or default-stream
+context must not supply `ssl.cafile` or `ssl.capath` when `proxyCaFile` is
+omitted; the dialer rejects that ambiguous trust configuration before TLS or
+CONNECT. This includes empty/null overrides and relative paths such as `0`.
+Pass the desired CA bundle through `proxyCaFile` instead.
+Explicit private roots replace other trust sources: Go snapshots the supplied
+pool, and PHP overrides any connector CA file and disables inherited/INI CA
+directories. Private proxy CAs are runtime configuration,
 outside portable JSON profiles:
 
 ```go
@@ -129,7 +137,8 @@ PHP requires ext-openssl for HTTPS proxy hops; raw HTTP/SOCKS still needs no
 cURL. A custom connector/dialer must return a plain TCP connection to the proxy;
 Proxy performs the TLS handshake itself. The setup budget covers TCP, TLS, and
 CONNECT as one operation. Cancellation/failure closes the raw hop without waiting
-for TLS shutdown. The established connection is reused for tunnel I/O, with setup
+for TLS shutdown. PHP refreshes the remaining budget after every crypto step
+before waiting for more TLS data. The established connection is reused for tunnel I/O, with setup
 deadlines cleared. Go returns a `*tls.Conn` for HTTPS proxy tunnels; its native
 TLS shutdown behavior applies when the caller closes it.
 
