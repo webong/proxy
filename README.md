@@ -1,7 +1,9 @@
 # Proxy
 
 `webong/proxy` is a Laravel package for registry-backed webhook endpoints and
-outbound HTTP client profiles. An endpoint is a durable network identity: it
+outbound client profiles. The v0.3.0 candidate also provides portable PHP/Go
+HTTP clients, TCP dialers and UDP associations; its wire profiles retain
+`version: 1`, independently of the package version. An endpoint is a durable network identity: it
 can receive and route webhooks through subscriptions, and it can own named
 outbound profiles for clients such as Guzzle.
 
@@ -159,7 +161,8 @@ See [the profile contract](spec/README.md) for supported settings and validation
 The existing Laravel registry and webhook APIs remain in their current locations.
 Existing `GuzzleClientFactory::make` and `options` preserve Guzzle-only behavior.
 Use `$factory->profile($endpoint, 'partner-api')` to explicitly normalize an
-endpoint profile for portable export; unsupported portable settings are rejected.
+endpoint profile for portable export; invalid portable values are rejected. The normalizer extracts connection settings;
+headers, TLS options and other Guzzle-only fields are not exported.
 The PHP classes under `Webong\Proxy\Http` do not require a Laravel application.
 
 ```php
@@ -204,7 +207,9 @@ Run the Go checks with `go test -race ./...` and `go vet ./...`.
 
 ## TCP dialers and SOCKS5
 
-These transport APIs are experimental on this branch.
+The v0.3.0 transport candidate is frozen for readiness checks on this branch. See [the public contract](spec/CONTRACT.md)
+and [migration guide](spec/MIGRATION.md) before integration. No v0.3 release
+has been published from this experimental branch.
 
 Both libraries now provide direct TCP, SOCKS5 CONNECT, and HTTP/HTTPS CONNECT dialers.
 For HTTP CONNECT use `http://user:password@proxy.example:8080` in a TCP profile;

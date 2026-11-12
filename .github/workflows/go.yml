@@ -5,11 +5,15 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ['1.23.x', 'stable']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: ${{ matrix.go }}
           cache: false # The library currently has no external Go dependencies/go.sum.
       - run: go test -race ./...
       - run: go vet ./...

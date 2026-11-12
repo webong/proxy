@@ -5,6 +5,7 @@ for semantic IP validity; the schema additionally checks the wire document shape
 URL grammar, decoded credential byte lengths and portable HTTP byte subset.
 """
 
+import hashlib
 import json
 from pathlib import Path
 from urllib.parse import quote
@@ -58,3 +59,10 @@ for case in load(ROOT / "spec/socks5-cases.json"):
             check(schema, {"version": 1, "proxy": f'socks5h://{user}:{password}@proxy.example'}, True, case["name"])
 
 print(f"Validated {checked} shared profile/schema cases")
+
+# The v0.3 candidate freezes the existing wire version 1 schemas. JSON formatting alone does not change a digest.
+expected = load(ROOT / "spec/api/schemas-v0.3.json")
+actual = {path: hashlib.sha256(json.dumps(load(ROOT / path), sort_keys=True, separators=(",", ":")).encode()).hexdigest() for path in expected}
+if actual != expected:
+    raise AssertionError("v0.3 wire schema baseline changed; review spec/CONTRACT.md before introducing a new version")
+print("Wire schemas match the frozen v0.3 baseline")

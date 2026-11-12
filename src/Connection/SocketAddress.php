@@ -6,6 +6,7 @@ namespace Webong\Proxy\Connection;
 
 use InvalidArgumentException;
 
+/** @internal Transport implementation helper; not a supported consumer API. */
 final class SocketAddress
 {
     public static function validate(string $host, int $port, bool $allowZero = false): void

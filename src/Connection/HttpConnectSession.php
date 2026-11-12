@@ -6,7 +6,11 @@ namespace Webong\Proxy\Connection;
 
 use Webong\Proxy\Tcp\DialException;
 
-/** HTTP/1.x CONNECT. Reads exactly through headers, preserving tunnel bytes. */
+/**
+ * HTTP/1.x CONNECT. Reads exactly through headers, preserving tunnel bytes.
+ *
+ * @internal Transport implementation helper; not a supported consumer API.
+ */
 final class HttpConnectSession
 {
     public static function connect($stream, array $proxy, string $host, int $port, float $deadline): void

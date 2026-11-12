@@ -1,5 +1,8 @@
 # Portable HTTP profile v1
 
+The [v0.3 candidate contract](CONTRACT.md) defines compatibility and the
+[migration guide](MIGRATION.md) documents released and experimental API changes.
+
 `http-profile.schema.json` describes the language-neutral connection settings.
 The `version` field is mandatory and currently must be `1`. Unknown fields and
 explicit null values are rejected. Missing timeout fields use client defaults;
@@ -45,7 +48,9 @@ shape. Top-level `proxy` takes precedence over `options.proxy`; null falls back
 to `options.proxy`. `connect_timeout` and `timeout` map to portable seconds.
 `GuzzleClientFactory::profile($endpoint, $name)` explicitly exports an active
 `guzzle` or `http` endpoint profile through this normalizer. Portable export
-rejects unsupported settings, including zero/unbounded timeouts. SOCKS
+rejects invalid connection values, including zero/unbounded timeouts. Legacy
+Guzzle-only options such as headers, TLS verification and redirects are omitted;
+callers must preserve and apply them separately. SOCKS
 credentials require both username and password, each 1–255 decoded bytes.
 Portable HTTP proxy credentials reject decoded C0 control bytes (0x00–0x1F)
 across all schemes; the raw TCP API retains support for binary credentials.

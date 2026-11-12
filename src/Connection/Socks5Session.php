@@ -6,6 +6,7 @@ namespace Webong\Proxy\Connection;
 
 use Webong\Proxy\Tcp\DialException;
 
+/** @internal Transport implementation helper; not a supported consumer API. */
 final class Socks5Session
 {
     public static function authenticate($stream, array $proxy, float $deadline): void

@@ -6,7 +6,11 @@ namespace Webong\Proxy\Connection;
 
 use Webong\Proxy\Tcp\DialException;
 
-/** Verified TLS to the proxy, within the existing monotonic setup deadline. */
+/**
+ * Verified TLS to the proxy, within the existing monotonic setup deadline.
+ *
+ * @internal Transport implementation helper; not a supported consumer API.
+ */
 final class ProxyTlsSession
 {
     public static function connect($stream, string $host, float $deadline, ?string $caFile): void

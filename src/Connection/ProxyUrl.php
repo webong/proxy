@@ -6,7 +6,11 @@ namespace Webong\Proxy\Connection;
 
 use InvalidArgumentException;
 
-/** Shared URL validation; error messages never contain credential values. */
+/**
+ * Shared URL validation; error messages never contain credential values.
+ *
+ * @internal Transport implementation helper; not a supported consumer API.
+ */
 final class ProxyUrl
 {
     /** @return array<string, mixed> */

@@ -17,6 +17,8 @@ if [[ ! -f vendor/autoload.php ]]; then
     exit 1
 fi
 
+php scripts/check_php_api.php
+
 # A green run must exercise every test, including the authentication downgrade case.
 php vendor/bin/pest --configuration=phpunit.xml.dist \
     --cache-directory="$proxy_test_checkout/.phpunit.cache" --fail-on-skipped "$@"

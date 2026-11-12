@@ -1,0 +1,836 @@
+{
+    "Webong\\Proxy\\Connection\\SocketProfile": {
+        "final": false,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [
+            "JsonSerializable"
+        ],
+        "properties": {
+            "data": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": {
+                            "version": 1
+                        }
+                    }
+                ]
+            },
+            "fromArray": {
+                "static": true,
+                "return_type": "static",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "fromJson": {
+                "static": true,
+                "return_type": "static",
+                "parameters": [
+                    {
+                        "name": "json",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "jsonSerialize": {
+                "static": false,
+                "return_type": "array",
+                "parameters": []
+            },
+            "toArray": {
+                "static": false,
+                "return_type": "array",
+                "parameters": []
+            },
+            "toJson": {
+                "static": false,
+                "return_type": "string",
+                "parameters": []
+            }
+        }
+    },
+    "Webong\\Proxy\\GuzzleClientFactory": {
+        "final": true,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "make": {
+                "static": false,
+                "return_type": "GuzzleHttp\\ClientInterface",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\Endpoint",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "profile",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "options": {
+                "static": false,
+                "return_type": "array",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\Endpoint",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "profile",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "profile": {
+                "static": false,
+                "return_type": "Webong\\Proxy\\Http\\HttpProfile",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\Endpoint",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "profile",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Http\\GuzzleOptions": {
+        "final": true,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "fromProfile": {
+                "static": true,
+                "return_type": "array",
+                "parameters": [
+                    {
+                        "name": "profile",
+                        "type": "Webong\\Proxy\\Http\\HttpProfile",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "handler",
+                        "type": "?callable",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Http\\HttpProfile": {
+        "final": true,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [
+            "JsonSerializable"
+        ],
+        "properties": {
+            "data": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": {
+                            "version": 1
+                        }
+                    }
+                ]
+            },
+            "fromArray": {
+                "static": true,
+                "return_type": "Webong\\Proxy\\Http\\HttpProfile",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "fromJson": {
+                "static": true,
+                "return_type": "Webong\\Proxy\\Http\\HttpProfile",
+                "parameters": [
+                    {
+                        "name": "json",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "jsonSerialize": {
+                "static": false,
+                "return_type": "array",
+                "parameters": []
+            },
+            "proxyFor": {
+                "static": false,
+                "return_type": "?string",
+                "parameters": [
+                    {
+                        "name": "scheme",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "host",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "toArray": {
+                "static": false,
+                "return_type": "array",
+                "parameters": []
+            },
+            "toJson": {
+                "static": false,
+                "return_type": "string",
+                "parameters": []
+            }
+        }
+    },
+    "Webong\\Proxy\\Http\\HttpProfileNormalizer": {
+        "final": true,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "normalize": {
+                "static": false,
+                "return_type": "Webong\\Proxy\\Http\\HttpProfile",
+                "parameters": [
+                    {
+                        "name": "configuration",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Tcp\\DialException": {
+        "final": true,
+        "readonly": false,
+        "parent": "RuntimeException",
+        "interfaces": [
+            "Stringable",
+            "Throwable"
+        ],
+        "properties": [],
+        "constants": [],
+        "methods": []
+    },
+    "Webong\\Proxy\\Tcp\\TcpDialer": {
+        "final": true,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "profile",
+                        "type": "Webong\\Proxy\\Tcp\\TcpProfile",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "connector",
+                        "type": "?callable",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "resolver",
+                        "type": "?callable",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "proxyCaFile",
+                        "type": "?string",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "dial": {
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "host",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "port",
+                        "type": "int",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Tcp\\TcpProfile": {
+        "final": true,
+        "readonly": true,
+        "parent": "Webong\\Proxy\\Connection\\SocketProfile",
+        "interfaces": [
+            "JsonSerializable"
+        ],
+        "properties": {
+            "data": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": {
+                            "version": 1
+                        }
+                    }
+                ]
+            },
+            "fromArray": {
+                "static": true,
+                "return_type": "static",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "fromJson": {
+                "static": true,
+                "return_type": "static",
+                "parameters": [
+                    {
+                        "name": "json",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "jsonSerialize": {
+                "static": false,
+                "return_type": "array",
+                "parameters": []
+            },
+            "toArray": {
+                "static": false,
+                "return_type": "array",
+                "parameters": []
+            },
+            "toJson": {
+                "static": false,
+                "return_type": "string",
+                "parameters": []
+            }
+        }
+    },
+    "Webong\\Proxy\\Udp\\Datagram": {
+        "final": true,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [],
+        "properties": {
+            "host": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "payload": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "port": {
+                "type": "int",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "host",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "port",
+                        "type": "int",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Udp\\Socks5Datagram": {
+        "final": true,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [],
+        "properties": [],
+        "constants": {
+            "MAX_WIRE_SIZE": 65507
+        },
+        "methods": {
+            "decode": {
+                "static": true,
+                "return_type": "?Webong\\Proxy\\Udp\\Datagram",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "encode": {
+                "static": true,
+                "return_type": "string",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "host",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "port",
+                        "type": "int",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "maxPayloadSize": {
+                "static": true,
+                "return_type": "int",
+                "parameters": [
+                    {
+                        "name": "host",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "port",
+                        "type": "int",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Udp\\UdpAssociation": {
+        "final": true,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "__destruct": {
+                "static": false,
+                "return_type": "",
+                "parameters": []
+            },
+            "close": {
+                "static": false,
+                "return_type": "void",
+                "parameters": []
+            },
+            "isClosed": {
+                "static": false,
+                "return_type": "bool",
+                "parameters": []
+            },
+            "localAddress": {
+                "static": false,
+                "return_type": "array",
+                "parameters": []
+            },
+            "receive": {
+                "static": false,
+                "return_type": "Webong\\Proxy\\Udp\\Datagram",
+                "parameters": [
+                    {
+                        "name": "timeout",
+                        "type": "float",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": 10.0
+                    }
+                ]
+            },
+            "sendTo": {
+                "static": false,
+                "return_type": "int",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "host",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "port",
+                        "type": "int",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "timeout",
+                        "type": "float",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": 10.0
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Udp\\UdpDialer": {
+        "final": true,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "profile",
+                        "type": "Webong\\Proxy\\Udp\\UdpProfile",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "connector",
+                        "type": "?callable",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "resolver",
+                        "type": "?callable",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "open": {
+                "static": false,
+                "return_type": "Webong\\Proxy\\Udp\\UdpAssociation",
+                "parameters": [
+                    {
+                        "name": "bindHost",
+                        "type": "?string",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "bindPort",
+                        "type": "int",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": 0
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Udp\\UdpException": {
+        "final": true,
+        "readonly": false,
+        "parent": "RuntimeException",
+        "interfaces": [
+            "Stringable",
+            "Throwable"
+        ],
+        "properties": [],
+        "constants": [],
+        "methods": []
+    },
+    "Webong\\Proxy\\Udp\\UdpProfile": {
+        "final": true,
+        "readonly": true,
+        "parent": "Webong\\Proxy\\Connection\\SocketProfile",
+        "interfaces": [
+            "JsonSerializable"
+        ],
+        "properties": {
+            "data": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": {
+                            "version": 1
+                        }
+                    }
+                ]
+            },
+            "fromArray": {
+                "static": true,
+                "return_type": "static",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "fromJson": {
+                "static": true,
+                "return_type": "static",
+                "parameters": [
+                    {
+                        "name": "json",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "jsonSerialize": {
+                "static": false,
+                "return_type": "array",
+                "parameters": []
+            },
+            "toArray": {
+                "static": false,
+                "return_type": "array",
+                "parameters": []
+            },
+            "toJson": {
+                "static": false,
+                "return_type": "string",
+                "parameters": []
+            }
+        }
+    }
+}
