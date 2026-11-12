@@ -1,0 +1,110 @@
+[
+  {
+    "name": "ipv4",
+    "host": "192.0.2.1",
+    "port": 53,
+    "payload": "68656c6c6f",
+    "wire": "00000001c0000201003568656c6c6f",
+    "valid": true,
+    "decoded_host": "192.0.2.1"
+  },
+  {
+    "name": "empty",
+    "host": "192.0.2.1",
+    "port": 53,
+    "payload": "",
+    "wire": "00000001c00002010035",
+    "valid": true,
+    "decoded_host": "192.0.2.1"
+  },
+  {
+    "name": "binary",
+    "host": "192.0.2.1",
+    "port": 65535,
+    "payload": "00ff01",
+    "wire": "00000001c0000201ffff00ff01",
+    "valid": true,
+    "decoded_host": "192.0.2.1"
+  },
+  {
+    "name": "ipv6",
+    "host": "2001:db8::1",
+    "port": 9000,
+    "payload": "7636",
+    "wire": "0000000420010db800000000000000000000000123287636",
+    "valid": true,
+    "decoded_host": "2001:db8::1"
+  },
+  {
+    "name": "domain",
+    "host": "unresolved.example",
+    "port": 123,
+    "payload": "646e73",
+    "wire": "0000000312756e7265736f6c7665642e6578616d706c65007b646e73",
+    "valid": true,
+    "decoded_host": "unresolved.example"
+  },
+  {
+    "name": "mapped",
+    "host": "::ffff:192.0.2.1",
+    "port": 53,
+    "payload": "6d6170706564",
+    "wire": "00000001c000020100356d6170706564",
+    "valid": true,
+    "decoded_host": "192.0.2.1"
+  },
+  {
+    "name": "reserved",
+    "wire": "01000001c0000201003568656c6c6f",
+    "valid": false
+  },
+  {
+    "name": "fragment",
+    "wire": "00000101c0000201003568656c6c6f",
+    "valid": false
+  },
+  {
+    "name": "last-fragment",
+    "wire": "00008101c0000201003568656c6c6f",
+    "valid": false
+  },
+  {
+    "name": "unknown-type",
+    "wire": "000000ffc0000201003568656c6c6f",
+    "valid": false
+  },
+  {
+    "name": "short",
+    "wire": "0000",
+    "valid": false
+  },
+  {
+    "name": "truncated-ip",
+    "wire": "00000001c0",
+    "valid": false
+  },
+  {
+    "name": "empty-domain",
+    "wire": "00000003000035",
+    "valid": false
+  },
+  {
+    "name": "domain-control",
+    "wire": "0000000301010035",
+    "valid": false
+  },
+  {
+    "name": "zero-port",
+    "wire": "00000001c00002010000",
+    "valid": false
+  },
+  {
+    "name": "mapped-source",
+    "wire": "0000000400000000000000000000ffffc0000201003570696e67",
+    "valid": true,
+    "decode_only": true,
+    "decoded_host": "192.0.2.1",
+    "port": 53,
+    "payload": "70696e67"
+  }
+]

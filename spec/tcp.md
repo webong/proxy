@@ -14,8 +14,8 @@ PHP `Webong\Proxy\Tcp\TcpProfile` and Go `tcpdial.Profile` share
 Omit `proxy` for direct TCP. A proxy uses `socks5` (resolve the destination
 locally) or `socks5h` (send its hostname to the proxy). Literal IP addresses never
 require DNS. The proxy hop itself is resolved locally in both modes. Missing
-SOCKS ports default to 1080. HTTP CONNECT, SOCKS BIND, and UDP ASSOCIATE are not
-implemented by these raw TCP dialers. Only Go's `tcp` network is accepted;
+SOCKS ports default to 1080. HTTP CONNECT and SOCKS BIND are not implemented by these raw TCP dialers.
+[UDP ASSOCIATE](udp.md) is provided by separate owning UDP associations. Only Go's `tcp` network is accepted;
 service names and scoped IPv6 addresses are outside the destination contract.
 PHP takes an unbracketed IP/hostname and an integer port; Go takes host:port
 with normal brackets around IPv6 literals. Ports must be 1–65535.

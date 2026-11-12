@@ -8,11 +8,14 @@ use Closure;
 use InvalidArgumentException;
 use Throwable;
 use Webong\Proxy\Connection\ProxyUrl;
+use Webong\Proxy\Connection\SocketAddress;
+use Webong\Proxy\Connection\Socks5Session;
 
 /** Blocking TCP streams; only setup is deadline-bounded. Callers own subsequent I/O and TLS. */
 final class TcpDialer
 {
     private readonly ?Closure $connector;
+
     private readonly ?Closure $resolver;
 
     /**
@@ -89,18 +92,8 @@ final class TcpDialer
             }
             $ip = true;
         }
-        if ($ip) {
-            $packed = inet_pton($host);
-            // Match Go's handling of IPv4-mapped IPv6 literals.
-            if (strlen($packed) === 16 && substr($packed, 0, 12) === str_repeat("\0", 10)."\xff\xff") {
-                $packed = substr($packed, 12);
-            }
-            $address = chr(strlen($packed) === 4 ? 1 : 4).$packed;
-        } else {
-            $address = chr(3).chr(strlen($host)).$host;
-        }
 
-        return $address.pack('n', $port);
+        return SocketAddress::encode($host, $port);
     }
 
     /** @return list<string> */
@@ -121,41 +114,8 @@ final class TcpDialer
 
     private function handshake($stream, array $proxy, string $target, float $deadline): void
     {
-        $method = isset($proxy['user']) ? 2 : 0;
-        $this->write($stream, "\x05\x01".chr($method), $deadline);
-        $reply = $this->read($stream, 2, $deadline);
-        if (ord($reply[0]) !== 5) {
-            throw new DialException('Invalid SOCKS5 response.');
-        }
-        if (ord($reply[1]) !== $method) {
-            throw new DialException('SOCKS5 authentication failed.');
-        }
-        if ($method === 2) {
-            $user = rawurldecode($proxy['user']);
-            $password = rawurldecode($proxy['pass']);
-            $this->write($stream, "\x01".chr(strlen($user)).$user.chr(strlen($password)).$password, $deadline);
-            if ($this->read($stream, 2, $deadline) !== "\x01\x00") {
-                throw new DialException('SOCKS5 authentication failed.');
-            }
-        }
-        $this->write($stream, "\x05\x01\x00".$target, $deadline);
-        $header = $this->read($stream, 4, $deadline);
-        if (ord($header[0]) !== 5 || ord($header[2]) !== 0) {
-            throw new DialException('Invalid SOCKS5 response.');
-        }
-        if (ord($header[1]) !== 0) {
-            throw new DialException('SOCKS5 connection rejected.', ord($header[1]));
-        }
-        $length = match (ord($header[3])) {
-            1 => 4,
-            4 => 16,
-            3 => ord($this->read($stream, 1, $deadline)),
-            default => 0,
-        };
-        if ($length === 0) {
-            throw new DialException('Invalid SOCKS5 address response.');
-        }
-        $this->read($stream, $length + 2, $deadline);
+        Socks5Session::authenticate($stream, $proxy, $deadline);
+        Socks5Session::request($stream, 1, $target, $deadline);
     }
 
     private function remaining(float $deadline): float
@@ -166,49 +126,5 @@ final class TcpDialer
         }
 
         return $remaining;
-    }
-
-    private function wait($stream, bool $writing, float $deadline): void
-    {
-        $remaining = $this->remaining($deadline);
-        $seconds = (int) $remaining;
-        $microseconds = min(999999, (int) ceil(($remaining - $seconds) * 1e6));
-        $read = $writing ? [] : [$stream];
-        $write = $writing ? [$stream] : [];
-        $except = [];
-        $ready = @stream_select($read, $write, $except, $seconds, $microseconds);
-        if ($ready === false) {
-            throw new DialException('TCP stream selection failed.');
-        }
-        if ($ready === 0) {
-            throw new DialException('TCP connection setup timed out.');
-        }
-    }
-
-    private function read($stream, int $length, float $deadline): string
-    {
-        $data = '';
-        while (strlen($data) < $length) {
-            $this->wait($stream, false, $deadline);
-            $chunk = @fread($stream, $length - strlen($data));
-            if ($chunk === false || ($chunk === '' && feof($stream))) {
-                throw new DialException('SOCKS5 connection closed during handshake.');
-            }
-            $data .= $chunk;
-        }
-
-        return $data;
-    }
-
-    private function write($stream, string $data, float $deadline): void
-    {
-        while ($data !== '') {
-            $this->wait($stream, true, $deadline);
-            $written = @fwrite($stream, $data);
-            if ($written === false || $written === 0) {
-                throw new DialException('SOCKS5 handshake write failed.');
-            }
-            $data = substr($data, $written);
-        }
     }
 }

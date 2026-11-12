@@ -3,8 +3,6 @@ package tcpdial
 
 import (
 	"context"
-	"encoding/binary"
-	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -16,6 +14,7 @@ import (
 	"time"
 
 	"github.com/webong/proxy/internal/proxyurl"
+	"github.com/webong/proxy/internal/socks5"
 )
 
 type ContextDialer interface {
@@ -31,14 +30,10 @@ type Dialer struct {
 	resolver Resolver
 }
 
-var ErrProtocol = errors.New("invalid SOCKS5 response")
-var ErrAuthentication = errors.New("SOCKS5 authentication failed")
+var ErrProtocol = socks5.ErrProtocol
+var ErrAuthentication = socks5.ErrAuthentication
 
-type ReplyError struct{ Code byte }
-
-func (e *ReplyError) Error() string {
-	return fmt.Sprintf("SOCKS5 connection rejected (code %d)", e.Code)
-}
+type ReplyError = socks5.ReplyError
 
 // New snapshots configuration. A custom base sees the proxy hop for SOCKS traffic;
 // it cannot authorize a remotely resolved destination. Custom dependencies must honor context.
@@ -172,84 +167,17 @@ func (d *Dialer) target(ctx context.Context, host string, port int) ([]byte, err
 			return nil, fmt.Errorf("SOCKS local DNS returned no addresses")
 		}
 	}
-	var result []byte
 	if ip != nil {
-		if v4 := ip.To4(); v4 != nil {
-			result = append([]byte{1}, v4...)
-		} else {
-			result = append([]byte{4}, ip.To16()...)
-		}
-	} else {
-		result = append([]byte{3, byte(len(host))}, []byte(host)...)
+		host = ip.String()
 	}
-	return binary.BigEndian.AppendUint16(result, uint16(port)), nil
+	return socks5.Encode(socks5.Address{Host: host, Port: port}, false)
 }
+
 func (d *Dialer) handshake(conn net.Conn, target []byte) error {
-	method := byte(0)
-	if d.proxy.User != nil {
-		method = 2
-	}
-	if err := writeAll(conn, []byte{5, 1, method}); err != nil {
+	if err := socks5.Authenticate(conn, d.proxy); err != nil {
 		return err
 	}
-	var response [2]byte
-	if _, err := io.ReadFull(conn, response[:]); err != nil {
-		return err
-	}
-	if response[0] != 5 {
-		return ErrProtocol
-	}
-	if response[1] != method {
-		return ErrAuthentication
-	}
-	if method == 2 {
-		user := d.proxy.User.Username()
-		password, _ := d.proxy.User.Password()
-		message := append([]byte{1, byte(len(user))}, []byte(user)...)
-		message = append(message, byte(len(password)))
-		message = append(message, []byte(password)...)
-		if err := writeAll(conn, message); err != nil {
-			return err
-		}
-		if _, err := io.ReadFull(conn, response[:]); err != nil {
-			return err
-		}
-		if response[0] != 1 || response[1] != 0 {
-			return ErrAuthentication
-		}
-	}
-	if err := writeAll(conn, append([]byte{5, 1, 0}, target...)); err != nil {
-		return err
-	}
-	var header [4]byte
-	if _, err := io.ReadFull(conn, header[:]); err != nil {
-		return err
-	}
-	if header[0] != 5 || header[2] != 0 {
-		return ErrProtocol
-	}
-	if header[1] != 0 {
-		return &ReplyError{Code: header[1]}
-	}
-	length := 0
-	switch header[3] {
-	case 1:
-		length = 4
-	case 4:
-		length = 16
-	case 3:
-		var size [1]byte
-		if _, err := io.ReadFull(conn, size[:]); err != nil {
-			return err
-		}
-		length = int(size[0])
-		if length == 0 {
-			return ErrProtocol
-		}
-	default:
-		return ErrProtocol
-	}
-	_, err := io.ReadFull(conn, make([]byte, length+2))
+	_, err := socks5.Request(conn, 1, target)
 	return err
 }
 func writeAll(w io.Writer, data []byte) error {

@@ -35,7 +35,8 @@ def check(schema, document, expected, label):
 
 http = validator("spec/http-profile.schema.json")
 tcp = validator("spec/tcp-profile.schema.json")
-for schema, directory in [(http, "spec/fixtures"), (tcp, "spec/tcp")]:
+udp = validator("spec/udp-profile.schema.json")
+for schema, directory in [(http, "spec/fixtures"), (tcp, "spec/tcp"), (udp, "spec/tcp")]:
     for group in ("valid", "invalid"):
         files = sorted((ROOT / directory / group).glob("*.json"))
         assert files, f"Missing {directory}/{group} fixtures"
@@ -53,6 +54,7 @@ for case in load(ROOT / "spec/socks5-cases.json"):
     if case.get("credentials"):
         user = quote(case.get("username", "user"), safe="")
         password = quote(case.get("password", "p@ss"), safe="")
-        check(tcp, {"version": 1, "proxy": f'socks5h://{user}:{password}@proxy.example'}, True, case["name"])
+        for schema in (tcp, udp):
+            check(schema, {"version": 1, "proxy": f'socks5h://{user}:{password}@proxy.example'}, True, case["name"])
 
 print(f"Validated {checked} shared profile/schema cases")

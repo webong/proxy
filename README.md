@@ -248,3 +248,48 @@ ext-curl; mandatory authenticated SOCKS HTTP additionally requires libcurl 8.23+
 The raw PHP TCP dialer supports authentication without cURL. Read the
 [TCP contract](spec/tcp.md) for setup timeouts, PHP blocking DNS limitations,
 custom connectors/resolvers, TLS ownership, and protocol boundaries.
+
+## UDP and SOCKS5 UDP ASSOCIATE
+
+Both libraries provide direct UDP sockets and owning SOCKS5 UDP associations.
+They preserve datagram boundaries, binary/empty payloads, and source addresses.
+The TCP control connection remains open until the association closes.
+
+```php
+use Webong\Proxy\Udp\UdpProfile;
+use Webong\Proxy\Udp\UdpDialer;
+
+$profile = UdpProfile::fromArray([
+    'version' => 1,
+    'proxy' => 'socks5h://proxy.example.test:1080',
+]);
+$udp = (new UdpDialer($profile))->open();
+try {
+    $udp->sendTo('ping', 'service.example.test', 9000);
+    $reply = $udp->receive(5); // payload, host, port
+} finally {
+    $udp->close();
+}
+```
+
+```go
+import "github.com/webong/proxy/udpdial"
+
+profile := udpdial.Profile{Version: 1, Proxy: "socks5h://proxy.example.test:1080"}
+dialer, err := udpdial.New(profile, nil, nil)
+if err != nil { return err }
+udp, err := dialer.Open(ctx, "")
+if err != nil { return err }
+defer udp.Close()
+udp.SetDeadline(time.Now().Add(5 * time.Second))
+_, err = udp.WriteTo([]byte("ping"), udpdial.Address{Host: "service.example.test", Port: 9000})
+if err != nil { return err }
+buffer := make([]byte, udpdial.MaxWireSize)
+n, source, err := udp.ReadFrom(buffer)
+// Handle err, buffer[:n], and source here.
+```
+
+Omit `proxy` for direct UDP. Raw UDP authentication needs no cURL extension.
+The [UDP contract](spec/udp.md) explains DNS modes, IPv6 bindings, payload limits,
+control-connection lifetime, source filtering, and unsupported SOCKS fragmentation.
+Gateway does not consume these experimental libraries yet.
