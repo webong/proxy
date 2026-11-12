@@ -1,0 +1,49 @@
+name: PHP
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4', '8.5']
+        laravel: ['12', '13']
+        exclude:
+          - php: '8.3'
+            laravel: '13'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, pdo_sqlite, curl
+          coverage: none
+      - name: Select framework test dependencies
+        run: |
+          if [ '${{ matrix.laravel }}' = '13' ]; then
+            composer require --dev 'orchestra/testbench:^11.0' --no-update
+          else
+            composer require --dev 'orchestra/testbench:^10.0' --no-update
+          fi
+      - run: composer update --prefer-dist --no-interaction
+      - run: composer test
+
+  socks-auth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mbstring, pdo_sqlite, curl
+          coverage: none
+      - run: composer update --prefer-dist --no-interaction
+      - name: Build PHP with pinned libcurl 8.23
+        run: docker build -f tests/runtime/Dockerfile.curl823 -t proxy-curl823 tests/runtime
+      - name: Run every test without skips on libcurl 8.23
+        run: >-
+          docker run --rm
+          --mount "type=bind,source=${{ github.workspace }},target=/source,readonly"
+          proxy-curl823 bash /source/tests/runtime/run-curl823.sh --compact

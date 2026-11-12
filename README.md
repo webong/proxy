@@ -1,7 +1,9 @@
 # Proxy
 
 `webong/proxy` is a Laravel package for registry-backed webhook endpoints and
-outbound HTTP client profiles. An endpoint is a durable network identity: it
+outbound client profiles. Version v0.3.0 also provides portable PHP/Go
+HTTP clients, TCP dialers and UDP associations; its wire profiles retain
+`version: 1`, independently of the package version. An endpoint is a durable network identity: it
 can receive and route webhooks through subscriptions, and it can own named
 outbound profiles for clients such as Guzzle.
 
@@ -151,3 +153,164 @@ not included in `proxy-migrations`.
 ```bash
 composer test
 ```
+
+## Portable HTTP profiles (PHP and Go)
+
+Proxy now includes a versioned HTTP connection profile shared by both libraries.
+See [the profile contract](spec/README.md) for supported settings and validation.
+The existing Laravel registry and webhook APIs remain in their current locations.
+Existing `GuzzleClientFactory::make` and `options` preserve Guzzle-only behavior.
+Use `$factory->profile($endpoint, 'partner-api')` to explicitly normalize an
+endpoint profile for portable export; invalid portable values are rejected. The normalizer extracts connection settings;
+headers, TLS options and other Guzzle-only fields are not exported.
+The PHP classes under `Webong\Proxy\Http` do not require a Laravel application.
+
+```php
+use Webong\Proxy\Http\HttpProfileNormalizer;
+use Webong\Proxy\Http\GuzzleOptions;
+
+$profile = (new HttpProfileNormalizer())->normalize([
+    'proxy' => ['https' => 'http://proxy.example.test:8080'],
+    'options' => ['connect_timeout' => 5, 'timeout' => 15],
+]);
+$json = $profile->toJson();
+$client = new \GuzzleHttp\Client(GuzzleOptions::fromProfile($profile));
+```
+
+The Go module is `github.com/webong/proxy`:
+
+```go
+import (
+    "github.com/webong/proxy/httpprofile"
+    "github.com/webong/proxy/httpclient"
+)
+
+profile, err := httpprofile.Parse(profileJSON)
+if err != nil { return err }
+client, err := httpclient.New(profile, nil)
+if err != nil { return err }
+defer client.CloseIdleConnections()
+// Reuse client for requests made with this profile.
+```
+
+`httpclient.New` clones an optional base `*http.Transport`, preserving its TLS
+settings and dialer. Connect deadlines wrap supplied context-aware dialers, including TLS dialers.
+The adapters round positive deadlines up to milliseconds. Custom Go dialers
+must honor their context; legacy `Dial` and `DialTLS` are rejected with a connect timeout. With a nil base,
+it uses package-owned standard transport defaults, independent of later changes
+to `http.DefaultTransport`. Missing timeouts use the underlying
+transport defaults and no overall request deadline. Caller-supplied clients own
+redirect and destination authorization policies. No queue, registry persistence,
+or Gateway dependency is included in the Go library.
+
+Run the Go checks with `go test -race ./...` and `go vet ./...`.
+
+## TCP dialers and SOCKS5
+
+The v0.3.0 transport contract is frozen for its patch line. See [the public
+contract](spec/CONTRACT.md), [adoption guide](spec/ADOPTING.md), and
+[release notes](CHANGELOG.md). Package v0.3.0 retains wire `version: 1`;
+it does not declare a package v1 API.
+
+Both libraries now provide direct TCP, SOCKS5 CONNECT, and HTTP/HTTPS CONNECT dialers.
+For HTTP CONNECT use `http://user:password@proxy.example:8080` in a TCP profile;
+credentials are optional, Basic authentication is supported, and the proxy resolves
+the target hostname.
+
+Use `https://` to secure the proxy hop (default port 443); certificate and
+hostname verification are always enabled. Private CAs use Go's
+`tcpdial.WithProxyRootCAs(roots)` or PHP's `proxyCaFile` constructor argument.
+Go supports nesting target TLS inside this tunnel; the PHP native stream API
+provides the proxy TLS layer only. See the TCP contract for that limitation.
+
+`socks5://` resolves destination names locally; `socks5h://` resolves them at the proxy.
+Both support IPv4, IPv6, and optional username/password authentication.
+
+```php
+use Webong\Proxy\Tcp\TcpProfile;
+use Webong\Proxy\Tcp\TcpDialer;
+
+$profile = TcpProfile::fromArray([
+    'version' => 1,
+    'proxy' => 'socks5h://proxy.example.test:1080',
+    'connect_timeout_seconds' => 5,
+]);
+$stream = (new TcpDialer($profile))->dial('service.example.test', 9000);
+try {
+    // Set application I/O timeouts and perform the application protocol here.
+} finally {
+    fclose($stream);
+}
+```
+
+```go
+import "github.com/webong/proxy/tcpdial"
+
+profile := tcpdial.Profile{
+    Version: 1,
+    Proxy: "socks5h://proxy.example.test:1080",
+    ConnectTimeoutSeconds: 5,
+}
+dialer, err := tcpdial.New(profile, nil, nil)
+if err != nil { return err }
+conn, err := dialer.DialContext(ctx, "tcp", "service.example.test:9000")
+if err != nil { return err }
+defer conn.Close()
+// Set application deadlines and perform the application protocol here.
+```
+
+Go callers that previously passed `socketprofile.Profile` into `tcpdial.New`
+should convert with `tcpdial.Profile(sharedProfile)`, or construct a
+`tcpdial.Profile` directly. TCP profiles now validate HTTP CONNECT independently
+of the shared SOCKS-only UDP profile.
+
+The HTTP profile adapters also accept SOCKS proxy URLs. PHP SOCKS HTTP requires
+ext-curl; mandatory authenticated SOCKS HTTP additionally requires libcurl 8.23+.
+The raw PHP TCP dialer supports authentication without cURL. Read the
+[TCP contract](spec/tcp.md) for setup timeouts, PHP blocking DNS limitations,
+custom connectors/resolvers, TLS ownership, and protocol boundaries.
+
+## UDP and SOCKS5 UDP ASSOCIATE
+
+Both libraries provide direct UDP sockets and owning SOCKS5 UDP associations.
+They preserve datagram boundaries, binary/empty payloads, and source addresses.
+The TCP control connection remains open until the association closes.
+
+```php
+use Webong\Proxy\Udp\UdpProfile;
+use Webong\Proxy\Udp\UdpDialer;
+
+$profile = UdpProfile::fromArray([
+    'version' => 1,
+    'proxy' => 'socks5h://proxy.example.test:1080',
+]);
+$udp = (new UdpDialer($profile))->open();
+try {
+    $udp->sendTo('ping', 'service.example.test', 9000);
+    $reply = $udp->receive(5); // payload, host, port
+} finally {
+    $udp->close();
+}
+```
+
+```go
+import "github.com/webong/proxy/udpdial"
+
+profile := udpdial.Profile{Version: 1, Proxy: "socks5h://proxy.example.test:1080"}
+dialer, err := udpdial.New(profile, nil, nil)
+if err != nil { return err }
+udp, err := dialer.Open(ctx, "")
+if err != nil { return err }
+defer udp.Close()
+udp.SetDeadline(time.Now().Add(5 * time.Second))
+_, err = udp.WriteTo([]byte("ping"), udpdial.Address{Host: "service.example.test", Port: 9000})
+if err != nil { return err }
+buffer := make([]byte, udpdial.MaxWireSize)
+n, source, err := udp.ReadFrom(buffer)
+// Handle err, buffer[:n], and source here.
+```
+
+Omit `proxy` for direct UDP. Raw UDP authentication needs no cURL extension.
+The [UDP contract](spec/udp.md) explains DNS modes, IPv6 bindings, payload limits,
+control-connection lifetime, source filtering, and unsupported SOCKS fragmentation.
+Gateway does not consume these transport libraries yet.

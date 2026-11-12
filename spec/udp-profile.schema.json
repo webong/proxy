@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UDP profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "proxy": {
+      "type": "string",
+      "pattern": "^socks5h?://(?:(?:[A-Za-z0-9._~!$&'()*+,;=-]|%[0-9A-Fa-f]{2}){1,255}:(?:[A-Za-z0-9._~!$&'()*+,;=:-]|%[0-9A-Fa-f]{2}){1,255}@)?(?:\\[[0-9A-Fa-f:.]+\\]|[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.?)(?::(?:0{0,4}[1-9]|0{0,3}[1-9][0-9]|0{0,2}[1-9][0-9]{2}|0?[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?/?$",
+      "not": {
+        "pattern": "[\u0000- \u007f\u2028\u2029]"
+      }
+    },
+    "connect_timeout_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 300
+    }
+  }
+}

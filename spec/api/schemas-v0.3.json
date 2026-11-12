@@ -1,0 +1,5 @@
+{
+  "spec/http-profile.schema.json": "369f90bd40ffcde87719ccb0969f60a4c3c1106d7d5f67e87f4ebc61fe4269ed",
+  "spec/tcp-profile.schema.json": "1855d627d24f00dd531e2fa405a1a77fae40a33b1b4a5ad8bef93549e93ac638",
+  "spec/udp-profile.schema.json": "bb172e51178ba6f9fab4628f44fc1405af5101f982d1d21f5e237fd21ca48919"
+}

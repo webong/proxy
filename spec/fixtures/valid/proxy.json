@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "proxy": {
+    "http": "http://user:pass@proxy.example:8080",
+    "https": "https://proxy.example:8443",
+    "no_proxy": [
+      ".internal.example",
+      "localhost",
+      "127.0.0.1",
+      "*"
+    ]
+  },
+  "connect_timeout_seconds": 2.5,
+  "request_timeout_seconds": 15
+}

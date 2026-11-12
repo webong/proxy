@@ -1,0 +1,72 @@
+[
+  {
+    "host": "example.test",
+    "rule": "example.test",
+    "match": true
+  },
+  {
+    "host": "sub.example.test",
+    "rule": "example.test",
+    "match": true
+  },
+  {
+    "host": "example.test",
+    "rule": ".example.test",
+    "match": false
+  },
+  {
+    "host": "sub.example.test",
+    "rule": ".example.test",
+    "match": true
+  },
+  {
+    "host": "badexample.test",
+    "rule": "example.test",
+    "match": false
+  },
+  {
+    "host": "EXAMPLE.TEST",
+    "rule": "example.test",
+    "match": true
+  },
+  {
+    "host": "127.0.0.1",
+    "rule": "127.0.0.1",
+    "match": true
+  },
+  {
+    "host": "any.test",
+    "rule": "*",
+    "match": true
+  },
+  {
+    "host": "example.test.",
+    "rule": "example.test",
+    "match": true
+  },
+  {
+    "host": "sub.example.test.",
+    "rule": ".example.test",
+    "match": true
+  },
+  {
+    "host": "127.0.0.1",
+    "rule": ".0.1",
+    "match": false
+  },
+  {
+    "host": "127.0.0.1",
+    "rule": "0.1",
+    "match": false
+  },
+  {
+    "host": "::ffff:127.0.0.1",
+    "rule": "127.0.0.1",
+    "match": false
+  },
+  {
+    "host": "::1",
+    "rule": "*",
+    "match": true
+  }
+]

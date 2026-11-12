@@ -1,0 +1,4 @@
+{
+  "version": 1,
+  "proxy": "socks5h://user:p%40ss@[::1]:1080"
+}

@@ -27,7 +27,10 @@
         }
     },
     "scripts": {
-        "test": "pest"
+        "test": [
+            "@php scripts/check_php_api.php",
+            "pest"
+        ]
     },
     "extra": {
         "laravel": {
