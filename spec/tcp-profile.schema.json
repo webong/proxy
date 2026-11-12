@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TCP profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "proxy": {
+      "type": "string",
+      "pattern": "^socks5h?://(?:[A-Za-z0-9._~!$&'()*+,;=:%-]*@)?(?:\\[[0-9A-Fa-f:.]+\\]|[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*\\.?)(?::[0-9]{1,5})?/?$"
+    },
+    "connect_timeout_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 300
+    }
+  }
+}

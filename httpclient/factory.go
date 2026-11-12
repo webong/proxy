@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/webong/proxy/httpprofile"
+	"github.com/webong/proxy/internal/proxyurl"
+	"github.com/webong/proxy/tcpdial"
 )
 
 // New clones base so callers can supply TLS settings and a policy-aware dialer.
@@ -72,7 +74,15 @@ func New(profile httpprofile.Profile, base *http.Transport) (*http.Client, error
 			return url.Parse(value)
 		}
 	}
-	return &http.Client{Transport: transport, Timeout: seconds(profile.RequestTimeoutSeconds)}, nil
+	var outgoing http.RoundTripper = transport
+	if profile.Proxy != nil && (isSOCKS(profile.Proxy.HTTP) || isSOCKS(profile.Proxy.HTTPS)) {
+		routed, err := socksRoutes(profile, transport)
+		if err != nil {
+			return nil, err
+		}
+		outgoing = routed
+	}
+	return &http.Client{Transport: outgoing, Timeout: seconds(profile.RequestTimeoutSeconds)}, nil
 }
 func deadlineDialer(dial func(context.Context, string, string) (net.Conn, error), timeout time.Duration) func(context.Context, string, string) (net.Conn, error) {
 	return func(ctx context.Context, network, address string) (net.Conn, error) {
@@ -111,4 +121,81 @@ func bypass(host string, entries []string) bool {
 		}
 	}
 	return false
+}
+
+// SOCKS routes need a dedicated transport per request scheme so socks5 local DNS
+// is not silently changed to the standard library's remote SOCKS resolution.
+type schemeTransport struct{ http, https *http.Transport }
+
+func (t *schemeTransport) RoundTrip(request *http.Request) (*http.Response, error) {
+	switch request.URL.Scheme {
+	case "http":
+		return t.http.RoundTrip(request)
+	case "https":
+		return t.https.RoundTrip(request)
+	default:
+		return nil, fmt.Errorf("unsupported HTTP scheme")
+	}
+}
+func (t *schemeTransport) CloseIdleConnections() {
+	t.http.CloseIdleConnections()
+	t.https.CloseIdleConnections()
+}
+func isSOCKS(value string) bool {
+	u, err := proxyurl.Parse(value)
+	return err == nil && proxyurl.IsSOCKS(u)
+}
+
+type dialFunc func(context.Context, string, string) (net.Conn, error)
+
+func (f dialFunc) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
+	return f(ctx, network, address)
+}
+func socksRoutes(profile httpprofile.Profile, base *http.Transport) (*schemeTransport, error) {
+	build := func(value string) (*http.Transport, error) {
+		tr := base.Clone()
+		if !isSOCKS(value) {
+			return tr, nil
+		}
+		if tr.DialTLSContext != nil || tr.DialTLS != nil {
+			return nil, fmt.Errorf("SOCKS HTTP transport cannot use a custom TLS dialer; supply TLSClientConfig instead")
+		}
+		if tr.DialContext == nil && tr.Dial != nil {
+			return nil, fmt.Errorf("SOCKS HTTP transport requires a context-aware dialer")
+		}
+		direct := tr.DialContext
+		if direct == nil {
+			direct = (&net.Dialer{KeepAlive: 30 * time.Second}).DialContext
+		}
+		timeout := profile.ConnectTimeoutSeconds
+		if timeout == 0 {
+			timeout = 30
+		}
+		socks, err := tcpdial.New(tcpdial.Profile{Version: 1, Proxy: value, ConnectTimeoutSeconds: timeout}, dialFunc(direct), nil)
+		if err != nil {
+			return nil, err
+		}
+		bypasses := append([]string(nil), profile.Proxy.NoProxy...)
+		tr.Proxy = nil
+		tr.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
+			host, _, err := net.SplitHostPort(address)
+			if err != nil {
+				return nil, err
+			}
+			if bypass(host, bypasses) {
+				return direct(ctx, network, address)
+			}
+			return socks.DialContext(ctx, network, address)
+		}
+		return tr, nil
+	}
+	httpRoute, err := build(profile.Proxy.HTTP)
+	if err != nil {
+		return nil, err
+	}
+	httpsRoute, err := build(profile.Proxy.HTTPS)
+	if err != nil {
+		return nil, err
+	}
+	return &schemeTransport{http: httpRoute, https: httpsRoute}, nil
 }

@@ -201,3 +201,50 @@ redirect and destination authorization policies. No queue, registry persistence,
 or Gateway dependency is included in the Go library.
 
 Run the Go checks with `go test -race ./...` and `go vet ./...`.
+
+## TCP dialers and SOCKS5
+
+These transport APIs are experimental on this branch.
+
+Both libraries now provide direct TCP and SOCKS5 CONNECT dialers. `socks5://`
+resolves destination names locally; `socks5h://` resolves them at the proxy.
+Both support IPv4, IPv6, and optional username/password authentication.
+
+```php
+use Webong\Proxy\Tcp\TcpProfile;
+use Webong\Proxy\Tcp\TcpDialer;
+
+$profile = TcpProfile::fromArray([
+    'version' => 1,
+    'proxy' => 'socks5h://proxy.example.test:1080',
+    'connect_timeout_seconds' => 5,
+]);
+$stream = (new TcpDialer($profile))->dial('service.example.test', 9000);
+try {
+    // Set application I/O timeouts and perform the application protocol here.
+} finally {
+    fclose($stream);
+}
+```
+
+```go
+import "github.com/webong/proxy/tcpdial"
+
+profile := tcpdial.Profile{
+    Version: 1,
+    Proxy: "socks5h://proxy.example.test:1080",
+    ConnectTimeoutSeconds: 5,
+}
+dialer, err := tcpdial.New(profile, nil, nil)
+if err != nil { return err }
+conn, err := dialer.DialContext(ctx, "tcp", "service.example.test:9000")
+if err != nil { return err }
+defer conn.Close()
+// Set application deadlines and perform the application protocol here.
+```
+
+The HTTP profile adapters also accept SOCKS proxy URLs. PHP SOCKS HTTP requires
+ext-curl; mandatory authenticated SOCKS HTTP additionally requires libcurl 8.23+.
+The raw PHP TCP dialer supports authentication without cURL. Read the
+[TCP contract](spec/tcp.md) for setup timeouts, PHP blocking DNS limitations,
+custom connectors/resolvers, TLS ownership, and protocol boundaries.

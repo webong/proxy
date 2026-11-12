@@ -18,7 +18,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, pdo_sqlite
+          extensions: mbstring, pdo_sqlite, curl
           coverage: none
       - name: Select framework test dependencies
         run: |

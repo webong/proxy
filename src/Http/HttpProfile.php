@@ -7,6 +7,7 @@ namespace Webong\Proxy\Http;
 use InvalidArgumentException;
 use JsonSerializable;
 use stdClass;
+use Webong\Proxy\Connection\ProxyUrl;
 
 /** Framework-independent, versioned HTTP connection settings. */
 final readonly class HttpProfile implements JsonSerializable
@@ -124,19 +125,10 @@ final readonly class HttpProfile implements JsonSerializable
                 continue;
             }
             $url = $proxy[$scheme];
-            $parts = is_string($url) ? parse_url($url) : false;
-            if (! is_array($parts)
-                || ! in_array($parts['scheme'] ?? '', ['http', 'https'], true)
-                || ($parts['host'] ?? '') === ''
-                || preg_match("~^https?://(?:[A-Za-z0-9._\~!\$&'()*+,;=:%-]*@)?(?:\[[0-9A-Fa-f:.]+\]|[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*\.?)(?::[0-9]{1,5})?/?\$~D", $url) !== 1
-                || preg_match('/%(?:[^0-9A-Fa-f]|[0-9A-Fa-f](?:[^0-9A-Fa-f]|$)|$)/', $url)
-                || (str_starts_with($parts['host'] ?? '', '[') && filter_var(trim($parts['host'], '[]'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false)
-                || preg_match('/[\x00-\x20\x7f]/', $url)
-                || (isset($parts['port']) && $parts['port'] < 1)
-                || isset($parts['query']) || isset($parts['fragment'])
-                || ! in_array($parts['path'] ?? '', ['', '/'], true)) {
-                throw new InvalidArgumentException('Proxy must be an HTTP(S) URL without a path, query, or fragment.');
+            if (! is_string($url)) {
+                throw new InvalidArgumentException('Proxy URL must be a string.');
             }
+            ProxyUrl::parse($url);
         }
 
         $hosts = array_key_exists('no_proxy', $proxy) ? $proxy['no_proxy'] : [];

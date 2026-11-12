@@ -15,8 +15,9 @@ are rejected when a connect timeout is configured; use `DialContext` and
 process changes to `http.DefaultTransport` are not inherited. Pass an explicit
 base to retain custom transport settings and policies.
 
-Proxy URLs support HTTP and HTTPS, including URL-encoded credentials. SOCKS,
-proxy paths other than `/`, queries, and fragments are outside v1. Proxy hosts
+Proxy URLs support HTTP, HTTPS, SOCKS5, and SOCKS5h, including URL-encoded
+credentials. SOCKS5 resolves destinations locally; SOCKS5h uses proxy DNS.
+Proxy paths other than `/`, queries, and fragments are outside v1. Proxy hosts
 must be ASCII hostnames/IPv4 addresses or bracketed IPv6 addresses. Ports are
 one to five decimal digits in the range 1–65535; malformed percent escapes
 and encoded hostnames are rejected. A missing
@@ -44,7 +45,10 @@ shape. Top-level `proxy` takes precedence over `options.proxy`; null falls back
 to `options.proxy`. `connect_timeout` and `timeout` map to portable seconds.
 `GuzzleClientFactory::profile($endpoint, $name)` explicitly exports an active
 `guzzle` or `http` endpoint profile through this normalizer. Portable export
-rejects unsupported settings, including zero/unbounded timeouts and SOCKS.
+rejects unsupported settings, including zero/unbounded timeouts. SOCKS
+credentials require both username and password, each 1–255 decoded bytes.
+See [the TCP/SOCKS contract](tcp.md) for the new raw dialers and HTTP backend
+requirements, including authenticated PHP HTTP cURL compatibility.
 
 Existing `GuzzleClientFactory::make` and `options` retain their prior Guzzle-only
 behavior, including PHP-specific options and proxy formats. They still require

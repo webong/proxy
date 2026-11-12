@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/webong/proxy/httpprofile"
+	"github.com/webong/proxy/internal/sockstest"
 )
 
 func TestProxySelection(t *testing.T) {
@@ -275,5 +276,102 @@ func TestNilBaseIndependentOfGlobalTransport(t *testing.T) {
 	defer client.CloseIdleConnections()
 	if client.Transport.(*http.Transport).TLSHandshakeTimeout != time.Minute {
 		t.Fatal("profile timeout lost")
+	}
+}
+
+func TestSOCKSHTTPModesAndAuthentication(t *testing.T) {
+	cases := sockstest.Load(t, "../spec/socks5-cases.json")
+	for _, c := range cases {
+		if c.Name != "remote-domain" && c.Name != "literal-ipv4" && c.Name != "remote-auth" {
+			continue
+		}
+		t.Run(c.Name, func(t *testing.T) {
+			c.Mode = "http"
+			server := sockstest.Start(t, c)
+			user := ""
+			if c.Credentials {
+				user = "user:p%40ss@"
+			}
+			p := httpprofile.Profile{Version: 1, Proxy: &httpprofile.Proxy{HTTP: c.Scheme + "://" + user + server.Address}, RequestTimeoutSeconds: 2}
+			client, err := New(p, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer client.CloseIdleConnections()
+			response, err := client.Get("http://" + c.Host + ":443/path")
+			if err != nil {
+				t.Fatal(err)
+			}
+			response.Body.Close()
+			if response.StatusCode != 204 {
+				t.Fatal(response.StatusCode)
+			}
+			record := server.Record()
+			if record.ATYP != c.ATYP || record.Host != c.WireHost {
+				t.Fatalf("DNS mode: %+v", record)
+			}
+			if c.Credentials && (record.User != "user" || record.Password != "p@ss") {
+				t.Fatal("credentials")
+			}
+		})
+	}
+}
+func TestSOCKSHTTPBypass(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(204) }))
+	defer server.Close()
+	client, err := New(httpprofile.Profile{Version: 1, Proxy: &httpprofile.Proxy{HTTP: "socks5h://127.0.0.1:1", NoProxy: []string{"127.0.0.1"}}, RequestTimeoutSeconds: 2}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseIdleConnections()
+	response, err := client.Get(server.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != 204 {
+		t.Fatal(response.StatusCode)
+	}
+}
+
+func TestHTTPSSOCKSTunnel(t *testing.T) {
+	target := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Connection", "close")
+		w.WriteHeader(204)
+	}))
+	defer target.Close()
+	targetURL, _ := url.Parse(target.URL)
+	server := sockstest.Start(t, sockstest.Case{Mode: "tunnel", Greeting: "0500", Reply: "05000001000000000000", Success: true, Upstream: targetURL.Host})
+	client, err := New(httpprofile.Profile{Version: 1, Proxy: &httpprofile.Proxy{HTTPS: "socks5h://" + server.Address}, RequestTimeoutSeconds: 2}, target.Client().Transport.(*http.Transport))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseIdleConnections()
+	response, err := client.Get(target.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != 204 {
+		t.Fatal(response.StatusCode)
+	}
+}
+
+func TestSOCKSHTTPLocalDNSUsesIPFrame(t *testing.T) {
+	c := sockstest.Case{Mode: "http", Greeting: "0500", Reply: "05000001000000000000", Success: true}
+	server := sockstest.Start(t, c)
+	client, err := New(httpprofile.Profile{Version: 1, Proxy: &httpprofile.Proxy{HTTP: "socks5://" + server.Address}, RequestTimeoutSeconds: 2}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseIdleConnections()
+	response, err := client.Get("http://localhost/path")
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	record := server.Record()
+	if record.ATYP == 3 || net.ParseIP(record.Host) == nil {
+		t.Fatalf("local DNS was sent to proxy: %+v", record)
 	}
 }

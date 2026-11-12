@@ -5,11 +5,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/webong/proxy/internal/proxyurl"
 	"math"
 	"net"
-	"net/url"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -96,9 +95,6 @@ func (p Profile) MarshalJSON() ([]byte, error) {
 	return json.Marshal(wire(p))
 }
 
-var proxyURLPattern = regexp.MustCompile(`^https?://(?:[A-Za-z0-9._~!$&'()*+,;=:%-]*@)?(?:\[[0-9A-Fa-f:.]+\]|[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*\.?)(?::[0-9]{1,5})?/?$`)
-var invalidEscape = regexp.MustCompile(`%(?:[^0-9A-Fa-f]|[0-9A-Fa-f](?:[^0-9A-Fa-f]|$)|$)`)
-
 var hostPattern = regexp.MustCompile(`^\.?[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)*$`)
 
 func (p Profile) Validate() error {
@@ -117,24 +113,8 @@ func (p Profile) Validate() error {
 		if value == "" {
 			continue
 		}
-		if !proxyURLPattern.MatchString(value) || invalidEscape.MatchString(value) {
-			return fmt.Errorf("invalid HTTP proxy URL")
-		}
-		u, err := url.Parse(value)
-		if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Hostname() == "" || (u.Path != "" && u.Path != "/") || u.RawPath != "" || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || strings.ContainsAny(value, " \t\r\n") {
-			return fmt.Errorf("invalid HTTP proxy URL")
-		}
-		if strings.HasPrefix(u.Host, "[") && net.ParseIP(u.Hostname()) == nil {
-			return fmt.Errorf("invalid proxy IPv6 address")
-		}
-		if port := u.Port(); port != "" {
-			n, err := strconv.Atoi(port)
-			if err != nil || n < 1 || n > 65535 {
-				return fmt.Errorf("invalid proxy port")
-			}
-		}
-		if strings.Contains(value, "#") {
-			return fmt.Errorf("proxy fragments are not supported")
+		if _, err := proxyurl.Parse(value); err != nil {
+			return err
 		}
 
 	}
