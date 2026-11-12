@@ -86,7 +86,7 @@ final class Socks5Session
             self::wait($stream, false, $deadline);
             $chunk = @fread($stream, $length - strlen($data));
             if ($chunk === false || ($chunk === '' && feof($stream))) {
-                throw new DialException('SOCKS5 connection closed during handshake.');
+                throw new DialException('Socket connection closed during handshake.');
             }
             $data .= $chunk;
         }
@@ -100,7 +100,7 @@ final class Socks5Session
             self::wait($stream, true, $deadline);
             $written = @fwrite($stream, $data);
             if ($written === false || $written === 0) {
-                throw new DialException('SOCKS5 handshake write failed.');
+                throw new DialException('Socket handshake write failed.');
             }
             $data = substr($data, $written);
         }

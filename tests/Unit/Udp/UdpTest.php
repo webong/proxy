@@ -31,11 +31,11 @@ function withUdpFixture(array $config, callable $test): array
 }
 
 it('validates the raw profile corpus for UDP', function (): void {
-    foreach (glob(__DIR__.'/../../../spec/tcp/valid/*.json') as $file) {
+    foreach (glob(__DIR__.'/../../../spec/udp/valid/*.json') as $file) {
         $p = UdpProfile::fromJson(file_get_contents($file));
         expect($p)->toBeInstanceOf(UdpProfile::class)->and(UdpProfile::fromJson($p->toJson())->toArray())->toBe($p->toArray());
     }
-    foreach (glob(__DIR__.'/../../../spec/tcp/invalid/*.json') as $file) {
+    foreach (glob(__DIR__.'/../../../spec/udp/invalid/*.json') as $file) {
         expect(fn () => UdpProfile::fromJson(file_get_contents($file)))->toThrow(InvalidArgumentException::class);
     }
 });

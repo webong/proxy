@@ -47,4 +47,17 @@ final class ProxyUrl
 
         return $parts;
     }
+
+    public static function validateConnectCredentials(array $parts): void
+    {
+        if (! isset($parts['user'])) {
+            return;
+        }
+        $user = rawurldecode($parts['user']);
+        $password = rawurldecode($parts['pass'] ?? '');
+        if (! array_key_exists('pass', $parts) || strlen($user) < 1 || strlen($user) > 255 || strlen($password) > 255
+            || str_contains($user, ':') || preg_match('/[\x00-\x1f\x7f]/', $user.$password)) {
+            throw new InvalidArgumentException('Invalid CONNECT credentials.');
+        }
+    }
 }

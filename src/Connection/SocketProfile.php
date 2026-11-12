@@ -10,6 +10,8 @@ use stdClass;
 
 readonly class SocketProfile implements JsonSerializable
 {
+    protected const PROXY_SCHEMES = ['socks5', 'socks5h'];
+
     public function __construct(public array $data = ['version' => 1])
     {
         if (($data['version'] ?? null) !== 1 || array_diff(array_keys($data), ['version', 'proxy', 'connect_timeout_seconds'])) {
@@ -17,11 +19,14 @@ readonly class SocketProfile implements JsonSerializable
         }
         if (array_key_exists('proxy', $data)) {
             if (! is_string($data['proxy'])) {
-                throw new InvalidArgumentException('Socket proxy must be a SOCKS URL.');
+                throw new InvalidArgumentException('Socket proxy must be a supported URL.');
             }
             $parts = ProxyUrl::parse($data['proxy']);
-            if (! in_array($parts['scheme'], ['socks5', 'socks5h'], true)) {
-                throw new InvalidArgumentException('Socket proxy must use socks5 or socks5h.');
+            if (! in_array($parts['scheme'], static::PROXY_SCHEMES, true)) {
+                throw new InvalidArgumentException('Unsupported socket proxy scheme.');
+            }
+            if ($parts['scheme'] === 'http') {
+                ProxyUrl::validateConnectCredentials($parts);
             }
         }
         if (array_key_exists('connect_timeout_seconds', $data)) {

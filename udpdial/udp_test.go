@@ -20,7 +20,7 @@ type resolverFunc func(context.Context, string) ([]net.IPAddr, error)
 func (f resolverFunc) LookupIPAddr(c context.Context, h string) ([]net.IPAddr, error) { return f(c, h) }
 func TestProfiles(t *testing.T) {
 	for _, group := range []string{"valid", "invalid"} {
-		files, _ := filepath.Glob("../spec/tcp/" + group + "/*.json")
+		files, _ := filepath.Glob("../spec/udp/" + group + "/*.json")
 		for _, f := range files {
 			data, _ := os.ReadFile(f)
 			_, err := Parse(data)

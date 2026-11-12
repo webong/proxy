@@ -14,7 +14,8 @@ PHP `Webong\Proxy\Tcp\TcpProfile` and Go `tcpdial.Profile` share
 Omit `proxy` for direct TCP. A proxy uses `socks5` (resolve the destination
 locally) or `socks5h` (send its hostname to the proxy). Literal IP addresses never
 require DNS. The proxy hop itself is resolved locally in both modes. Missing
-SOCKS ports default to 1080. HTTP CONNECT and SOCKS BIND are not implemented by these raw TCP dialers.
+SOCKS ports default to 1080. HTTP CONNECT is supported with `http://` proxy URLs
+(default port 80); SOCKS BIND remains unsupported.
 [UDP ASSOCIATE](udp.md) is provided by separate owning UDP associations. Only Go's `tcp` network is accepted;
 service names and scoped IPv6 addresses are outside the destination contract.
 PHP takes an unbracketed IP/hostname and an integer port; Go takes host:port
@@ -50,6 +51,46 @@ overbudget results fail after return. Use an appropriately bounded custom
 connector/resolver, or numeric hop/destination addresses, when this matters.
 PHP's default stream I/O timeout still applies after setup unless the caller
 changes it. PHP does not provide Go-style context cancellation.
+
+## Raw HTTP CONNECT
+
+Use `http://proxy.example:8080` in a TCP profile to open an HTTP/1.1 CONNECT
+tunnel. The destination authority (hostname or bracketed IPv6 plus numeric port)
+is sent to the proxy; target DNS is performed by that proxy, without invoking the
+local destination resolver. The connector sees the proxy hop. UDP profiles still
+accept only SOCKS proxies; TCP and UDP now have separate fixture directories.
+Go `tcpdial.Profile` has the same fields as `socketprofile.Profile` but is a
+separate type with TCP-specific parsing and validation.
+
+Optional URL credentials are percent-decoded and sent preemptively as Basic
+`Proxy-Authorization`. Supply both username and password; the username must
+contain 1–255 bytes, the password 0–255 bytes. Username colons and control bytes
+(0x00–0x1F and 0x7F in either field) are rejected. Password colons are allowed.
+No authentication challenge retries, Digest, NTLM, Negotiate, redirects, or
+fallback to direct traffic are implemented. A 407 fails setup.
+
+HTTP/1.0 and HTTP/1.1 responses are accepted. Any 2xx establishes the tunnel;
+Content-Length and Transfer-Encoding on that response do not consume tunnel
+bytes, following [RFC9110 section 9.3.6](https://www.rfc-editor.org/rfc/rfc9110#section-9.3.6).
+Up to eight informational responses are accepted, excluding 101. Response
+headers across all responses are bounded to 32,768 bytes. Malformed/truncated
+responses, folded fields, bare LF, invalid control bytes, and non-2xx final
+statuses fail and close the connection. Go returns `*ConnectError` for rejected
+statuses; PHP uses the status as `DialException`'s code. Errors do not include
+credentials or untrusted response text. Bytes following the successful header
+terminator belong to the returned raw connection and are preserved.
+
+The existing setup timeout covers connecting, sending CONNECT, and reading the
+response; Go context cancellation closes an in-progress handshake. Successful
+tunnels have setup deadlines cleared. Callers own subsequent TLS and I/O.
+TLS to the HTTP proxy itself (`https://`), HTTP/2 CONNECT, extended CONNECT,
+and CONNECT-UDP are not supported by these raw dialers. HTTP proxy credentials
+and tunneled plaintext require deployment-level protection; Basic is not encryption.
+Raw HTTP CONNECT in PHP uses streams and does not require cURL.
+
+`http-connect-cases.json` runs against independent PHP and Go loopback peers,
+covering authentication, status/header validation, fragmented responses,
+coalesced tunnel data, deadline clearing, and setup failures.
 
 ## HTTP adapters
 

@@ -36,7 +36,7 @@ def check(schema, document, expected, label):
 http = validator("spec/http-profile.schema.json")
 tcp = validator("spec/tcp-profile.schema.json")
 udp = validator("spec/udp-profile.schema.json")
-for schema, directory in [(http, "spec/fixtures"), (tcp, "spec/tcp"), (udp, "spec/tcp")]:
+for schema, directory in [(http, "spec/fixtures"), (tcp, "spec/tcp"), (udp, "spec/udp")]:
     for group in ("valid", "invalid"):
         files = sorted((ROOT / directory / group).glob("*.json"))
         assert files, f"Missing {directory}/{group} fixtures"

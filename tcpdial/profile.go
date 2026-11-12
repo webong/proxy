@@ -2,6 +2,7 @@ package tcpdial
 
 import "github.com/webong/proxy/socketprofile"
 
-type Profile = socketprofile.Profile
+// Profile describes direct TCP, SOCKS5 CONNECT, or HTTP CONNECT.
+type Profile = socketprofile.TCPProfile
 
-func Parse(data []byte) (Profile, error) { return socketprofile.Parse(data) }
+func Parse(data []byte) (Profile, error) { return socketprofile.ParseTCP(data) }

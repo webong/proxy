@@ -68,3 +68,23 @@ func ParseHTTP(value string) (*url.URL, error) {
 	}
 	return u, nil
 }
+
+// ValidateConnectCredentials enforces a portable Basic authentication pair.
+func ValidateConnectCredentials(u *url.URL) error {
+	if u.User == nil {
+		return nil
+	}
+	user := u.User.Username()
+	password, ok := u.User.Password()
+	if !ok || len(user) < 1 || len(user) > 255 || len(password) > 255 || strings.Contains(user, ":") {
+		return fmt.Errorf("invalid CONNECT credentials")
+	}
+	for _, field := range []string{user, password} {
+		for i := 0; i < len(field); i++ {
+			if field[i] < 32 || field[i] == 127 {
+				return fmt.Errorf("invalid CONNECT credentials")
+			}
+		}
+	}
+	return nil
+}

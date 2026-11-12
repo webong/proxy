@@ -1,4 +1,4 @@
-// Package tcpdial provides direct and SOCKS5 TCP connections.
+// Package tcpdial provides direct, SOCKS5 CONNECT, and HTTP CONNECT TCP connections.
 package tcpdial
 
 import (
@@ -35,7 +35,7 @@ var ErrAuthentication = socks5.ErrAuthentication
 
 type ReplyError = socks5.ReplyError
 
-// New snapshots configuration. A custom base sees the proxy hop for SOCKS traffic;
+// New snapshots configuration. A custom base sees the proxy hop for proxied traffic;
 // it cannot authorize a remotely resolved destination. Custom dependencies must honor context.
 func New(profile Profile, base ContextDialer, resolver Resolver) (*Dialer, error) {
 	if err := profile.Validate(); err != nil {
@@ -87,11 +87,22 @@ func (d *Dialer) DialContext(ctx context.Context, network, address string) (net.
 	if d.proxy == nil {
 		return d.connect(ctx, net.JoinHostPort(host, strconv.Itoa(port)))
 	}
-	target, err := d.target(ctx, host, port)
+	var target []byte
+	if d.proxy.Scheme != "http" {
+		target, err = d.target(ctx, host, port)
+	}
 	if err != nil {
 		return nil, err
 	}
-	conn, err := d.connect(ctx, proxyurl.Address(d.proxy))
+	hop := proxyurl.Address(d.proxy)
+	if d.proxy.Scheme == "http" {
+		p := d.proxy.Port()
+		if p == "" {
+			p = "80"
+		}
+		hop = net.JoinHostPort(d.proxy.Hostname(), p)
+	}
+	conn, err := d.connect(ctx, hop)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +113,11 @@ func (d *Dialer) DialContext(ctx context.Context, network, address string) (net.
 	}
 	stopped := make(chan struct{})
 	stop := context.AfterFunc(ctx, func() { conn.Close(); close(stopped) })
-	err = d.handshake(conn, target)
+	if d.proxy.Scheme == "http" {
+		err = d.connectHandshake(conn, net.JoinHostPort(host, strconv.Itoa(port)))
+	} else {
+		err = d.handshake(conn, target)
+	}
 	if !stop() {
 		<-stopped
 	}

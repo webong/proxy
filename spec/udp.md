@@ -1,8 +1,9 @@
 # UDP and SOCKS5 UDP ASSOCIATE
 
 Both languages support direct UDP and SOCKS5 UDP ASSOCIATE on the experimental
-branch. They share the raw socket profile with TCP: `version: 1`, optional
+branch. They share the raw socket fields with TCP: `version: 1`, optional
 `socks5://` or `socks5h://` proxy URL, and optional `connect_timeout_seconds`.
+UDP proxy schemes remain SOCKS-only; HTTP CONNECT is TCP-only.
 See `udp-profile.schema.json` and [the raw socket profile](tcp.md) for validation,
 authentication, and PHP's non-preemptible system DNS/callback constraints.
 Go also exposes the common type through `socketprofile.Profile`.

@@ -7,6 +7,7 @@ namespace Webong\Proxy\Tcp;
 use Closure;
 use InvalidArgumentException;
 use Throwable;
+use Webong\Proxy\Connection\HttpConnectSession;
 use Webong\Proxy\Connection\ProxyUrl;
 use Webong\Proxy\Connection\SocketAddress;
 use Webong\Proxy\Connection\Socks5Session;
@@ -41,9 +42,9 @@ final class TcpDialer
         $timeout = ceil(($settings['connect_timeout_seconds'] ?? 10) * 1000) / 1000;
         $deadline = hrtime(true) / 1e9 + $timeout;
         $proxy = isset($settings['proxy']) ? ProxyUrl::parse($settings['proxy']) : null;
-        $target = $proxy === null ? '' : $this->target($host, $port, $proxy['scheme'], $deadline);
+        $target = $proxy === null || $proxy['scheme'] === 'http' ? '' : $this->target($host, $port, $proxy['scheme'], $deadline);
         $hop = $proxy === null ? $host : trim($proxy['host'], '[]');
-        $hopPort = $proxy === null ? $port : ($proxy['port'] ?? 1080);
+        $hopPort = $proxy === null ? $port : ($proxy['port'] ?? ($proxy['scheme'] === 'http' ? 80 : 1080));
         $remaining = $this->remaining($deadline);
         $stream = $this->connector !== null
             ? ($this->connector)($hop, $hopPort, $remaining)
@@ -57,7 +58,11 @@ final class TcpDialer
                 if (! stream_set_blocking($stream, false)) {
                     throw new DialException('Unable to configure TCP stream.');
                 }
-                $this->handshake($stream, $proxy, $target, $deadline);
+                if ($proxy['scheme'] === 'http') {
+                    HttpConnectSession::connect($stream, $proxy, $host, $port, $deadline);
+                } else {
+                    $this->handshake($stream, $proxy, $target, $deadline);
+                }
             }
             $this->remaining($deadline);
             if (! stream_set_blocking($stream, true)) {

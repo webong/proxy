@@ -18,7 +18,9 @@ type Profile struct {
 	ConnectTimeoutSeconds float64 `json:"connect_timeout_seconds,omitempty"`
 }
 
-func Parse(data []byte) (Profile, error) {
+func Parse(data []byte) (Profile, error) { return parse(data, false) }
+
+func parse(data []byte, tcp bool) (Profile, error) {
 	var p Profile
 	var fields map[string]json.RawMessage
 	if err := json.Unmarshal(data, &fields); err != nil || fields == nil {
@@ -47,9 +49,11 @@ func Parse(data []byte) (Profile, error) {
 		return p, fmt.Errorf("invalid socket profile types")
 	}
 	p = Profile(decoded)
-	return p, p.Validate()
+	return p, p.validate(tcp)
 }
-func (p Profile) Validate() error {
+func (p Profile) Validate() error { return p.validate(false) }
+
+func (p Profile) validate(tcp bool) error {
 	if p.Version != 1 {
 		return fmt.Errorf("unsupported socket profile version")
 	}
@@ -62,8 +66,11 @@ func (p Profile) Validate() error {
 		if err != nil {
 			return err
 		}
+		if tcp && u.Scheme == "http" {
+			return proxyurl.ValidateConnectCredentials(u)
+		}
 		if !proxyurl.IsSOCKS(u) {
-			return fmt.Errorf("socket proxy must use socks5 or socks5h")
+			return fmt.Errorf("unsupported socket proxy scheme")
 		}
 	}
 	return nil
