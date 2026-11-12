@@ -10,3 +10,5 @@ use Webong\Proxy\Tests\TestCase;
 
 uses(TestCase::class, LazilyRefreshDatabase::class)->in('Feature');
 uses(TestCase::class)->in('Unit');
+
+uses(\Webong\Proxy\Tests\DatabaseTestCase::class)->in('Database');

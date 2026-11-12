@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Webong\Proxy\Models;
 
+use Webong\Proxy\Database\SubscriptionIdentity;
 use Webong\Proxy\Enums\WebhookProxyTargetType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -21,11 +22,14 @@ class WebProxyDestination extends Model
 
     public const string MULTIPLE_SUBSCRIBERS_METADATA_KEY = '_allows_multiple_subscribers';
 
+    protected $hidden = ['registration_hash'];
+
     protected $attributes = [
         'target_type' => 'request',
     ];
 
     protected $fillable = [
+        'registration_hash',
         'endpoint_id',
         'owner_id',
         'registration_id',
@@ -40,6 +44,13 @@ class WebProxyDestination extends Model
         'last_failed_at',
         'last_error',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $destination): void {
+            $destination->setAttribute('registration_hash', SubscriptionIdentity::hash($destination->getAttributes()));
+        });
+    }
 
     /** @return array<string, string> */
     protected function casts(): array

@@ -6,6 +6,7 @@ namespace Webong\Proxy;
 
 use Webong\Proxy\Contracts\WebhookEvent;
 use Webong\Proxy\Contracts\WebhookJob;
+use Webong\Proxy\Database\SubscriptionIdentity;
 use Webong\Proxy\Enums\WebhookProxyTargetType;
 use Webong\Proxy\Models\WebProxyDestination;
 use Webong\Proxy\Models\WebProxyEndpoint;
@@ -63,17 +64,20 @@ class DatabaseDestinationAttacher
                     ->update(['is_active' => false]);
             }
 
+            $identity = [
+                'endpoint_id' => (string) $endpoint->getKey(),
+                'owner_id' => $definition->ownerId,
+                'registration_id' => $definition->registrationId,
+                'webhook_group' => $definition->webhookGroup,
+                'routing_scope' => $definition->routingScope,
+                'routing_key' => $definition->routingKey,
+                'target_type' => $definition->targetType->value,
+            ];
+
             return WebProxyDestination::query()->updateOrCreate(
+                ['registration_hash' => SubscriptionIdentity::hash($identity)],
                 [
-                    'endpoint_id' => $endpoint->getKey(),
-                    'owner_id' => $definition->ownerId,
-                    'registration_id' => $definition->registrationId,
-                    'webhook_group' => $definition->webhookGroup,
-                    'routing_scope' => $definition->routingScope,
-                    'routing_key' => $definition->routingKey,
-                    'target_type' => $definition->targetType,
-                ],
-                [
+                    ...$identity,
                     'target' => $definition->target,
                     'metadata' => [
                         ...$definition->metadata,

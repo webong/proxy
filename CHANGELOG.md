@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Fix subscription registration uniqueness on utf8mb4 MySQL/MariaDB without
+  shortening stored values. Add a resumable migration for existing registries
+  and recovery for empty tables left by the original failed MySQL migration.
+- Test registry migrations and runtime behavior on PostgreSQL 18, MySQL 8.4,
+  MariaDB 11.4 and SQLite. See [SQL upgrade requirements](spec/SQL.md) before
+  deploying: writers must be stopped and MySQL rollback requires a forward fix
+  or a pre-upgrade backup.
+
 ## v0.3.0 — 2026-11-12
 
 - Add portable HTTP profiles shared by PHP and Go, PHP normalization/export and
