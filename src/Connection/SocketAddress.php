@@ -82,7 +82,37 @@ final class SocketAddress
             $packed = substr($packed, 12);
         }
 
-        return inet_ntop($packed);
+        if (strlen($packed) === 4) {
+            return inet_ntop($packed);
+        }
+
+        // RFC5952 canonical hex rendering also covers IPv4-compatible IPv6,
+        // for which libc inet_ntop can choose dotted output unlike Go.
+        $groups = array_values(unpack('n8', $packed));
+        $start = -1;
+        $length = 0;
+        for ($i = 0; $i < 8;) {
+            if ($groups[$i] !== 0) {
+                $i++;
+
+                continue;
+            }
+            $end = $i;
+            while ($end < 8 && $groups[$end] === 0) {
+                $end++;
+            }
+            if ($end - $i > $length) {
+                $start = $i;
+                $length = $end - $i;
+            }
+            $i = $end;
+        }
+        $hex = array_map(dechex(...), $groups);
+        if ($length < 2) {
+            return implode(':', $hex);
+        }
+
+        return implode(':', array_slice($hex, 0, $start)).'::'.implode(':', array_slice($hex, $start + $length));
     }
 
     public static function text(string $host, int $port): string

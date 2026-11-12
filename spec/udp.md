@@ -60,7 +60,9 @@ Go's setup context may be cancelled without closing the association.
 encodes domain names for proxy-side resolution. Literal IPv4/IPv6 destinations
 never trigger DNS; IPv4-mapped IPv6 is encoded canonically as IPv4. One
 association can send to multiple destinations. Received packets retain the
-source address supplied by the relay without another DNS lookup.
+source address supplied by the relay without another DNS lookup. Both codecs
+render IPv6 with lowercase hexadecimal and longest-zero-run compression;
+IPv4-compatible IPv6 stays IPv6, while mapped addresses normalize to IPv4.
 
 Payloads are binary-safe, including zero-length datagrams. Direct traffic has no
 SOCKS header; proxied traffic uses RSV=0, FRAG=0 and a typed destination address.
@@ -84,3 +86,7 @@ has no encryption; application payload protection remains the caller's job.
 `udp-datagrams.json` is executed by both codec suites, along with independent
 loopback relay fixtures testing authentication, IPv4/IPv6, empty/binary payloads,
 source filtering, malformed/fragmented packets, timeouts, and TCP lifetime.
+
+Go pending-write deadlines, including destination DNS, return errors matching
+`os.ErrDeadlineExceeded`. Setup cancellation and setup deadlines retain context
+errors. Clearing or extending a write deadline also updates pending DNS.

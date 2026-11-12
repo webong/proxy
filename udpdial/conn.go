@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -33,7 +34,21 @@ func newConn(socket *net.UDPConn, control net.Conn, d *Dialer) *Conn {
 	lifetime, cancel := context.WithCancel(context.Background())
 	return &Conn{socket: socket, control: control, dialer: d, done: make(chan struct{}), deadlineChanged: make(chan struct{}), lifetime: lifetime, cancelLifetime: cancel}
 }
-func (c *Conn) watchControl()         { var b [1]byte; c.control.Read(b[:]); c.Close() }
+func (c *Conn) watchControl() {
+	var b [1]byte
+	for {
+		select {
+		case <-c.done:
+			return
+		default:
+		}
+		n, err := c.control.Read(b[:])
+		if n > 0 || err != nil {
+			c.Close()
+			return
+		}
+	}
+}
 func (c *Conn) Done() <-chan struct{} { return c.done }
 func (c *Conn) Close() error {
 	var err error
@@ -85,8 +100,10 @@ func (c *Conn) writeContext() (context.Context, func()) {
 			var timeout <-chan time.Time
 			if !deadline.IsZero() {
 				if !time.Now().Before(deadline) {
-					cancel(context.DeadlineExceeded)
-					return
+					if c.expireWriteDeadline(deadline, cancel) {
+						return
+					}
+					continue
 				}
 				timer = time.NewTimer(time.Until(deadline))
 				timeout = timer.C
@@ -103,18 +120,26 @@ func (c *Conn) writeContext() (context.Context, func()) {
 				}
 				continue
 			case <-timeout:
-				c.mu.RLock()
-				current := c.writeDeadline
-				c.mu.RUnlock()
-				if current != deadline || current.IsZero() || time.Now().Before(current) {
-					continue
+				if c.expireWriteDeadline(deadline, cancel) {
+					return
 				}
-				cancel(context.DeadlineExceeded)
-				return
 			}
 		}
 	}()
 	return ctx, func() { cancel(context.Canceled); <-done }
+}
+
+// Serialize expiration with deadline updates so a stale timer (or initial
+// snapshot) cannot cancel a write after its deadline was cleared or extended.
+func (c *Conn) expireWriteDeadline(expected time.Time, cancel context.CancelCauseFunc) bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	current := c.writeDeadline
+	if current != expected || current.IsZero() || time.Now().Before(current) {
+		return false
+	}
+	cancel(os.ErrDeadlineExceeded)
+	return true
 }
 func (c *Conn) WriteTo(payload []byte, address net.Addr) (written int, resultErr error) {
 	select {

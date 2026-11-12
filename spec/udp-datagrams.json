@@ -106,5 +106,68 @@
     "decoded_host": "192.0.2.1",
     "port": 53,
     "payload": "70696e67"
+  },
+  {
+    "name": "compatible",
+    "host": "::192.0.2.1",
+    "port": 53,
+    "payload": "63616e6f6e",
+    "wire": "00000004000000000000000000000000c0000201003563616e6f6e",
+    "valid": true,
+    "decoded_host": "::c000:201"
+  },
+  {
+    "name": "v6-loopback",
+    "host": "::1",
+    "port": 53,
+    "payload": "63616e6f6e",
+    "wire": "0000000400000000000000000000000000000001003563616e6f6e",
+    "valid": true,
+    "decoded_host": "::1"
+  },
+  {
+    "name": "v6-unspecified",
+    "host": "::",
+    "port": 53,
+    "payload": "63616e6f6e",
+    "wire": "0000000400000000000000000000000000000000003563616e6f6e",
+    "valid": true,
+    "decoded_host": "::"
+  },
+  {
+    "name": "compression-tie",
+    "host": "2001:0:0:1:0:0:1:1",
+    "port": 53,
+    "payload": "63616e6f6e",
+    "wire": "0000000420010000000000010000000000010001003563616e6f6e",
+    "valid": true,
+    "decoded_host": "2001::1:0:0:1:1"
+  },
+  {
+    "name": "single-zero",
+    "host": "2001:db8:0:1:2:3:4:5",
+    "port": 53,
+    "payload": "63616e6f6e",
+    "wire": "0000000420010db8000000010002000300040005003563616e6f6e",
+    "valid": true,
+    "decoded_host": "2001:db8:0:1:2:3:4:5"
+  },
+  {
+    "name": "translation",
+    "host": "64:ff9b::192.0.2.1",
+    "port": 53,
+    "payload": "63616e6f6e",
+    "wire": "000000040064ff9b0000000000000000c0000201003563616e6f6e",
+    "valid": true,
+    "decoded_host": "64:ff9b::c000:201"
+  },
+  {
+    "name": "expanded-uppercase",
+    "host": "2001:0DB8:0000:0000:0000:0000:0000:0001",
+    "port": 53,
+    "payload": "63616e6f6e",
+    "wire": "0000000420010db8000000000000000000000001003563616e6f6e",
+    "valid": true,
+    "decoded_host": "2001:db8::1"
   }
 ]

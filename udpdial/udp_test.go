@@ -362,7 +362,7 @@ func TestPendingDNSRespectsCloseAndDeadlineUpdates(t *testing.T) {
 				if action == "close" && !errors.Is(err, net.ErrClosed) {
 					t.Fatal(err)
 				}
-				if action != "close" && !errors.Is(err, context.DeadlineExceeded) {
+				if action != "close" && !errors.Is(err, os.ErrDeadlineExceeded) {
 					t.Fatal(err)
 				}
 			case <-time.After(time.Second):
@@ -404,5 +404,79 @@ func TestPendingDNSDeadlineCanBeCleared(t *testing.T) {
 	c.SetReadDeadline(time.Now().Add(time.Second))
 	if _, _, err := c.ReadFrom(make([]byte, 8)); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestStaleWriteDeadlineCannotCancelWrite(t *testing.T) {
+	socket, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := newConn(socket, nil, nil)
+	defer c.Close()
+	expired := time.Now().Add(-time.Second)
+	for _, updated := range []time.Time{time.Time{}, time.Now().Add(time.Hour)} {
+		c.SetWriteDeadline(expired)
+		c.SetWriteDeadline(updated)
+		ctx, cancel := context.WithCancelCause(context.Background())
+		if c.expireWriteDeadline(expired, cancel) || ctx.Err() != nil {
+			t.Fatal("stale deadline cancelled write")
+		}
+		cancel(context.Canceled)
+	}
+	c.SetWriteDeadline(expired)
+	ctx, cancel := context.WithCancelCause(context.Background())
+	defer cancel(context.Canceled)
+	if !c.expireWriteDeadline(expired, cancel) || !errors.Is(context.Cause(ctx), os.ErrDeadlineExceeded) {
+		t.Fatal("current deadline did not expire")
+	}
+	_, err = c.WriteTo(nil, &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 53})
+	if !errors.Is(err, os.ErrDeadlineExceeded) {
+		t.Fatalf("native deadline: %v", err)
+	}
+}
+
+type noProgressControl struct {
+	net.Conn
+	reads   int
+	resumed chan struct{}
+}
+
+func (c *noProgressControl) Read(p []byte) (int, error) {
+	c.reads++
+	if c.reads == 1 {
+		return 0, nil
+	}
+	if c.reads == 2 {
+		close(c.resumed)
+	}
+	return c.Conn.Read(p)
+}
+func TestControlWatcherContinuesAfterNoProgress(t *testing.T) {
+	socket, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	local, peer := net.Pipe()
+	defer peer.Close()
+	control := &noProgressControl{Conn: local, resumed: make(chan struct{})}
+	c := newConn(socket, control, nil)
+	defer c.Close()
+	go c.watchControl()
+	select {
+	case <-control.resumed:
+	case <-time.After(time.Second):
+		t.Fatal("watcher did not retry")
+	}
+	select {
+	case <-c.Done():
+		t.Fatal("no progress closed association")
+	default:
+	}
+	peer.Close()
+	select {
+	case <-c.Done():
+	case <-time.After(time.Second):
+		t.Fatal("EOF did not close association")
 	}
 }
