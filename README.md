@@ -312,3 +312,10 @@ n, source, err := udp.ReadFrom(buffer)
 Omit `proxy` for direct UDP. Raw UDP authentication needs no cURL extension.
 The [UDP contract](spec/udp.md) explains DNS modes, IPv6 bindings, payload limits,
 control-connection lifetime, source filtering, and unsupported SOCKS fragmentation.
+
+## SQL registry storage
+
+The registry is tested on SQLite, PostgreSQL, MySQL and MariaDB. See
+[SQL storage and upgrade notes](spec/SQL.md) for supported versions, the portable
+subscription identity migration, partial MySQL migration recovery and rollback
+requirements.

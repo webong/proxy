@@ -72,6 +72,22 @@ abstract class TestCase extends Orchestra
             ],
         ]);
 
+        if (($driver = getenv('PROXY_TEST_DB')) && $driver !== 'sqlite') {
+            $app['config']->set('database.default', $driver);
+            $app['config']->set('database.connections.'.$driver, [
+                'driver' => $driver,
+                'host' => getenv('PROXY_TEST_DB_HOST') ?: '127.0.0.1',
+                'port' => getenv('PROXY_TEST_DB_PORT') ?: ($driver === 'pgsql' ? '5432' : '3306'),
+                'database' => getenv('PROXY_TEST_DB_DATABASE') ?: 'proxy_test',
+                'username' => getenv('PROXY_TEST_DB_USERNAME') ?: ($driver === 'pgsql' ? 'postgres' : 'root'),
+                'password' => getenv('PROXY_TEST_DB_PASSWORD') ?: '',
+                'charset' => $driver === 'pgsql' ? 'utf8' : 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
+                'prefix' => '',
+                'strict' => true,
+            ]);
+        }
+
         $app->bind(
             WebhookProxyRouteDefinition::class,
             static fn (): WebhookProxyRouteDefinition => new class implements WebhookProxyRouteDefinition {
@@ -91,6 +107,6 @@ abstract class TestCase extends Orchestra
 
     protected function defineDatabaseMigrations(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->app->make('migrator')->path(__DIR__.'/../database/migrations');
     }
 }

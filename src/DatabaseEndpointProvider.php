@@ -233,7 +233,7 @@ class DatabaseEndpointProvider implements EndpointProvider
     {
         WebProxyDestination::query()
             ->whereKey($destination->id)
-            ->update($attributes);
+            ->first()?->forceFill($attributes)->save();
     }
 
     public function updateEndpoint(EndpointRecord $endpoint, array $registration): EndpointRecord
@@ -251,9 +251,9 @@ class DatabaseEndpointProvider implements EndpointProvider
         string $webhookGroup,
     ): int {
         return WebProxyDestination::query()
-            ->where('owner_id', $ownerId)
-            ->where('registration_id', $registrationId)
-            ->where('webhook_group', $webhookGroup)
+            ->whereIdentity('owner_id', $ownerId)
+            ->whereIdentity('registration_id', $registrationId)
+            ->whereIdentity('webhook_group', $webhookGroup)
             ->where('is_active', true)
             ->update(['is_active' => false]);
     }
@@ -264,9 +264,9 @@ class DatabaseEndpointProvider implements EndpointProvider
         string $webhookGroup,
     ): bool {
         return WebProxyDestination::query()
-            ->where('owner_id', $ownerId)
-            ->where('registration_id', $registrationId)
-            ->where('webhook_group', $webhookGroup)
+            ->whereIdentity('owner_id', $ownerId)
+            ->whereIdentity('registration_id', $registrationId)
+            ->whereIdentity('webhook_group', $webhookGroup)
             ->where('is_active', true)
             ->exists();
     }

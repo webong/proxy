@@ -1,0 +1,55 @@
+name: SQL databases
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: mysql:8.4
+            driver: mysql
+            port: 3306
+            username: root
+            health: mysqladmin ping -h 127.0.0.1 --silent
+          - image: mariadb:11.4
+            driver: mariadb
+            port: 3306
+            username: root
+            health: healthcheck.sh --connect --innodb_initialized
+          - image: postgres:18
+            driver: pgsql
+            port: 5432
+            username: postgres
+            health: pg_isready -U postgres -d proxy_test
+    services:
+      database:
+        image: ${{ matrix.image }}
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: proxy_test
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 'yes'
+          MARIADB_DATABASE: proxy_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: proxy_test
+        ports:
+          - 3306:3306
+          - 5432:5432
+        options: >-
+          --health-cmd="${{ matrix.health }}"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      PROXY_TEST_DB: ${{ matrix.driver }}
+      PROXY_TEST_DB_PORT: ${{ matrix.port }}
+      PROXY_TEST_DB_USERNAME: ${{ matrix.username }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite, pdo_mysql, pdo_pgsql, curl
+          coverage: none
+      - run: composer update --prefer-dist --no-interaction
+      - run: composer test
