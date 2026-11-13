@@ -7,6 +7,7 @@
     <testsuites>
         <testsuite name="WebProxy">
             <directory>tests</directory>
+            <exclude>tests/packaging</exclude>
         </testsuite>
     </testsuites>
     <source>

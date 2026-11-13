@@ -27,6 +27,7 @@ jobs:
           else
             composer require --dev 'orchestra/testbench:^10.0' --no-update
           fi
+      - run: php scripts/bootstrap-composer.php --plugin-only
       - run: composer update --prefer-dist --no-interaction
       - run: composer test
 
@@ -39,6 +40,7 @@ jobs:
           php-version: '8.5'
           extensions: mbstring, pdo_sqlite, curl
           coverage: none
+      - run: php scripts/bootstrap-composer.php --plugin-only
       - run: composer update --prefer-dist --no-interaction
       - name: Build PHP with pinned libcurl 8.23
         run: docker build -f tests/runtime/Dockerfile.curl823 -t proxy-curl823 tests/runtime

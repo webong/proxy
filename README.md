@@ -154,6 +154,19 @@ not included in `proxy-migrations`.
 composer test
 ```
 
+## Composer development packaging (unreleased)
+
+The next package candidate keeps this full Laravel integration in
+`webong/proxy` and provides `webong/proxy-transport` for PHP transport-only
+consumers. Registries and persistence remain here; public namespaces and the Go
+module are unchanged. The new transport package is not published yet.
+
+For local development, run `php scripts/bootstrap-composer.php` on a fresh clone.
+The Composer Source Plugin links `packages/transport` as a workspace. Ordinary
+published-package consumers will not need the plugin. See
+[package installation, bootstrap and release order](spec/COMPOSER.md) before
+changing dependencies; projection alone cannot remove Laravel requirements.
+
 ## Portable HTTP profiles (PHP and Go)
 
 Proxy now includes a versioned HTTP connection profile shared by both libraries.

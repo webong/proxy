@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Adopt Composer Source Plugin ^0.4 workspaces for local package development.
+- Prepare a separate Laravel-free proxy-transport package while retaining
+  webong/proxy as the full registry/persistence/integration entry point. Public
+  PHP namespaces, transport signatures and the Go module remain unchanged.
+- Add archive-consumer, no-plugin/no-dev, projection and workspace bootstrap
+  installation checks. The new package must be published before the parent
+  release can be installed from the default registry; see spec/COMPOSER.md.
+
 ## v0.3.1 — 2026-11-13
 
 - Fix subscription registration uniqueness on utf8mb4 MySQL/MariaDB without

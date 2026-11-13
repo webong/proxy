@@ -23,7 +23,9 @@ spl_autoload_register(static function (string $class): void {
     if (! str_starts_with($class, $prefix)) {
         return;
     }
-    $path = __DIR__.'/../src/'.str_replace('\\', '/', substr($class, strlen($prefix))).'.php';
+    $relative = str_replace('\\', '/', substr($class, strlen($prefix))).'.php';
+    $transport = preg_match('~^(Connection|Http|Tcp|Udp)/~', $relative) === 1;
+    $path = __DIR__.'/../'.($transport ? 'packages/transport/src/' : 'src/').$relative;
     if (is_file($path)) {
         require $path;
     }

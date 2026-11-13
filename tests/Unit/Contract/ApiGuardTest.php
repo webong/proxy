@@ -12,14 +12,16 @@ function withTransportApiFixture(callable $test): void
             mkdir(dirname($root.'/'.$file), 0700, true);
             copy(__DIR__.'/../../../'.$file, $root.'/'.$file);
         }
-        $source = __DIR__.'/../../../src';
-        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS));
-        foreach ($files as $file) {
-            $target = $root.'/src/'.substr($file->getPathname(), strlen($source) + 1);
-            if (! is_dir(dirname($target))) {
-                mkdir(dirname($target), 0700, true);
+        foreach (['src', 'packages/transport/src'] as $directory) {
+            $source = __DIR__.'/../../../'.$directory;
+            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS));
+            foreach ($files as $file) {
+                $target = $root.'/'.$directory.'/'.substr($file->getPathname(), strlen($source) + 1);
+                if (! is_dir(dirname($target))) {
+                    mkdir(dirname($target), 0700, true);
+                }
+                copy($file->getPathname(), $target);
             }
-            copy($file->getPathname(), $target);
         }
         $test($root);
     } finally {
@@ -58,7 +60,7 @@ it('rejects source-breaking PHP API mutations', function (string $path, string $
         expect($status)->toBe(1)->and($output)->toContain('Public PHP API changed');
     });
 })->with([
-    'abstract class' => ['src/Connection/SocketProfile.php', 'readonly class SocketProfile', 'abstract readonly class SocketProfile'],
-    'reference return' => ['src/Http/HttpProfile.php', 'public function toArray(): array', 'public function &toArray(): array'],
-    'named argument' => ['src/Http/HttpProfile.php', 'proxyFor(string $scheme', 'proxyFor(string $changedName'],
+    'abstract class' => ['packages/transport/src/Connection/SocketProfile.php', 'readonly class SocketProfile', 'abstract readonly class SocketProfile'],
+    'reference return' => ['packages/transport/src/Http/HttpProfile.php', 'public function toArray(): array', 'public function &toArray(): array'],
+    'named argument' => ['packages/transport/src/Http/HttpProfile.php', 'proxyFor(string $scheme', 'proxyFor(string $changedName'],
 ]);
