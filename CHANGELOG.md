@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.3.1 — 2026-11-13
 
 - Fix subscription registration uniqueness on utf8mb4 MySQL/MariaDB without
   shortening stored values. Add a resumable migration for existing registries

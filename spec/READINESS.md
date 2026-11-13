@@ -1,7 +1,8 @@
 # Release readiness
 
 The v0.3.0 transport contract is frozen by [CONTRACT.md](CONTRACT.md); API changes and
-opt-in adoption are documented in [ADOPTING.md](ADOPTING.md). The v0.3.0 tag identifies the reviewed release. It remains a pre-1.0 public API,
+opt-in adoption are documented in [ADOPTING.md](ADOPTING.md). The v0.3.1 tag identifies the reviewed SQL portability release; its transport
+API retains the frozen v0.3.0 baseline. It remains a pre-1.0 public API,
 with patch-line compatibility as defined in the contract. Consumers should retain
 the resolved commit SHA in their dependency lockfiles.
 

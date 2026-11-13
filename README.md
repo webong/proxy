@@ -1,7 +1,7 @@
 # Proxy
 
 `webong/proxy` is a Laravel package for registry-backed webhook endpoints and
-outbound client profiles. Version v0.3.0 also provides portable PHP/Go
+outbound client profiles. Version v0.3.1 provides portable PHP/Go
 HTTP clients, TCP dialers and UDP associations; its wire profiles retain
 `version: 1`, independently of the package version. An endpoint is a durable network identity: it
 can receive and route webhooks through subscriptions, and it can own named
@@ -315,7 +315,8 @@ control-connection lifetime, source filtering, and unsupported SOCKS fragmentati
 
 ## SQL registry storage
 
-The registry is tested on SQLite, PostgreSQL, MySQL and MariaDB. See
+Version v0.3.1 fixes SQL registry portability on SQLite, PostgreSQL, MySQL and
+MariaDB. Existing registries require an additive subscription-identity migration. See
 [SQL storage and upgrade notes](spec/SQL.md) for supported versions, the portable
 subscription identity migration, partial MySQL migration recovery and rollback
 requirements.
