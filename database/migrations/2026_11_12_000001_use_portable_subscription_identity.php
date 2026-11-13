@@ -12,6 +12,7 @@ return new class extends Migration {
     public function up(): void
     {
         $table = (string) config('proxy.tables.subscriptions', 'subscriptions');
+        $this->assertKnownIndexes($table);
         if (! Schema::hasColumn($table, 'registration_hash')) {
             Schema::table($table, static function (Blueprint $blueprint): void {
                 $blueprint->char('registration_hash', 64)->nullable();
@@ -34,11 +35,11 @@ return new class extends Migration {
                 $blueprint->unique('registration_hash', 'subscriptions_registration_hash_unique');
             });
         }
-        // Add the replacement before removing the legacy constraint.
-        if (Schema::hasIndex($table, 'subscriptions_registration_unique')) {
-            Schema::table($table, static function (Blueprint $blueprint): void {
-                $blueprint->dropUnique('subscriptions_registration_unique');
-            });
+        // Legacy table adoption renames tables, but retains historical index names.
+        foreach (['subscriptions_registration_unique', 'web_proxy_destinations_registration_unique'] as $index) {
+            if (Schema::hasIndex($table, $index)) {
+                Schema::table($table, static fn (Blueprint $blueprint) => $blueprint->dropUnique($index));
+            }
         }
     }
 
@@ -50,10 +51,36 @@ return new class extends Migration {
             throw new RuntimeException('The portable subscription identity cannot be rolled back on MySQL/MariaDB; use a forward fix or restore a pre-upgrade backup.');
         }
         $table = (string) config('proxy.tables.subscriptions', 'subscriptions');
-        Schema::table($table, static function (Blueprint $blueprint): void {
-            $blueprint->unique(SubscriptionIdentity::COLUMNS, 'subscriptions_registration_unique');
-            $blueprint->dropUnique('subscriptions_registration_hash_unique');
-            $blueprint->dropColumn('registration_hash');
+        // SQLite can fail after creating the old key and dropping the new one.
+        // Keep all rollback DDL atomic, even when down() is invoked directly.
+        Schema::getConnection()->transaction(function () use ($table): void {
+            $this->assertKnownIndexes($table);
+            if (! Schema::hasIndex($table, 'subscriptions_registration_unique')) {
+                Schema::table($table, static function (Blueprint $blueprint): void {
+                    $blueprint->unique(SubscriptionIdentity::COLUMNS, 'subscriptions_registration_unique');
+                });
+            }
+            if (Schema::hasIndex($table, 'subscriptions_registration_hash_unique')) {
+                Schema::table($table, static fn (Blueprint $blueprint) => $blueprint->dropUnique('subscriptions_registration_hash_unique'));
+            }
+            if (Schema::hasColumn($table, 'registration_hash')) {
+                Schema::table($table, static fn (Blueprint $blueprint) => $blueprint->dropColumn('registration_hash'));
+            }
         });
+    }
+
+    private function assertKnownIndexes(string $table): void
+    {
+        $expected = [
+            'subscriptions_registration_hash_unique' => ['registration_hash'],
+            'subscriptions_registration_unique' => SubscriptionIdentity::COLUMNS,
+            'web_proxy_destinations_registration_unique' => SubscriptionIdentity::COLUMNS,
+        ];
+        foreach (Schema::getIndexes($table) as $index) {
+            if (isset($expected[$index['name']])
+                && (! $index['unique'] || $index['columns'] !== $expected[$index['name']])) {
+                throw new RuntimeException('Unexpected subscription index definition: '.$index['name']);
+            }
+        }
     }
 };

@@ -5,6 +5,9 @@
 - Fix subscription registration uniqueness on utf8mb4 MySQL/MariaDB without
   shortening stored values. Add a resumable migration for existing registries
   and recovery for empty tables left by the original failed MySQL migration.
+- Preserve identity through provider updates, partial/quiet model saves and
+  PostgreSQL UUID normalization; align exact registration predicates across SQL
+  collations. Handle genuine legacy index names and atomic populated rollback.
 - Test registry migrations and runtime behavior on PostgreSQL 18, MySQL 8.4,
   MariaDB 11.4 and SQLite. See [SQL upgrade requirements](spec/SQL.md) before
   deploying: writers must be stopped and MySQL rollback requires a forward fix

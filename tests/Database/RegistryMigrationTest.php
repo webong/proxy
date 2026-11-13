@@ -37,7 +37,7 @@ it('adopts legacy migration history before renamed migrations run', function ():
 });
 
 
-it('backfills existing registrations without changing their values and can resume the upgrade', function (): void {
+it('backfills existing registrations without changing their values and can resume the upgrade', function (bool $partial): void {
     $table = 'tenant_subscriptions';
     Schema::rename('subscriptions', $table);
     config()->set('proxy.tables.subscriptions', $table);
@@ -63,6 +63,9 @@ it('backfills existing registrations without changing their values and can resum
     ];
     DB::table($table)->insert($values);
     $before = (array) DB::table($table)->first();
+    if ($partial) {
+        Schema::table($table, fn ($blueprint) => $blueprint->char('registration_hash', 64)->nullable());
+    }
     $migration = require __DIR__.'/../../database/migrations/2026_11_12_000001_use_portable_subscription_identity.php';
     $migration->up();
     $migration->up();
@@ -73,7 +76,7 @@ it('backfills existing registrations without changing their values and can resum
         ->and($hash)->toBe(\Webong\Proxy\Database\SubscriptionIdentity::hash($values))
         ->and(Schema::hasIndex($table, 'subscriptions_registration_hash_unique'))->toBeTrue()
         ->and(Schema::hasIndex($table, 'subscriptions_registration_unique'))->toBeFalse();
-});
+})->with(['new column' => false, 'interrupted nullable column' => true]);
 
 it('enforces exact registration identity for long Unicode values and updates its key on model saves', function (): void {
     $attributes = [
@@ -137,3 +140,99 @@ if (in_array(getenv('PROXY_TEST_DB'), ['mysql', 'mariadb'], true)) {
             ->and(DB::table('subscriptions')->count())->toBe(1);
     });
 }
+
+it('removes the genuine legacy-named subscription key during upgrade', function (): void {
+    Schema::table('subscriptions', function ($table): void {
+        $table->dropUnique('subscriptions_registration_hash_unique');
+        $table->dropColumn('registration_hash');
+    });
+    if (in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
+        DB::statement('ALTER TABLE subscriptions CONVERT TO CHARACTER SET latin1 COLLATE latin1_bin');
+    }
+    Schema::table('subscriptions', fn ($table) => $table->unique(
+        \Webong\Proxy\Database\SubscriptionIdentity::COLUMNS,
+        'web_proxy_destinations_registration_unique',
+    ));
+    (require __DIR__.'/../../database/migrations/2026_11_12_000001_use_portable_subscription_identity.php')->up();
+    expect(Schema::hasIndex('subscriptions', 'web_proxy_destinations_registration_unique'))->toBeFalse()
+        ->and(Schema::hasIndex('subscriptions', 'subscriptions_registration_hash_unique'))->toBeTrue();
+});
+
+if (! in_array(getenv('PROXY_TEST_DB'), ['mysql', 'mariadb'], true)) {
+    it('preserves the portable key and rows when legacy rollback cannot complete', function (): void {
+        $attributes = [
+            'endpoint_id' => (string) \Illuminate\Support\Str::uuid(),
+            'owner_id' => 'owner', 'registration_id' => 'registration',
+            'webhook_group' => 'events', 'routing_scope' => 'account', 'routing_key' => 'key',
+            'target_type' => 'request', 'target' => 'https://example.test/hook',
+        ];
+        $model = \Webong\Proxy\Models\WebProxyDestination::create($attributes);
+        // An application-owned index prevents dropping its referenced column.
+        Schema::table('subscriptions', fn ($table) => $table->index('registration_hash', 'application_hash_index'));
+        $migration = require __DIR__.'/../../database/migrations/2026_11_12_000001_use_portable_subscription_identity.php';
+        if (DB::getDriverName() === 'sqlite') {
+            expect(fn () => $migration->down())->toThrow(\Illuminate\Database\QueryException::class);
+            expect(Schema::hasIndex('subscriptions', 'subscriptions_registration_hash_unique'))->toBeTrue()
+                ->and(Schema::hasIndex('subscriptions', 'subscriptions_registration_unique'))->toBeFalse()
+                ->and(DB::table('subscriptions')->where('id', $model->id)->value('registration_hash'))->toBe($model->registration_hash);
+            Schema::table('subscriptions', fn ($table) => $table->dropIndex('application_hash_index'));
+        }
+        $migration->down();
+        $migration->up();
+        expect(DB::table('subscriptions')->where('id', $model->id)->value('registration_hash'))->toBe($model->registration_hash);
+    });
+}
+
+it('rejects a misleading portable index before removing the legacy constraint', function (): void {
+    Schema::table('subscriptions', function ($table): void {
+        $table->dropUnique('subscriptions_registration_hash_unique');
+        $table->index('registration_hash', 'subscriptions_registration_hash_unique');
+    });
+    $migration = require __DIR__.'/../../database/migrations/2026_11_12_000001_use_portable_subscription_identity.php';
+    expect(fn () => $migration->up())->toThrow(RuntimeException::class, 'Unexpected subscription index definition');
+});
+
+if (getenv('PROXY_TEST_DB') === 'pgsql') {
+    it('preserves PostgreSQL rows and portable uniqueness when a populated legacy key is too large', function (): void {
+        $attributes = [
+            'endpoint_id' => (string) \Illuminate\Support\Str::uuid(),
+            'target_type' => 'request', 'target' => 'https://example.test/hook',
+        ];
+        foreach (['owner_id', 'registration_id', 'webhook_group', 'routing_scope', 'routing_key'] as $field) {
+            $attributes[$field] = '';
+            for ($i = 0; $i < 255; $i++) {
+                $attributes[$field] .= mb_chr(0x10000 + hexdec(substr(hash('sha256', $field.':'.$i), 0, 4)));
+            }
+        }
+        $model = \Webong\Proxy\Models\WebProxyDestination::create($attributes);
+        $before = (array) DB::table('subscriptions')->where('id', $model->id)->first();
+        expect(fn () => $this->artisan('migrate:rollback', ['--step' => 1, '--force' => true])->run())
+            ->toThrow(\Illuminate\Database\QueryException::class);
+        expect((array) DB::table('subscriptions')->where('id', $model->id)->first())->toBe($before)
+            ->and(Schema::hasIndex('subscriptions', 'subscriptions_registration_hash_unique'))->toBeTrue()
+            ->and(Schema::hasIndex('subscriptions', 'subscriptions_registration_unique'))->toBeFalse();
+    });
+}
+
+it('preserves populated migration history through rollback or explicit refusal', function (): void {
+    $values = [
+        'endpoint_id' => (string) \Illuminate\Support\Str::uuid(),
+        'owner_id' => 'owner', 'registration_id' => 'registration',
+        'webhook_group' => 'events', 'routing_scope' => 'account', 'routing_key' => 'key',
+        'target_type' => 'request', 'target' => 'https://example.test/hook',
+    ];
+    $row = \Webong\Proxy\Models\WebProxyDestination::create($values);
+    $migration = '2026_11_12_000001_use_portable_subscription_identity';
+    if (in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
+        expect(fn () => $this->artisan('migrate:rollback', ['--step' => 1, '--force' => true])->run())
+            ->toThrow(RuntimeException::class, 'cannot be rolled back');
+        expect(DB::table('migrations')->where('migration', $migration)->exists())->toBeTrue();
+    } else {
+        $this->artisan('migrate:rollback', ['--step' => 1, '--force' => true])->assertSuccessful();
+        expect(DB::table('migrations')->where('migration', $migration)->exists())->toBeFalse()
+            ->and(Schema::hasColumn('subscriptions', 'registration_hash'))->toBeFalse();
+        $this->artisan('migrate', ['--force' => true])->assertSuccessful();
+        expect(DB::table('migrations')->where('migration', $migration)->exists())->toBeTrue();
+    }
+    expect(DB::table('subscriptions')->where('id', $row->id)->value('registration_hash'))->toBe($row->registration_hash);
+});

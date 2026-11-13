@@ -30,14 +30,14 @@ class DatabaseDestinationAttacher
 
         return DB::transaction(function () use ($endpoint, $definition): WebProxyDestination {
             WebProxyDestination::query()
-                ->where('owner_id', $definition->ownerId)
-                ->where('registration_id', $definition->registrationId)
-                ->where('webhook_group', $definition->webhookGroup)
+                ->whereIdentity('owner_id', $definition->ownerId)
+                ->whereIdentity('registration_id', $definition->registrationId)
+                ->whereIdentity('webhook_group', $definition->webhookGroup)
                 ->where(function ($query) use ($endpoint, $definition): void {
                     $query
                         ->where('endpoint_id', '!=', $endpoint->getKey())
-                        ->orWhere('routing_scope', '!=', $definition->routingScope)
-                        ->orWhere('routing_key', '!=', $definition->routingKey);
+                        ->orWhere(fn ($query) => $query->whereIdentity('routing_scope', $definition->routingScope, '!='))
+                        ->orWhere(fn ($query) => $query->whereIdentity('routing_key', $definition->routingKey, '!='));
                 })
                 ->update(['is_active' => false]);
 
@@ -49,7 +49,7 @@ class DatabaseDestinationAttacher
             $routeSubscribers = (clone $route)->lockForUpdate()->get();
 
             if (
-                $routeSubscribers->contains('owner_id', '!=', $definition->ownerId)
+                $routeSubscribers->contains(fn (WebProxyDestination $subscriber): bool => $subscriber->owner_id !== $definition->ownerId)
                 && ! $definition->allowsMultipleSubscribers
             ) {
                 throw new RuntimeException('This webhook route is already registered to another owner.');
@@ -59,8 +59,8 @@ class DatabaseDestinationAttacher
 
             if (! $definition->allowsMultipleSubscribers) {
                 (clone $route)
-                    ->where('owner_id', $definition->ownerId)
-                    ->where('registration_id', '!=', $definition->registrationId)
+                    ->whereIdentity('owner_id', $definition->ownerId)
+                    ->whereIdentity('registration_id', $definition->registrationId, '!=')
                     ->update(['is_active' => false]);
             }
 

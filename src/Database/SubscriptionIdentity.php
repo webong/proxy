@@ -12,6 +12,12 @@ final class SubscriptionIdentity
         'routing_scope', 'routing_key', 'target_type',
     ];
 
+    public static function canonicalEndpointId(string $value): string
+    {
+        return preg_match('/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/iD', $value) === 1
+            ? strtolower($value) : $value;
+    }
+
     /** @param array<string, mixed> $attributes */
     public static function hash(array $attributes): string
     {
@@ -20,6 +26,9 @@ final class SubscriptionIdentity
             $value = $attributes[$column] ?? null;
             if (! is_string($value)) {
                 throw new \InvalidArgumentException("Subscription identity requires string {$column}.");
+            }
+            if ($column === 'endpoint_id') {
+                $value = self::canonicalEndpointId($value);
             }
             // Length prefixes prevent ambiguous tuples, including embedded separators.
             $encoded .= pack('N', strlen($value)).$value;
