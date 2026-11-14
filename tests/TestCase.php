@@ -107,6 +107,6 @@ abstract class TestCase extends Orchestra
 
     protected function defineDatabaseMigrations(): void
     {
-        $this->app->make('migrator')->path(__DIR__.'/../database/migrations');
+        $this->app->make('migrator')->path(__DIR__.'/../adapters/laravel/database/migrations');
     }
 }

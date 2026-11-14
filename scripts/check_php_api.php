@@ -24,10 +24,9 @@ spl_autoload_register(static function (string $class): void {
         return;
     }
     $relative = str_replace('\\', '/', substr($class, strlen($prefix))).'.php';
-    $transport = preg_match('~^(Connection|Http|Tcp|Udp)/~', $relative) === 1;
-    $path = __DIR__.'/../'.($transport ? 'packages/transport/src/' : 'src/').$relative;
+    $path = __DIR__.'/../php/src/'.$relative;
     if (! is_file($path)) {
-        $path = __DIR__.'/../packages/registry/src/'.$relative;
+        $path = __DIR__.'/../adapters/laravel/src/'.$relative;
     }
     if (is_file($path)) {
         require $path;

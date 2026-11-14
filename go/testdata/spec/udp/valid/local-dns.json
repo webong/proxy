@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "proxy": "socks5://proxy.example:1080",
+  "connect_timeout_seconds": 3
+}

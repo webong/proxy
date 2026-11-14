@@ -1,0 +1,51 @@
+{
+    "name": "webong/proxy-laravel",
+    "description": "Laravel registry persistence, migrations and Spatie webhook integration for Proxy.",
+    "type": "library",
+    "version": "0.4.0",
+    "license": "MIT",
+    "require": {
+        "guzzlehttp/guzzle": "^7.10",
+        "illuminate/contracts": "^12.0 || ^13.0",
+        "illuminate/support": "^12.0 || ^13.0",
+        "laravel/framework": "^12.0 || ^13.0",
+        "php": "^8.3 || ^8.4",
+        "spatie/laravel-webhook-client": "^3.5",
+        "spatie/laravel-webhook-server": "^3.10",
+        "webong/proxy": "^0.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webong\\Proxy\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webong\\Proxy\\WebProxyServiceProvider"
+            ]
+        },
+        "source-plugin": {
+            "surfaces": {
+                "php": {
+                    "include": [
+                        "src/**",
+                        "config/**",
+                        "database/**",
+                        "README.md",
+                        "LICENSE"
+                    ]
+                }
+            }
+        }
+    },
+    "archive": {
+        "exclude": [
+            "/vendor",
+            "/tests",
+            "/.phpunit.cache",
+            "/composer.lock",
+            "/composer-source.lock"
+        ]
+    }
+}

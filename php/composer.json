@@ -1,0 +1,42 @@
+{
+    "name": "webong/proxy",
+    "description": "Framework-neutral HTTP profiles, TCP/UDP proxy transports and storage-neutral registry contracts.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.3",
+        "guzzlehttp/guzzle": "^7.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webong\\Proxy\\": "src/"
+        }
+    },
+    "extra": {
+        "source-plugin": {
+            "surfaces": {
+                "php": {
+                    "include": [
+                        "src/**",
+                        "README.md",
+                        "LICENSE"
+                    ]
+                }
+            }
+        }
+    },
+    "archive": {
+        "exclude": [
+            "/vendor",
+            "/tests",
+            "/.phpunit.cache",
+            "/composer.lock",
+            "/composer-source.lock"
+        ]
+    },
+    "version": "0.4.0",
+    "conflict": {
+        "webong/proxy-transport": "*",
+        "webong/proxy-registry": "*"
+    }
+}

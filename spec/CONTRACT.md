@@ -13,12 +13,14 @@ the existing Laravel registry/webhook APIs. See [adoption guide](ADOPTING.md) an
 | HTTP profile JSON v1 | `http-profile.schema.json`, [HTTP semantics](README.md), shared profile/bypass/credential fixtures |
 | TCP profile JSON v1 | `tcp-profile.schema.json`, [TCP semantics](tcp.md), TCP/CONNECT fixtures |
 | UDP profile JSON v1 | `udp-profile.schema.json`, [UDP semantics](udp.md), UDP/frame fixtures |
-| Go source API | `api/go-v0.3.json`, external consumer tests in `tests/contract` |
+| Go source API | `api/go-v0.3.json`, external consumer tests in `go/tests/contract` |
 | PHP source API | `api/php-v0.3.json`, standalone `scripts/check_php_api.php`, public consumer tests |
 | Schema identity | `api/schemas-v0.3.json`, checked by the schema CI job |
 
 The Go packages are `httpprofile`, `httpclient`, `socketprofile`, `tcpdial` and
-`udpdial` under `github.com/webong/proxy`. The snapshot also records the fields
+`udpdial` under `github.com/webong/proxy/go` (the v0.4 module location).
+The pre-v0.4 module used `github.com/webong/proxy`; update import prefixes when
+upgrading. API shapes and the existing v0.3 snapshot remain unchanged. The snapshot also records the fields
 and methods of the internal types exposed through public Address/ReplyError
 aliases; their internal import path is not a consumer API.
 
@@ -96,7 +98,7 @@ consumer integration.
 
 ## Updating the baseline
 
-Normal checks are `go test -race ./...`, `go vet ./...`, `composer test`, and
+Normal checks are `go -C go test -race ./...`, `go -C go vet ./...`, `composer test`, and
 `python scripts/check_profile_schemas.py` (Python requires `jsonschema>=4,<5`).
 Go source snapshots exclude implementation fields, bodies and error strings.
 They record exported variable names; exact public error-variable types are
@@ -113,7 +115,8 @@ compatibility by themselves.
 Only after an explicit contract review:
 
 ```sh
-go run ./scripts/snapshot-api -write
+go -C go run ./scripts/snapshot-api -write -baseline ../spec/api/go-v0.3.json
+python3 scripts/sync_go_testdata.py
 php scripts/check_php_api.php --write
 ```
 
@@ -126,11 +129,11 @@ the resolved commit in their dependency lockfiles.
 
 ## Registry candidate contract (0.4)
 
-The dependency-free `webong/proxy-registry` package adds repository ports for
-endpoint ownership, destinations and named profiles. Its README defines adapter
+The framework-neutral `webong/proxy` package includes repository ports for
+endpoint ownership, destinations and named profiles. [Registry semantics](REGISTRY.md) define adapter
 identity, atomicity and schema ownership semantics. Existing plain record
-namespaces and Laravel provider signatures remain available through the parent
-package; the legacy provider accepts optional repository overrides after its
+namespaces remain in the core. Laravel provider signatures remain available
+through `webong/proxy-laravel`; the legacy provider accepts optional repository overrides after its
 original three constructor arguments. Collection-returning compatibility APIs
 remain in the Laravel adapter; neutral selection returns a plain list.
 

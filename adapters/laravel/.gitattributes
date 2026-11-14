@@ -1,0 +1,4 @@
+/vendor export-ignore
+/composer.lock export-ignore
+/composer-source.lock export-ignore
+/.phpunit.cache export-ignore
