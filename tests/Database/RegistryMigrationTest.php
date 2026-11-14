@@ -10,7 +10,7 @@ it('renames legacy prefixed registry tables during an upgrade', function (): voi
     Schema::rename('subscriptions', 'web_proxy_destinations');
     Schema::rename('endpoint_registrations', 'web_proxy_endpoint_registrations');
 
-    (require __DIR__.'/../../database/legacy-migrations/2026_07_31_135456_adopt_legacy_registry_migrations.php')->up();
+    (require __DIR__.'/../../adapters/laravel/database/legacy-migrations/2026_07_31_135456_adopt_legacy_registry_migrations.php')->up();
 
     expect(Schema::hasTable('endpoints'))->toBeTrue()
         ->and(Schema::hasTable('subscriptions'))->toBeTrue()
@@ -30,7 +30,7 @@ it('adopts legacy migration history before renamed migrations run', function ():
         'batch' => 1,
     ]);
 
-    (require __DIR__.'/../../database/legacy-migrations/2026_07_31_135456_adopt_legacy_registry_migrations.php')->up();
+    (require __DIR__.'/../../adapters/laravel/database/legacy-migrations/2026_07_31_135456_adopt_legacy_registry_migrations.php')->up();
 
     expect(DB::table('migrations')->where('migration', $legacy)->exists())->toBeFalse()
         ->and(DB::table('migrations')->where('migration', $renamed)->exists())->toBeTrue();
@@ -66,7 +66,7 @@ it('backfills existing registrations without changing their values and can resum
     if ($partial) {
         Schema::table($table, fn ($blueprint) => $blueprint->char('registration_hash', 64)->nullable());
     }
-    $migration = require __DIR__.'/../../database/migrations/2026_11_12_000001_use_portable_subscription_identity.php';
+    $migration = require __DIR__.'/../../adapters/laravel/database/migrations/2026_11_12_000001_use_portable_subscription_identity.php';
     $migration->up();
     $migration->up();
     $after = (array) DB::table($table)->first();
@@ -106,15 +106,15 @@ if (in_array(getenv('PROXY_TEST_DB'), ['mysql', 'mariadb'], true)) {
             $table->dropColumn('registration_hash');
             $table->dropIndex('subscriptions_routing_index');
         });
-        (require __DIR__.'/../../database/migrations/2026_07_31_135458_create_subscriptions_table.php')->up();
-        (require __DIR__.'/../../database/migrations/2026_11_12_000001_use_portable_subscription_identity.php')->up();
+        (require __DIR__.'/../../adapters/laravel/database/migrations/2026_07_31_135458_create_subscriptions_table.php')->up();
+        (require __DIR__.'/../../adapters/laravel/database/migrations/2026_11_12_000001_use_portable_subscription_identity.php')->up();
         expect(Schema::hasIndex('subscriptions', 'subscriptions_routing_index'))->toBeTrue()
             ->and(Schema::hasIndex('subscriptions', 'subscriptions_registration_hash_unique'))->toBeTrue();
     });
 }
 
 it('keeps uniqueness protected when rolling back the portable key', function (): void {
-    $migration = require __DIR__.'/../../database/migrations/2026_11_12_000001_use_portable_subscription_identity.php';
+    $migration = require __DIR__.'/../../adapters/laravel/database/migrations/2026_11_12_000001_use_portable_subscription_identity.php';
     if (in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
         expect(fn () => $migration->down())->toThrow(RuntimeException::class)
             ->and(Schema::hasIndex('subscriptions', 'subscriptions_registration_hash_unique'))->toBeTrue();
@@ -135,7 +135,7 @@ if (in_array(getenv('PROXY_TEST_DB'), ['mysql', 'mariadb'], true)) {
             'webhook_group' => 'events', 'routing_scope' => 'account', 'routing_key' => 'key',
             'target_type' => 'request', 'target' => 'https://example.test/hook',
         ]);
-        $migration = require __DIR__.'/../../database/migrations/2026_07_31_135458_create_subscriptions_table.php';
+        $migration = require __DIR__.'/../../adapters/laravel/database/migrations/2026_07_31_135458_create_subscriptions_table.php';
         expect(fn () => $migration->up())->toThrow(RuntimeException::class)
             ->and(DB::table('subscriptions')->count())->toBe(1);
     });
@@ -153,7 +153,7 @@ it('removes the genuine legacy-named subscription key during upgrade', function 
         \Webong\Proxy\Database\SubscriptionIdentity::COLUMNS,
         'web_proxy_destinations_registration_unique',
     ));
-    (require __DIR__.'/../../database/migrations/2026_11_12_000001_use_portable_subscription_identity.php')->up();
+    (require __DIR__.'/../../adapters/laravel/database/migrations/2026_11_12_000001_use_portable_subscription_identity.php')->up();
     expect(Schema::hasIndex('subscriptions', 'web_proxy_destinations_registration_unique'))->toBeFalse()
         ->and(Schema::hasIndex('subscriptions', 'subscriptions_registration_hash_unique'))->toBeTrue();
 });
@@ -169,7 +169,7 @@ if (! in_array(getenv('PROXY_TEST_DB'), ['mysql', 'mariadb'], true)) {
         $model = \Webong\Proxy\Models\WebProxyDestination::create($attributes);
         // An application-owned index prevents dropping its referenced column.
         Schema::table('subscriptions', fn ($table) => $table->index('registration_hash', 'application_hash_index'));
-        $migration = require __DIR__.'/../../database/migrations/2026_11_12_000001_use_portable_subscription_identity.php';
+        $migration = require __DIR__.'/../../adapters/laravel/database/migrations/2026_11_12_000001_use_portable_subscription_identity.php';
         if (DB::getDriverName() === 'sqlite') {
             expect(fn () => $migration->down())->toThrow(\Illuminate\Database\QueryException::class);
             expect(Schema::hasIndex('subscriptions', 'subscriptions_registration_hash_unique'))->toBeTrue()
@@ -188,7 +188,7 @@ it('rejects a misleading portable index before removing the legacy constraint', 
         $table->dropUnique('subscriptions_registration_hash_unique');
         $table->index('registration_hash', 'subscriptions_registration_hash_unique');
     });
-    $migration = require __DIR__.'/../../database/migrations/2026_11_12_000001_use_portable_subscription_identity.php';
+    $migration = require __DIR__.'/../../adapters/laravel/database/migrations/2026_11_12_000001_use_portable_subscription_identity.php';
     expect(fn () => $migration->up())->toThrow(RuntimeException::class, 'Unexpected subscription index definition');
 });
 
@@ -246,7 +246,7 @@ it('upgrades and rolls back the adapter mutex schema without changing registry d
     $endpoint = \Webong\Proxy\Tests\Support\WebhookFixtures::endpoint();
     $destination = \Webong\Proxy\Tests\Support\WebhookFixtures::destination($endpoint);
     $before = (array) DB::table('subscriptions')->where('id', $destination->id)->first();
-    $migration = require __DIR__.'/../../database/migrations/2026_11_14_000001_create_subscription_locks_table.php';
+    $migration = require __DIR__.'/../../adapters/laravel/database/migrations/2026_11_14_000001_create_subscription_locks_table.php';
     $migration->down();
     expect(Schema::hasTable('subscription_locks'))->toBeFalse();
     $migration->up();

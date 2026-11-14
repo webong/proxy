@@ -1,6 +1,8 @@
 # Registry SQL storage
 
-Proxy retains ownership of endpoint/destination registries and stored profiles.
+`webong/proxy-laravel` owns the SQL schema, migrations and encrypted storage for
+endpoint/destination registries and stored profiles. The framework-neutral core
+provides contracts only; custom adapters own their own schemas.
 The registry suite covers SQLite 3, PostgreSQL 18, MySQL 8.4 and MariaDB 11.4.
 The MySQL/MariaDB tests use utf8mb4 with utf8mb4_unicode_ci; changing to latin1
 is not a supported workaround for index-size failures. CI runs the full PHP

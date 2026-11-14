@@ -2,3 +2,10 @@
 /.phpunit.cache/
 /vendor/
 /composer.bootstrap.lock
+
+/php/vendor/
+/php/composer.lock
+/adapters/*/vendor/
+/adapters/*/composer.lock
+
+__pycache__/

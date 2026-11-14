@@ -29,7 +29,7 @@ final class LaravelConsumerTest extends TestCase
     {
         // Discover from installed metadata, rather than hard-coding provider classes.
         $providers = [];
-        foreach (['spatie/laravel-webhook-client', 'spatie/laravel-webhook-server', 'webong/proxy'] as $name) {
+        foreach (['spatie/laravel-webhook-client', 'spatie/laravel-webhook-server', 'webong/proxy-laravel'] as $name) {
             $path = InstalledVersions::getInstallPath($name);
             $manifest = json_decode(file_get_contents($path.'/composer.json'), true, flags: JSON_THROW_ON_ERROR);
             foreach ($manifest['extra']['laravel']['providers'] ?? [] as $provider) {
@@ -37,6 +37,8 @@ final class LaravelConsumerTest extends TestCase
                 $providers[] = $provider;
             }
         }
+        $core = json_decode(file_get_contents(InstalledVersions::getInstallPath('webong/proxy').'/composer.json'), true, flags: JSON_THROW_ON_ERROR);
+        self::assertArrayNotHasKey('laravel', $core['extra']);
         self::assertContains(WebProxyServiceProvider::class, $providers);
         self::assertSame($providers, array_values(array_unique($providers)));
 
@@ -56,7 +58,7 @@ final class LaravelConsumerTest extends TestCase
 
     protected function defineDatabaseMigrations(): void
     {
-        $this->loadMigrationsFrom(InstalledVersions::getInstallPath('webong/proxy').'/database/migrations');
+        $this->loadMigrationsFrom(InstalledVersions::getInstallPath('webong/proxy-laravel').'/database/migrations');
     }
 
     protected function defineRoutes($router): void
@@ -91,15 +93,43 @@ final class LaravelConsumerTest extends TestCase
             }
         }
         $file = (new ReflectionClass(\Webong\Proxy\Http\HttpProfile::class))->getFileName();
-        self::assertStringContainsString('vendor/webong/proxy-transport/', $file);
-        self::assertFalse(is_link(InstalledVersions::getInstallPath('webong/proxy-transport')));
+        self::assertStringContainsString('vendor/webong/proxy/', $file);
+        self::assertFalse(is_link(InstalledVersions::getInstallPath('webong/proxy')));
+        foreach ([WebProxyServiceProvider::class, GuzzleClientFactory::class,
+            \Webong\Proxy\LaravelRegistryStore::class, \Webong\Proxy\Models\WebProxyEndpoint::class] as $class) {
+            self::assertStringContainsString('vendor/webong/proxy-laravel/', (new ReflectionClass($class))->getFileName());
+        }
+        self::assertFalse(is_link(InstalledVersions::getInstallPath('webong/proxy-laravel')));
+
         $recordFile = (new ReflectionClass(\Webong\Proxy\EndpointRecord::class))->getFileName();
-        self::assertStringContainsString('vendor/webong/proxy-registry/', $recordFile);
-        self::assertFalse(is_link(InstalledVersions::getInstallPath('webong/proxy-registry')));
+        self::assertStringContainsString('vendor/webong/proxy/', $recordFile);
+        self::assertFalse(is_link(InstalledVersions::getInstallPath('webong/proxy')));
         foreach ([\Webong\Proxy\Registry\Contracts\EndpointRepository::class,
             \Webong\Proxy\Registry\Contracts\DestinationRepository::class,
             \Webong\Proxy\Registry\Contracts\ProfileRepository::class] as $port) {
             self::assertInstanceOf(\Webong\Proxy\LaravelRegistryStore::class, app($port));
+        }
+    }
+
+    public function testActualDiscoveryAndPackageNameOptOut(): void
+    {
+        $base = sys_get_temp_dir().'/proxy-discovery-'.bin2hex(random_bytes(6));
+        mkdir($base, 0700);
+        try {
+            foreach ([[], ['webong/proxy'], ['webong/proxy-laravel'], ['*']] as $ignore) {
+                file_put_contents($base.'/composer.json', json_encode([
+                    'extra' => ['laravel' => ['dont-discover' => $ignore]],
+                ], JSON_THROW_ON_ERROR));
+                $manifest = new \Illuminate\Foundation\PackageManifest(new \Illuminate\Filesystem\Filesystem(), $base, $base.'/packages.php');
+                $manifest->vendorPath = getcwd().'/vendor';
+                $manifest->build();
+                self::assertSame(! in_array('webong/proxy-laravel', $ignore, true) && ! in_array('*', $ignore, true),
+                    in_array(WebProxyServiceProvider::class, $manifest->providers(), true));
+            }
+        } finally {
+            @unlink($base.'/composer.json');
+            @unlink($base.'/packages.php');
+            rmdir($base);
         }
     }
 }

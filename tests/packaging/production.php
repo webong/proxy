@@ -10,7 +10,17 @@ if (! class_exists(Webong\Proxy\WebProxyServiceProvider::class)
     || Composer\InstalledVersions::isInstalled('webong/composer-source-plugin')) {
     throw new RuntimeException('Production install depends on development tooling or is missing public classes.');
 }
-$root = Composer\InstalledVersions::getInstallPath('webong/proxy');
+foreach ([
+    Webong\Proxy\Jobs\ForwardWebhookJob::class,
+    Webong\Proxy\Jobs\ProcessWebhookJob::class,
+    Webong\Proxy\Events\WebhookDeliveryFailed::class,
+    Webong\Proxy\Events\WebhookDeliverySucceeded::class,
+] as $class) {
+    if (! class_exists($class)) {
+        throw new RuntimeException('Missing runtime job/event: '.$class);
+    }
+}
+$root = Composer\InstalledVersions::getInstallPath('webong/proxy-laravel');
 foreach (['config/proxy.php', 'database/migrations', 'database/legacy-migrations'] as $path) {
     if (! file_exists($root.'/'.$path)) {
         throw new RuntimeException('Missing runtime resource: '.$path);

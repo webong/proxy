@@ -1,28 +1,18 @@
 {
-    "name": "webong/proxy",
-    "description": "Laravel endpoint registries, persistence and webhook integration with portable Proxy transports.",
-    "type": "library",
+    "name": "webong/proxy-workspace",
+    "description": "Development workspace for Proxy PHP, Laravel and Go components.",
+    "type": "project",
     "license": "MIT",
     "require": {
-        "guzzlehttp/guzzle": "^7.10",
-        "illuminate/contracts": "^12.0 || ^13.0",
-        "illuminate/support": "^12.0 || ^13.0",
-        "php": "^8.3 || ^8.4",
-        "spatie/laravel-webhook-client": "^3.5",
-        "spatie/laravel-webhook-server": "^3.10",
-        "webong/proxy-registry": "^0.4.0",
-        "webong/proxy-transport": "^0.4.0"
+        "php": "^8.3"
     },
     "require-dev": {
         "orchestra/testbench": "^10.0 || ^11.0",
         "pestphp/pest": "^4.0",
         "pestphp/pest-plugin-laravel": "^4.0",
-        "webong/composer-source-plugin": "^0.4.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Webong\\Proxy\\": "src/"
-        }
+        "webong/composer-source-plugin": "^0.4.0",
+        "webong/proxy": "^0.4.0",
+        "webong/proxy-laravel": "^0.4.0"
     },
     "autoload-dev": {
         "psr-4": {
@@ -37,29 +27,11 @@
         ]
     },
     "extra": {
-        "laravel": {
-            "providers": [
-                "Webong\\Proxy\\WebProxyServiceProvider"
-            ]
-        },
         "source-plugin": {
             "workspaces": [
-                "packages/transport",
-                "packages/registry"
-            ],
-            "surfaces": {
-                "php": {
-                    "include": [
-                        "src/**",
-                        "config/**",
-                        "database/**",
-                        "README.md",
-                        "CHANGELOG.md",
-                        "LICENSE",
-                        "spec/**"
-                    ]
-                }
-            }
+                "php",
+                "adapters/laravel"
+            ]
         }
     },
     "minimum-stability": "dev",
@@ -70,25 +42,5 @@
             "webong/composer-source-plugin": true
         },
         "sort-packages": true
-    },
-    "archive": {
-        "exclude": [
-            "/packages",
-            "/tests",
-            "/scripts",
-            "/.github",
-            "/composer.bootstrap.json",
-            "/composer.bootstrap.lock",
-            "/composer.lock",
-            "/Makefile",
-            "/phpunit.xml.dist",
-            "/go.mod",
-            "/httpclient",
-            "/httpprofile",
-            "/socketprofile",
-            "/tcpdial",
-            "/udpdial",
-            "/internal"
-        ]
     }
 }

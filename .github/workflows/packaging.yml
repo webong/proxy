@@ -17,6 +17,10 @@ jobs:
       PROXY_PACKAGING_LARAVEL: ${{ matrix.laravel }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+          cache: false
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -24,6 +28,7 @@ jobs:
           coverage: none
       - run: php scripts/bootstrap-composer.php
       - run: composer validate --strict
-      - run: composer validate packages/transport/composer.json --strict --no-check-version
-      - run: composer validate packages/registry/composer.json --strict --no-check-version
+      - run: composer validate php/composer.json --strict --no-check-version
+      - run: composer validate adapters/laravel/composer.json --strict --no-check-version
+      - run: python3 scripts/sync_go_testdata.py --check
       - run: php tests/packaging/run.php

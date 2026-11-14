@@ -1,0 +1,75 @@
+{
+  "httpclient": [
+    "func New(profile httpprofile.Profile, base *http.Transport) (*http.Client, error)"
+  ],
+  "httpprofile": [
+    "func (p *Profile) UnmarshalJSON(data []byte) error",
+    "func (p Profile) MarshalJSON() ([]byte, error)",
+    "func (p Profile) Validate() error",
+    "func Parse(data []byte) (Profile, error)",
+    "type Profile struct {\n\tVersion               int     `json:\"version\"`\n\tProxy                 *Proxy  `json:\"proxy,omitempty\"`\n\tConnectTimeoutSeconds float64 `json:\"connect_timeout_seconds,omitempty\"`\n\tRequestTimeoutSeconds float64 `json:\"request_timeout_seconds,omitempty\"`\n}",
+    "type Proxy struct {\n\tHTTP    string   `json:\"http,omitempty\"`\n\tHTTPS   string   `json:\"https,omitempty\"`\n\tNoProxy []string `json:\"no_proxy,omitempty\"`\n}"
+  ],
+  "internal/socks5": [
+    "func (a Address) Network() string",
+    "func (a Address) String() string",
+    "func (e *ReplyError) Error() string",
+    "type Address struct {\n\tHost string\n\tPort int\n}",
+    "type ReplyError struct{ Code byte }"
+  ],
+  "socketprofile": [
+    "func (p *Profile) UnmarshalJSON(data []byte) error",
+    "func (p *TCPProfile) UnmarshalJSON(data []byte) error",
+    "func (p Profile) MarshalJSON() ([]byte, error)",
+    "func (p Profile) Validate() error",
+    "func (p TCPProfile) MarshalJSON() ([]byte, error)",
+    "func (p TCPProfile) Validate() error",
+    "func Parse(data []byte) (Profile, error)",
+    "func ParseTCP(data []byte) (TCPProfile, error)",
+    "type Profile struct {\n\tVersion               int     `json:\"version\"`\n\tProxy                 string  `json:\"proxy,omitempty\"`\n\tConnectTimeoutSeconds float64 `json:\"connect_timeout_seconds,omitempty\"`\n}",
+    "type TCPProfile Profile"
+  ],
+  "tcpdial": [
+    "func (d *Dialer) DialContext(ctx context.Context, network, address string) (net.Conn, error)",
+    "func (e *ConnectError) Error() string",
+    "func New(profile Profile, base ContextDialer, resolver Resolver, options ...Option) (*Dialer, error)",
+    "func Parse(data []byte) (Profile, error)",
+    "func WithProxyRootCAs(roots *x509.CertPool) Option",
+    "type ConnectError struct{ StatusCode int }",
+    "type ContextDialer interface {\n\tDialContext(context.Context, string, string) (net.Conn, error)\n}",
+    "type Dialer struct {\n}",
+    "type Option func(*Dialer) error",
+    "type Profile = socketprofile.TCPProfile",
+    "type ReplyError = socks5.ReplyError",
+    "type Resolver interface {\n\tLookupIPAddr(context.Context, string) ([]net.IPAddr, error)\n}",
+    "var ErrAuthentication",
+    "var ErrConnectProtocol",
+    "var ErrProtocol"
+  ],
+  "udpdial": [
+    "const MaxWireSize = 65507",
+    "func (c *Conn) Close() error",
+    "func (c *Conn) Done() \u003c-chan struct{}",
+    "func (c *Conn) LocalAddr() net.Addr",
+    "func (c *Conn) ReadFrom(buffer []byte) (int, net.Addr, error)",
+    "func (c *Conn) SetDeadline(t time.Time) error",
+    "func (c *Conn) SetReadDeadline(t time.Time) error",
+    "func (c *Conn) SetWriteDeadline(t time.Time) error",
+    "func (c *Conn) WriteTo(payload []byte, address net.Addr) (written int, resultErr error)",
+    "func (d *Dialer) Open(ctx context.Context, localAddress string) (result *Conn, err error)",
+    "func DecodeDatagram(data []byte) ([]byte, Address, error)",
+    "func EncodeDatagram(payload []byte, address Address) ([]byte, error)",
+    "func MaxPayloadSize(address Address) (int, error)",
+    "func New(profile Profile, base tcpdial.ContextDialer, resolver tcpdial.Resolver) (*Dialer, error)",
+    "func Parse(data []byte) (Profile, error)",
+    "type Address = socks5.Address",
+    "type Conn struct {\n}",
+    "type Dialer struct {\n}",
+    "type Profile = socketprofile.Profile",
+    "type ReplyError = socks5.ReplyError",
+    "var ErrAuthentication",
+    "var ErrFragment",
+    "var ErrMessageTooLarge",
+    "var ErrProtocol"
+  ]
+}
