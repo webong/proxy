@@ -1,177 +1,124 @@
-# Composer package layout (unreleased)
-
-This checkout prepares the next package generation; it does not change the
-published v0.3.1 artifacts. `webong/proxy-transport` and `webong/proxy-registry` 0.4.0 are unpublished
-candidates. Archive-based consumer tests use a temporary Composer repository,
-not a claim that Packagist already serves the new package.
-
-## Ownership and dependency installation
+# Composer package layout (unreleased 0.4.0)
 
 ```text
-webong/proxy (existing Laravel integration and compatibility entry point)
-  ├── webong/proxy-transport (portable PHP code, Guzzle; no Illuminate/Spatie)
-  ├── webong/proxy-registry (plain records and repository ports; PHP only)
-  ├── Illuminate registry adapter
-  └── existing Spatie webhook integration
+webong/proxy (repository root; PHP + Guzzle)
+├── src/Connection, Http, Tcp, Udp         portable transports
+├── src/Registry/Contracts               storage ports
+├── src/*Record, *Definition, WebhookRoute plain registry data
+└── packages/laravel → webong/proxy-laravel (requires core ^0.4)
+    ├── src/                              Laravel/Spatie implementation
+    ├── config/                           Laravel configuration
+    └── database/                         migrations and legacy adoption
 ```
 
-The registry contracts and plain data types live in `webong/proxy-registry`.
-The Laravel registry implementations, subscriptions, named profile storage, ownership
-indexes, models, persistence, configuration and migrations remain in `webong/proxy`. Its provider and every existing public namespace remain valid.
-The packaging change itself needs no data conversion. The accompanying Laravel
-concurrency fix adds an adapter-owned subscription-locks migration; publish/run it
-before using the candidate adapter. Existing SQL upgrade requirements still apply.
+There are exactly two PHP packages. Transport and registry code are combined in
+`webong/proxy`, which has no Illuminate/Spatie dependency, provider discovery or
+migration resources. `webong/proxy-laravel` owns all framework integration and
+storage, while keeping its existing `Webong\Proxy` namespaces. The Go module path
+and code are unchanged. Earlier experimental child manifests for proxy-transport
+and proxy-registry are removed; the core rejects their coexistence to prevent
+ambiguous class ownership if stale candidate archives are used.
 
-The neutral package owns `Webong\Proxy\Http`, `Connection`, `Tcp` and `Udp`.
-These namespaces and signatures are unchanged; no aliases/rebases or duplicate
-class definitions are introduced. Existing users keep the full installation by
-requiring the next compatible `webong/proxy` release. New transport-only users
-will require `webong/proxy-transport:^0.4` after it is published. It only requires
-PHP and Guzzle/PSR HTTP dependencies, and advertises no Laravel provider.
+## Development bootstrap
 
-Old Proxy releases already contain those transport classes, so the new neutral
-package conflicts with `webong/proxy:<0.4.0`. Upgrade the full package together
-rather than installing both copies of the classes. The root remains the Laravel
-integration package; a second registry package would add migration/provider
-churn without improving the independent transport install.
-
-Spatie extraction is separate work. This change deliberately preserves the
-current integration and does not remove or move registry/webhook functionality.
-The Go module, imports, profiles and source layout do not change.
-
-## Development workspaces
-
-The root requires `webong/composer-source-plugin:^0.4.0` in require-dev and
-explicitly permits it under allow-plugins. Version 0.4.0 is published and supports
-the configuration used here; README examples using ^1.0 must not be copied.
-`extra.source-plugin.workspaces` names `packages/transport` and `packages/registry` literally so a typo
-fails rather than silently skipping a glob.
-
-On a fresh clone (no vendor or local lock):
+The root requires the adapter only in require-dev to test the complete integration.
+The adapter requires core ^0.4; consumers never inherit this development cycle.
+Both candidate manifests currently specify version 0.4.0 so fresh workspaces without
+Git metadata resolve the same dependency graph. Keep manifests and release tags
+aligned on future version changes.
 
 ```sh
 php scripts/bootstrap-composer.php
-composer source:workspaces --json
 composer test
+make packaging
+make readiness PYTHON=/path/to/python-with-jsonschema
 ```
 
-The bootstrap installs only the trusted plugin from `composer.bootstrap.json`
-into the checkout's vendor directory, then installs the real manifest. This is
-necessary because a plugin cannot inject an unpublished workspace on the run
-that installs the plugin itself. Do not use the seed manifest as a runtime
-consumer. A custom Composer executable path can be supplied using
-PROXY_COMPOSER_BINARY.
+The bootstrap seeds published Composer Source Plugin ^0.4.0 before installing the
+real manifest. It discovers the literal `packages/laravel` workspace and records a
+relative path, so fresh locked clones can recreate it. A checkout carrying the old
+ignored development composer.lock needs `composer update --prefer-dist` after the
+bootstrap seed; do not reuse that old graph as release evidence.
 
-For an existing development checkout with an old ignored lock, resolve the new
-manifest explicitly after seeding the plugin:
+The plugin is development-only. Production consumers install normal archives
+without a plugin, custom path repositories, symlinks or any bootstrap script.
 
-```sh
-php scripts/bootstrap-composer.php --plugin-only
-composer update --prefer-dist
-```
+## Optional projections
 
-Seeding may replace development vendor contents; the following normal install
-restores the complete dependency graph. It does not edit the real manifest.
-Both lockfiles are local development state, as before. Workspace locks record
-relative path dists; fresh installations from those locks can use --no-plugins
-for the already-recorded set. Resolution of workspace changes requires the
-plugin. Library consumers do not inherit require-dev or root workspace settings.
-
-The workspace manifest declares version 0.4.0 so the plugin can validate the
-root's ^0.4.0 requirement. Bump this candidate version and requirement together
-when planning a later release. Never use a path dependency as published
-consumer installation metadata.
-
-## Optional consumer projection
-
-Ordinary consumer installs do not need the plugin. Both PHP packages advertise
-one conservative `php` surface retaining all runtime source, discovery metadata,
-configuration/migrations where applicable, README and MIT license. No advertised
-provider, class or runtime resource is pruned.
-
-A consumer that chooses projection may use the following after the candidate
-packages have been published:
+After installing the optional Composer Source Plugin, consumers may project `php`:
 
 ```json
 {
-  "require": {
-    "webong/proxy": "^0.4",
-    "webong/composer-source-plugin": "^0.4"
-  },
-  "config": {"allow-plugins": {"webong/composer-source-plugin": true}},
   "extra": {
     "source-plugin": {
       "projections": {
         "webong/proxy": {"surfaces": ["php"]},
-        "webong/proxy-transport": {"surfaces": ["php"]}
+        "webong/proxy-laravel": {"surfaces": ["php"]}
       }
     }
   }
 }
 ```
 
-For a neutral consumer, require only proxy-transport and project only that
-package. Install the plugin before relying on projection: the first update
-installs it/full packages, the second update applies and records projection.
-Commit composer.lock and composer-source.lock. A fresh locked clone likewise
-needs the initial plugin install followed by a second install to reconcile the
-recorded projection. Keep the plugin as a regular requirement if production
---no-dev installs must perform projection; it remains optional for runtime use.
+Core-only consumers omit the adapter entry. Surfaces preserve all runtime source,
+README/license and, for the adapter, config/migration resources. Projection only
+prunes files after dependency resolution; choose the core package itself to avoid
+Laravel and Spatie dependencies. Projection cannot target a package that is also a
+workspace; consumer projection tests therefore use installed ZIP copies.
 
-Do not project a package also selected by a workspace/loader or mirror. In this
-checkout proxy-transport is a workspace, so projection tests run in separate
-archive consumers. Projection only prunes installed files after dependency
-resolution; projecting webong/proxy does not remove Illuminate or Spatie.
-Choose the neutral package for independent dependency installation.
+## Upgrade and migration ownership
 
-## Release order and verification
+Existing Laravel consumers change their direct requirement from `webong/proxy:^0.3`
+to `webong/proxy-laravel:^0.4`; update any retained direct core constraint to ^0.4.
+If discovery was disabled for `webong/proxy`, rename that `dont-discover` entry to
+`webong/proxy-laravel`; `*` continues to disable all package discovery.
+Provider namespaces, publish tags, config keys, models, table names and recorded
+migration filenames are preserved. No database conversion is caused by moving
+files. Direct references to vendor config/migration paths must change from
+`vendor/webong/proxy` to `vendor/webong/proxy-laravel`.
 
-1. Publish the packages/transport and packages/registry subtrees as independent
-   Composer packages webong/proxy-transport and webong/proxy-registry, each with
-   its own root manifest and matching 0.4.0 tag.
-   Packagist does not discover a second package from a repository subdirectory;
-   a split repository or equivalent artifact registry must be configured.
-2. Verify a clean install from the intended public registry.
-3. Only then publish the parent release that requires ^0.4.0. Do not merge/release
-   an unsatisfiable default-registry installation before both dependencies exist.
+The previously introduced concurrency fix adds
+`2026_11_14_000001_create_subscription_locks_table`. Publish/run it before using the
+new adapter and upgrade subscription writers together. Durable mutex rows contain
+only framed registration-identity hashes; stop writers before cleanup or rollback.
+Rollback removes only mutex state. Earlier SQL migration safeguards still apply;
+see [SQL upgrades](SQL.md). The core owns no schema. Custom applications implement
+[registry ports](REGISTRY.md) and own their stores and migrations.
 
-No new repository, tag or external registry is created by this implementation.
-Local ZIP fixtures demonstrate the dependency graph and runtime behavior, while
-actual public publication is a separate release gate.
+## Publication order
 
-```sh
-make packaging
-make readiness PYTHON=/path/to/python-with-jsonschema
-```
+1. Publish/verify core `webong/proxy` v0.4.0 from the existing repository root.
+2. Publish `packages/laravel` as independent `webong/proxy-laravel` 0.4.0, with its
+   manifest at the published repository/archive root. Packagist does not discover
+   subdirectory manifests automatically; configure a split repository or equivalent
+   artifact registry before releasing the adapter.
+3. Verify both packages from the intended public registry, plus a fresh Go module
+   consumer at v0.4.0. Local ZIP tests do not establish public availability.
 
-Packaging checks exercise Composer archive resolution without path repositories,
-fresh lock clones without plugins, no-dev production consumers, optional
-projection and fresh projected clones, real Laravel provider discovery and
-registry/profile/migration behavior, legacy class-owner conflicts, and a fresh
-workspace bootstrap. Neutral consumers make real loopback HTTP/TCP/UDP requests
-and check that no Illuminate, Laravel or Spatie dependency was resolved. The
-existing frozen interface and PHP/Go regression gates remain unchanged.
+No new tag, repository, registry registration or release is created by this layout
+implementation. Candidate publication remains a separate action.
 
-## Storage-neutral registry package
+## Verification
 
-The workspace also contains `packages/registry` (`webong/proxy-registry`, candidate
-0.4.0). It owns the existing plain endpoint/destination/profile definitions and
-records, the target-type enum and route data, plus the three repository ports.
-It requires only PHP. See the `webong/proxy-registry` README
-for identity, atomicity, error and schema ownership requirements.
-
-The parent `webong/proxy` package remains the Laravel adapter. It owns the Eloquent
-models, `LaravelRegistryStore`, legacy provider facade, encryption, config and all
-migrations. Its existing API and migration filenames are preserved. Moving the
-plain types to the required registry dependency does not require a database
-migration or application namespace change. Separately, the adapter's concurrency
-fix requires publishing/running `2026_11_14_000001_create_subscription_locks_table`;
-its rollback affects only mutex state. See the registry README for deployment order
-and custom table configuration. Framework-free applications install
-only `webong/proxy-registry` and supply the ports they need; they own their schemas.
-
-Publish and verify **both** child packages (`proxy-transport` and `proxy-registry`)
-at 0.4.0 before releasing the parent requiring them. The parent remains unreleased
-until both dependencies are available. The optional `php` projection for the
-registry package retains its source, README and license. Fresh ZIP install,
-projection and lock-clone tests cover registry-only and full Laravel consumers.
+`make packaging` requires Git, Go, PHP ZIP and PDO SQLite support. It creates real Composer ZIP artifacts for the core and adapter.
+Composer-archive guards reject vendored dependencies, tests and adapter resources.
+A separate VCS archive test applies Git export rules rather than Composer filters:
+`.gitattributes` excludes `/packages`, so root VCS dist archives omit the Laravel
+adapter. Go sources, shared fixtures and scripts remain in that archive; its Go
+module is race-tested and vetted after extraction. Source clones intentionally
+contain the complete development repository; only runtime autoload/dependencies
+are isolated there. Actual consumers resolve the VCS-style core ZIP, not a smaller
+custom Composer archive.
+Neutral consumers exercise HTTP/TCP/UDP/SOCKS and a custom-schema profile repository
+in one installation, with no framework classes, migration resources or providers.
+Laravel 12/13 consumers discover only the adapter's provider, migrate its installed
+resources, use encrypted registries/profiles and transport clients, and verify
+actual class ownership. Tests also cover no-dev production installs, plugin-free
+lock clones, projections and fresh projected clones, old-release solver rejection,
+cold development bootstrap and portable workspace lock recreation. A fresh
+runtime-only adapter solve (without a Testbench-generated lock) loads queue jobs
+and delivery events. An actual public v0.3.1 consumer is seeded with persisted
+SQLite data and app-published migrations, upgraded to the adapter, and checked for
+unchanged IDs, ciphertext, configuration and migration history; only the pending
+mutex migration runs. Actual Laravel PackageManifest discovery checks cover
+normal discovery, renamed opt-outs and wildcard opt-outs.

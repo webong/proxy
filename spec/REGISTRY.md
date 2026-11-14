@@ -1,6 +1,8 @@
 # Proxy registry contracts
 
-`webong/proxy-registry` is a PHP 8.3+ package with no runtime dependencies beyond PHP.
+`webong/proxy` includes storage-neutral registry contracts alongside its PHP
+transport tools. The package requires PHP 8.3+ and Guzzle, with no framework
+dependencies; the registry types themselves depend only on PHP.
 It provides endpoint, destination and profile definitions/records and three storage
 ports under `Webong\Proxy\Registry\Contracts`:
 
@@ -10,10 +12,10 @@ ports under `Webong\Proxy\Registry\Contracts`:
   query them by owner, registration and webhook group.
 - `ProfileRepository`: upsert and retrieve named endpoint profiles.
 
-Install with `composer require webong/proxy-registry:^0.4`. This is an unreleased
+Install with `composer require webong/proxy:^0.4`. This is an unreleased
 candidate: publish the package before installing that version from Packagist.
-The existing record names remain `Webong\Proxy\EndpointRecord`, etc. Installing
-this package alongside Proxy older than 0.4 is rejected to avoid duplicate classes.
+The existing record names remain `Webong\Proxy\EndpointRecord`, etc. The Laravel
+adapter requires core ^0.4, preventing duplicate ownership with older releases.
 
 An application implements the ports it needs and owns its schema, migrations,
 connection lifecycle, encryption, validation policy and transaction boundaries.
@@ -61,7 +63,7 @@ operations, not SQL query builders or a universal transaction abstraction.
 
 ## Laravel adapter and compatibility
 
-`webong/proxy` is currently the Laravel adapter/compatibility package. Its
+`webong/proxy-laravel` is the Laravel adapter/compatibility package. Its
 `LaravelRegistryStore` implements all three ports, retaining Eloquent encryption,
 identity hashing, validation, transactions and database-specific safeguards.
 It alone owns `database/migrations` and `database/legacy-migrations`, publishes them
@@ -100,6 +102,6 @@ function saveProfile(ProfileRepository $store, \Webong\Proxy\EndpointRecord $end
 }
 ```
 
-The Composer packaging tests install this package alone and exercise an
+The Composer packaging tests install the core package alone and exercise an
 application-owned SQLite profile store whose schema is unrelated to the Laravel
 schema. No production in-memory or SQL adapter is bundled in the neutral package.

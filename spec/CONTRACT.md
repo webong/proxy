@@ -126,11 +126,11 @@ the resolved commit in their dependency lockfiles.
 
 ## Registry candidate contract (0.4)
 
-The dependency-free `webong/proxy-registry` package adds repository ports for
-endpoint ownership, destinations and named profiles. Its README defines adapter
+The framework-neutral `webong/proxy` package includes repository ports for
+endpoint ownership, destinations and named profiles. [Registry semantics](REGISTRY.md) define adapter
 identity, atomicity and schema ownership semantics. Existing plain record
-namespaces and Laravel provider signatures remain available through the parent
-package; the legacy provider accepts optional repository overrides after its
+namespaces remain in the core. Laravel provider signatures remain available
+through `webong/proxy-laravel`; the legacy provider accepts optional repository overrides after its
 original three constructor arguments. Collection-returning compatibility APIs
 remain in the Laravel adapter; neutral selection returns a plain list.
 

@@ -1,14 +1,27 @@
 # Changelog
 
-## Unreleased
+## Unreleased — 0.4.0 candidate
 
-- Adopt Composer Source Plugin ^0.4 workspaces for local package development.
-- Prepare a separate Laravel-free proxy-transport package while retaining
-  webong/proxy as the full registry/persistence/integration entry point. Public
-  PHP namespaces, transport signatures and the Go module remain unchanged.
-- Add archive-consumer, no-plugin/no-dev, projection and workspace bootstrap
-  installation checks. The new package must be published before the parent
-  release can be installed from the default registry; see spec/COMPOSER.md.
+- Make `webong/proxy` the framework-neutral PHP core: transports, plain registry
+  records and repository contracts require only PHP and Guzzle.
+- Move all Laravel/Spatie integration, Eloquent persistence, encrypted storage,
+  providers, configuration and migrations to `webong/proxy-laravel`.
+- Preserve PHP namespaces, transport API signatures, migration filenames and the
+  Go module. Laravel consumers change their Composer requirement to the adapter;
+  applications referencing vendor resource paths must use its new install path.
+- Adopt Composer Source Plugin ^0.4 workspaces for local adapter development;
+  consumers do not require the plugin. Validate real ZIP installs, no-dev and
+  plugin-free lock clones, projections and cold workspace bootstrap.
+- Keep the scoped Laravel adapter and compatible constructor overrides. Serialize
+  first attachments and cross-endpoint moves using endpoint/registration locks.
+  Publish/run the adapter-owned subscription-locks migration before deployment.
+- Complete the adapter's explicit Laravel Framework runtime dependency and verify
+  fresh production-only solves without Testbench. Cover real v0.3.1 data upgrades
+  and package discovery opt-outs when changing the Composer package name.
+- Exclude the adapter from core VCS archives through Git export attributes while
+  retaining Go test resources; test VCS-style and Composer archive distributions.
+- Guard the registry candidate contract independently of the v0.3 transport API.
+  No transport-only or registry-only Composer packages are published.
 
 ## v0.3.1 — 2026-11-13
 
@@ -42,19 +55,3 @@ CONNECT are outside this release. Authenticated PHP SOCKS HTTP needs libcurl 8.2
 See [the public contract](spec/CONTRACT.md) for all supported limits and
 [the adoption guide](spec/ADOPTING.md) for optional use and earlier experimental
 API adjustments. Package v0.3.0 is distinct from the unchanged JSON `version: 1`.
-
-### Unreleased registry storage ports
-
-- Extract plain registry definitions and records, retaining their namespaces, into
-  the dependency-free `webong/proxy-registry` workspace package (candidate 0.4.0).
-- Add endpoint, destination and profile repository contracts with documented
-  identity and atomicity semantics. Custom applications own their stores/schemas.
-- Add `LaravelRegistryStore` as the first adapter; keep existing provider APIs,
-  Eloquent behavior, encrypted storage, migration ownership and migration names.
-- Allow applications to replace repository bindings independently. Existing
-  three-argument `DatabaseEndpointProvider` construction remains supported.
-- Fix constructor override compatibility and scope lifetimes; serialize first
-  attachments and registration moves with endpoint and registration locks.
-- Laravel adapter upgrades must publish/run the new subscription-locks migration.
-  Existing registry data, migration filenames and public namespaces remain intact;
-  standalone registry consumers have no database migrations.

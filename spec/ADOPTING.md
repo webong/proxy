@@ -1,5 +1,8 @@
 # Adopting Proxy v0.3.0
 
+For the unreleased v0.4 package split, use [the Composer upgrade guide](COMPOSER.md).
+The migration statements below apply to the historical v0.3.0 transport release.
+
 ## Why this guide exists
 
 This is an adoption guide, **not a database migration**. The readiness work adds

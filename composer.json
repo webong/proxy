@@ -1,23 +1,18 @@
 {
     "name": "webong/proxy",
-    "description": "Laravel endpoint registries, persistence and webhook integration with portable Proxy transports.",
+    "description": "Framework-neutral HTTP profiles, TCP/UDP proxy transports and storage-neutral registry contracts.",
     "type": "library",
     "license": "MIT",
     "require": {
-        "guzzlehttp/guzzle": "^7.10",
-        "illuminate/contracts": "^12.0 || ^13.0",
-        "illuminate/support": "^12.0 || ^13.0",
-        "php": "^8.3 || ^8.4",
-        "spatie/laravel-webhook-client": "^3.5",
-        "spatie/laravel-webhook-server": "^3.10",
-        "webong/proxy-registry": "^0.4.0",
-        "webong/proxy-transport": "^0.4.0"
+        "php": "^8.3",
+        "guzzlehttp/guzzle": "^7.10"
     },
     "require-dev": {
         "orchestra/testbench": "^10.0 || ^11.0",
         "pestphp/pest": "^4.0",
         "pestphp/pest-plugin-laravel": "^4.0",
-        "webong/composer-source-plugin": "^0.4.0"
+        "webong/composer-source-plugin": "^0.4.0",
+        "webong/proxy-laravel": "^0.4.0"
     },
     "autoload": {
         "psr-4": {
@@ -37,22 +32,14 @@
         ]
     },
     "extra": {
-        "laravel": {
-            "providers": [
-                "Webong\\Proxy\\WebProxyServiceProvider"
-            ]
-        },
         "source-plugin": {
             "workspaces": [
-                "packages/transport",
-                "packages/registry"
+                "packages/laravel"
             ],
             "surfaces": {
                 "php": {
                     "include": [
                         "src/**",
-                        "config/**",
-                        "database/**",
                         "README.md",
                         "CHANGELOG.md",
                         "LICENSE",
@@ -88,7 +75,15 @@
             "/socketprofile",
             "/tcpdial",
             "/udpdial",
-            "/internal"
+            "/internal",
+            "/vendor",
+            "/.phpunit.cache",
+            "/composer-source.lock"
         ]
+    },
+    "version": "0.4.0",
+    "conflict": {
+        "webong/proxy-transport": "*",
+        "webong/proxy-registry": "*"
     }
 }

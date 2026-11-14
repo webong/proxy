@@ -1,182 +1,41 @@
 # Proxy
 
-`webong/proxy` is a Laravel package for registry-backed webhook endpoints and
-outbound client profiles. Version v0.3.1 provides portable PHP/Go
-HTTP clients, TCP dialers and UDP associations; its wire profiles retain
-`version: 1`, independently of the package version. An endpoint is a durable network identity: it
-can receive and route webhooks through subscriptions, and it can own named
-outbound profiles for clients such as Guzzle.
+Framework-neutral PHP transport tools and storage-neutral registry contracts,
+with matching Go transport libraries. The PHP core requires PHP 8.3+ and Guzzle;
+it does not install Laravel, Illuminate, Spatie, a service provider or migrations.
 
 ## Install
 
-```bash
-composer require webong/proxy
+```sh
+composer require webong/proxy:^0.4
 ```
 
-Laravel discovers `Webong\Proxy\WebProxyServiceProvider` automatically.
-Publish the package configuration and normal migrations, then migrate:
+Version 0.4.0 is an unreleased candidate. Fresh archive tests verify this layout;
+public installation requires publishing the release first.
 
-```bash
-php artisan vendor:publish --tag=proxy-config
-php artisan vendor:publish --tag=proxy-migrations
-php artisan migrate
-```
+For Laravel persistence and Spatie webhook integration, install
+`webong/proxy-laravel:^0.4` instead. That package requires this core and owns
+Eloquent models, encryption, providers, configuration and migrations. See the
+[Laravel integration guide](https://github.com/webong/proxy/blob/main/packages/laravel/README.md).
 
-The normal migration set creates:
+## Registry contracts
 
-- `endpoints`
-- `subscriptions`
-- `endpoint_registrations`
-- `profiles`
-- `subscription_locks` (Laravel adapter transaction mutexes, unreleased)
-
-All table names are configurable in `config/proxy.php` or through the matching
-`PROXY_*_TABLE` environment variables.
-
-## Configuration
-
-The package config is `config/proxy.php` and is read through the `proxy.*`
-namespace. Common environment variables are:
-
-```dotenv
-PROXY_URL=https://proxy.example.test
-PROXY_SECRET=replace-with-an-internal-signing-secret
-PROXY_CHANNEL=default
-PROXY_REGISTRY=local
-PROXY_ENDPOINTS_TABLE=endpoints
-PROXY_SUBSCRIPTIONS_TABLE=subscriptions
-PROXY_ENDPOINT_REGISTRATIONS_TABLE=endpoint_registrations
-PROXY_PROFILES_TABLE=profiles
-```
-
-The built-in `local` registry uses the database driver and provider. Custom
-registries can supply their own endpoint driver and provider through
-`proxy.registries` and `proxy.providers`.
-
-## Endpoints
-
-Create or retrieve an endpoint through `EndpointRegistry`. The endpoint key is
-the stable public identity, while `client` selects the webhook router that
-handles incoming work.
-
-```php
-use Webong\Proxy\EndpointDefinition;
-use Webong\Proxy\EndpointRegistry;
-
-$endpoint = app(EndpointRegistry::class)->ensure(new EndpointDefinition(
-    client: 'partner-webhooks',
-    externalId: 'account-123',
-    signingSecret: $partnerSigningSecret,
-    verificationToken: $partnerVerificationToken,
-    endpointKey: 'partner-account-123',
-    credentialOwnerId: 'account-123',
-));
-```
-
-An endpoint is not limited to webhook subscriptions. It is the registry-owned
-parent for all endpoint attachments, including outbound profiles.
-
-## Webhook subscriptions
-
-Attach destinations when an inbound webhook route should dispatch to an HTTP
-request, event, or job:
-
-```php
-use Webong\Proxy\DestinationDefinition;
-use Webong\Proxy\Enums\WebhookProxyTargetType;
-
-$endpoint->attach(new DestinationDefinition(
-    ownerId: 'account-123',
-    registrationId: 'partner-connection',
-    webhookGroup: 'partner',
-    routingScope: 'account',
-    routingKey: 'account-123',
-    target: 'https://receiver.example.test/webhooks/partner',
-    targetType: WebhookProxyTargetType::REQUEST,
-));
-```
-
-The package uses the configured channel and registry to resolve the endpoint,
-match an incoming route, and dispatch active subscriptions. Delivery options
-such as queue name, retries, backoff, idempotency TTL, and failure logging are
-configured under `proxy.*`.
-
-## Registry-backed Guzzle profiles
-
-Profiles belong to an endpoint and are persisted by that endpoint's registry.
-They are not global configuration entries. This lets each endpoint have its
-own egress identity and keeps profile credentials in the registry store.
-
-```php
-use Webong\Proxy\GuzzleClientFactory;
-use Webong\Proxy\ProfileDefinition;
-
-$endpoint->registerProfile(new ProfileDefinition(
-    name: 'partner-api',
-    configuration: [
-        'proxy' => [
-            'https' => 'http://proxy-user:proxy-password@proxy.example.test:8080',
-            'no' => ['.internal.example.test'],
-        ],
-        'options' => [
-            'connect_timeout' => 5,
-            'timeout' => 15,
-        ],
-    ],
-));
-
-$client = app(GuzzleClientFactory::class)->make($endpoint, 'partner-api');
-$response = $client->get('https://api.partner.example.test/v1/status');
-```
-
-`GuzzleClientFactory` accepts Guzzle's usual `proxy` string or per-scheme map,
-including the `no` bypass list. Other Guzzle options belong under `options`.
-Profile configuration is encrypted at rest by the database provider.
-
-## Migrating from `webong/web-proxy`
-
-New applications should use only the normal migration tag. Existing
-installations that already ran the historical prefixed migrations need one
-explicit compatibility step before they migrate the renamed package:
-
-```bash
-php artisan vendor:publish --tag=proxy-legacy-migrations
-php artisan vendor:publish --tag=proxy-migrations
-php artisan migrate
-```
-
-The opt-in legacy migration renames the historical prefixed tables and updates
-Laravel's `migrations` table to the new migration names. It is intentionally
-not included in `proxy-migrations`.
-
-## Testing
-
-```bash
-composer test
-```
-
-## Composer development packaging (unreleased)
-
-The next package candidate keeps this full Laravel integration in
-`webong/proxy` and provides `webong/proxy-transport` for PHP transport-only
-consumers. Registries and persistence remain here; public namespaces and the Go
-module are unchanged. The new transport package is not published yet.
-
-For local development, run `php scripts/bootstrap-composer.php` on a fresh clone.
-The Composer Source Plugin links `packages/transport` as a workspace. Ordinary
-published-package consumers will not need the plugin. See
-[package installation, bootstrap and release order](spec/COMPOSER.md) before
-changing dependencies; projection alone cannot remove Laravel requirements.
+The core includes endpoint, destination and profile records/definitions and
+`Webong\Proxy\Registry\Contracts\EndpointRepository`, `DestinationRepository`
+and `ProfileRepository`. Applications implement these ports using their own
+storage, schema and transaction strategy. No production store is bundled in the
+core. [Registry semantics](spec/REGISTRY.md) document identity and atomicity rules.
+The Laravel store is the first adapter; its classes retain their existing
+`Webong\Proxy` namespaces when the adapter is installed.
 
 ## Portable HTTP profiles (PHP and Go)
 
 Proxy now includes a versioned HTTP connection profile shared by both libraries.
 See [the profile contract](spec/README.md) for supported settings and validation.
-The existing Laravel registry and webhook APIs remain in their current locations.
-Existing `GuzzleClientFactory::make` and `options` preserve Guzzle-only behavior.
-Use `$factory->profile($endpoint, 'partner-api')` to explicitly normalize an
-endpoint profile for portable export; invalid portable values are rejected. The normalizer extracts connection settings;
-headers, TLS options and other Guzzle-only fields are not exported.
+Laravel registry/webhook APIs and the stored-profile `GuzzleClientFactory` live
+in `webong/proxy-laravel`, retaining their existing namespaces. Core normalization
+extracts portable connection settings; headers, TLS options and other Guzzle-only
+fields are not exported.
 The PHP classes under `Webong\Proxy\Http` do not require a Laravel application.
 
 ```php
@@ -327,27 +186,24 @@ Omit `proxy` for direct UDP. Raw UDP authentication needs no cURL extension.
 The [UDP contract](spec/udp.md) explains DNS modes, IPv6 bindings, payload limits,
 control-connection lifetime, source filtering, and unsupported SOCKS fragmentation.
 
-## SQL registry storage
+## Development and upgrade
 
-Version v0.3.1 fixes SQL registry portability on SQLite, PostgreSQL, MySQL and
-MariaDB. Existing registries require an additive subscription-identity migration. See
-[SQL storage and upgrade notes](spec/SQL.md) for supported versions, the portable
-subscription identity migration, partial MySQL migration recovery and rollback
-requirements.
+The repository root is the `webong/proxy` Composer package. `packages/laravel` is
+its `webong/proxy-laravel` development workspace, linked with Composer Source
+Plugin. The adapter is a development dependency of this checkout, never a runtime
+dependency of the core. Ordinary consumers do not need the plugin.
 
-### Storage-neutral registry contracts (unreleased)
+```sh
+php scripts/bootstrap-composer.php
+composer test
+make packaging
+```
 
-`packages/registry` provides `webong/proxy-registry`: plain endpoint, destination
-and profile records and repository contracts, requiring only PHP. Custom apps own
-their stores and schemas. This package (`webong/proxy`) remains the first Laravel
-adapter, owning Eloquent persistence, encryption and migrations while preserving
-its existing public APIs. See the `webong/proxy-registry` README for the storage contract.
-
-
-The unreleased Laravel adapter concurrency fix also adds
-`2026_11_14_000001_create_subscription_locks_table`. Existing Laravel installations
-must publish the new `proxy-migrations` file and run `php artisan migrate` before
-using the new adapter. It creates only registration mutex rows; it does not rewrite
-endpoint, subscription or profile data. Configure `proxy.tables.subscription_locks`
-(or `PROXY_SUBSCRIPTION_LOCKS_TABLE`) before migrating if a custom table name is
-needed. The neutral registry package has no migration dependency.
+PHP namespaces and the Go module path `github.com/webong/proxy` are unchanged.
+Existing Laravel consumers must replace their old direct `webong/proxy:^0.3`
+requirement with `webong/proxy-laravel:^0.4` (or update both constraints if retaining
+a direct core requirement). The package split does not convert registry data.
+The Laravel adapter still requires the subscription-lock migration introduced by
+the concurrency fix; publish/run it before using the new adapter.
+See [Composer packaging and release order](spec/COMPOSER.md),
+[public contracts](spec/CONTRACT.md) and [SQL upgrades](spec/SQL.md).
