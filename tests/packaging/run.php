@@ -68,7 +68,7 @@ function installed(string $consumer): array
 
 mkdir($lab.'/artifacts');
 $packages = [];
-foreach (['webong/proxy-transport' => $source.'/packages/transport', 'webong/proxy' => $source] as $name => $path) {
+foreach (['webong/proxy-registry' => $source.'/packages/registry', 'webong/proxy-transport' => $source.'/packages/transport', 'webong/proxy' => $source] as $name => $path) {
     $manifest = json_decode(file_get_contents($path.'/composer.json'), true, flags: JSON_THROW_ON_ERROR);
     $file = str_replace('/', '-', $name);
     command(['composer', 'archive', '--format=zip', '--dir='.$lab.'/artifacts', '--file='.$file, '--no-interaction'],
@@ -80,11 +80,11 @@ foreach (['webong/proxy-transport' => $source.'/packages/transport', 'webong/pro
 }
 writeJson($lab.'/artifacts/packages.json', ['packages' => $packages]);
 
-foreach (['neutral', 'full'] as $kind) {
+foreach (['registry', 'neutral', 'full'] as $kind) {
     $dir = $lab.'/'.$kind;
     mkdir($dir);
     $manifest = ['name' => 'fixture/'.$kind, 'require' => [
-        $kind === 'neutral' ? 'webong/proxy-transport' : 'webong/proxy' => '0.4.0',
+        $kind === 'registry' ? 'webong/proxy-registry' : ($kind === 'neutral' ? 'webong/proxy-transport' : 'webong/proxy') => '0.4.0',
     ], 'repositories' => [['type' => 'composer', 'url' => 'file://'.$lab.'/artifacts']],
         'config' => ['allow-plugins' => false]];
     if ($kind === 'full') {
@@ -93,17 +93,20 @@ foreach (['neutral', 'full'] as $kind) {
     writeJson($dir.'/composer.json', $manifest);
     command(['composer', 'install', '--prefer-dist', '--no-interaction', '--no-plugins'], $dir, $dir.'/home');
     $resolved = installed($dir);
+    if ($kind === 'registry') {
+        check(array_keys($resolved) === ['webong/proxy-registry'], 'Registry-only install has unexpected dependencies.');
+    }
     check(! isset($resolved['webong/composer-source-plugin']), 'Consumers must not inherit development tooling.');
     foreach ($resolved as $name => $package) {
         if (str_starts_with($name, 'webong/proxy')) {
             check($package['dist']['type'] === 'zip', 'Consumer accidentally resolved a workspace.');
             check(! is_link($dir.'/vendor/'.$name), 'Consumer must use archive copies.');
         }
-        if ($kind === 'neutral') {
+        if ($kind !== 'full') {
             check(! preg_match('~^(illuminate|laravel|spatie)/~', $name), 'Framework dependency leaked: '.$name);
         }
     }
-    command($kind === 'neutral' ? [PHP_BINARY, $source.'/tests/packaging/transport.php']
+    command($kind !== 'full' ? [PHP_BINARY, $source.'/tests/packaging/'.($kind === 'registry' ? 'registry' : 'transport').'.php']
         : [PHP_BINARY, 'vendor/bin/phpunit', '--no-configuration', '--bootstrap', 'vendor/autoload.php', $source.'/tests/packaging/LaravelConsumerTest.php'],
         $dir, $dir.'/home');
     command(['composer', 'install', '--prefer-dist', '--no-interaction', '--no-plugins'], $dir, $dir.'/home');
@@ -112,7 +115,7 @@ foreach (['neutral', 'full'] as $kind) {
     copy($dir.'/composer.json', $clone.'/composer.json');
     copy($dir.'/composer.lock', $clone.'/composer.lock');
     command(['composer', 'install', '--prefer-dist', '--no-interaction', '--no-plugins'], $clone, $clone.'/home');
-    command($kind === 'neutral' ? [PHP_BINARY, $source.'/tests/packaging/transport.php']
+    command($kind !== 'full' ? [PHP_BINARY, $source.'/tests/packaging/'.($kind === 'registry' ? 'registry' : 'transport').'.php']
         : [PHP_BINARY, 'vendor/bin/phpunit', '--no-configuration', '--bootstrap', 'vendor/autoload.php', $source.'/tests/packaging/LaravelConsumerTest.php'],
         $clone, $clone.'/home');
     if ($kind === 'full') {
@@ -127,17 +130,18 @@ foreach (['neutral', 'full'] as $kind) {
     writeJson($dir.'/composer.json', $manifest);
     command(['composer', 'update', '--prefer-dist', '--no-interaction'], $dir, $dir.'/home');
     $manifest['extra']['source-plugin']['projections'] = [
-        'webong/proxy-transport' => ['surfaces' => ['php']],
+        ($kind === 'registry' ? 'webong/proxy-registry' : 'webong/proxy-transport') => ['surfaces' => ['php']],
     ];
     if ($kind === 'full') {
         $manifest['extra']['source-plugin']['projections']['webong/proxy'] = ['surfaces' => ['php']];
+        $manifest['extra']['source-plugin']['projections']['webong/proxy-registry'] = ['surfaces' => ['php']];
     }
     writeJson($dir.'/composer.json', $manifest);
     command(['composer', 'update', '--prefer-dist', '--no-interaction'], $dir, $dir.'/home');
     foreach (array_keys($manifest['extra']['source-plugin']['projections']) as $name) {
         check(is_file($dir.'/vendor/'.$name.'/.source-plugin/projection.json'), 'Projection did not run: '.$name);
     }
-    command($kind === 'neutral' ? [PHP_BINARY, $source.'/tests/packaging/transport.php']
+    command($kind !== 'full' ? [PHP_BINARY, $source.'/tests/packaging/'.($kind === 'registry' ? 'registry' : 'transport').'.php']
         : [PHP_BINARY, 'vendor/bin/phpunit', '--no-configuration', '--bootstrap', 'vendor/autoload.php', $source.'/tests/packaging/LaravelConsumerTest.php'],
         $dir, $dir.'/home');
     command(['composer', 'install', '--prefer-dist', '--no-interaction'], $dir, $dir.'/home');
@@ -151,23 +155,25 @@ foreach (['neutral', 'full'] as $kind) {
     foreach (array_keys($manifest['extra']['source-plugin']['projections']) as $name) {
         check(is_file($clone.'/vendor/'.$name.'/.source-plugin/projection.json'), 'Fresh projection missing: '.$name);
     }
-    command($kind === 'neutral' ? [PHP_BINARY, $source.'/tests/packaging/transport.php']
+    command($kind !== 'full' ? [PHP_BINARY, $source.'/tests/packaging/'.($kind === 'registry' ? 'registry' : 'transport').'.php']
         : [PHP_BINARY, 'vendor/bin/phpunit', '--no-configuration', '--bootstrap', 'vendor/autoload.php', $source.'/tests/packaging/LaravelConsumerTest.php'],
         $clone, $clone.'/home');
     echo "PASS {$kind}: projection and fresh locked clone retain runtime and metadata\n";
 }
 
 // Older releases own the same transport classes: reject duplicate definitions.
-$dir = $lab.'/legacy-conflict';
-mkdir($dir);
-writeJson($dir.'/composer.json', [
-    'require' => ['webong/proxy' => '0.3.1', 'webong/proxy-transport' => '0.4.0'],
-    'repositories' => [['type' => 'composer', 'url' => 'file://'.$lab.'/artifacts', 'canonical' => false]],
-    'config' => ['allow-plugins' => false],
-]);
-$output = command(['composer', 'update', '--no-install', '--no-plugins', '--no-interaction'], $dir, $dir.'/home', [], false);
-check(str_contains($output, 'conflicts with webong/proxy'), 'Legacy coexistence failed for an unrelated reason: '.$output);
-echo "PASS legacy coexistence: duplicate transport ownership rejected by solver\n";
+foreach (['webong/proxy-transport', 'webong/proxy-registry'] as $child) {
+    $dir = $lab.'/legacy-conflict-'.basename($child);
+    mkdir($dir);
+    writeJson($dir.'/composer.json', [
+        'require' => ['webong/proxy' => '0.3.1', $child => '0.4.0'],
+        'repositories' => [['type' => 'composer', 'url' => 'file://'.$lab.'/artifacts', 'canonical' => false]],
+        'config' => ['allow-plugins' => false],
+    ]);
+    $output = command(['composer', 'update', '--no-install', '--no-plugins', '--no-interaction'], $dir, $dir.'/home', [], false);
+    check(str_contains($output, 'conflicts with webong/proxy'), 'Legacy coexistence failed for an unrelated reason: '.$output);
+}
+echo "PASS legacy coexistence: duplicate transport and registry ownership rejected by solver\n";
 
 // Bootstrap a genuinely fresh checkout: no vendor, lock or manually configured
 // path repositories. Only the plugin may discover the local workspace.
@@ -177,6 +183,8 @@ command([PHP_BINARY, 'scripts/bootstrap-composer.php'], $workspace, $workspace.'
 check(is_link($workspace.'/vendor/webong/proxy-transport'), 'Workspace was not linked by plugin.');
 $resolved = installed($workspace);
 check($resolved['webong/proxy-transport']['dist']['url'] === 'packages/transport', 'Workspace lock path is not portable.');
+check(is_link($workspace.'/vendor/webong/proxy-registry'), 'Registry workspace was not linked.');
+check($resolved['webong/proxy-registry']['dist']['url'] === 'packages/registry', 'Registry workspace path is not portable.');
 command(['composer', 'source:workspaces', '--json'], $workspace, $workspace.'/home');
 $clone = $lab.'/workspace-lock-clone';
 copyCheckout($source, $clone);
@@ -185,6 +193,8 @@ command(['composer', 'install', '--no-plugins', '--no-interaction'], $clone, $cl
 check(is_link($clone.'/vendor/webong/proxy-transport')
     && realpath($clone.'/vendor/webong/proxy-transport') === realpath($clone.'/packages/transport'),
     'Fresh lock clone did not recreate a portable workspace link.');
+check(realpath($clone.'/vendor/webong/proxy-registry') === realpath($clone.'/packages/registry'), 'Registry clone workspace link is not portable.');
 command([PHP_BINARY, 'scripts/check_php_api.php'], $workspace, $workspace.'/home');
+command([PHP_BINARY, 'scripts/check_php_api.php', '--registry'], $workspace, $workspace.'/home');
 echo "PASS workspace: fresh bootstrap, relative lock, linked sources, frozen interfaces\n";
 echo "All Composer packaging scenarios passed. Fixtures retained at {$lab}\n";

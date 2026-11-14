@@ -25,4 +25,5 @@ jobs:
       - run: php scripts/bootstrap-composer.php
       - run: composer validate --strict
       - run: composer validate packages/transport/composer.json --strict --no-check-version
+      - run: composer validate packages/registry/composer.json --strict --no-check-version
       - run: php tests/packaging/run.php

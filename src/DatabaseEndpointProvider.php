@@ -4,49 +4,35 @@ declare(strict_types=1);
 
 namespace Webong\Proxy;
 
-use Webong\Proxy\Contracts\EndpointProvider;
-use Webong\Proxy\Models\WebProxyEndpoint;
-use Webong\Proxy\Models\WebProxyEndpointRegistration;
-use Webong\Proxy\Models\WebProxyDestination;
-use Webong\Proxy\Models\ProxyProfile;
 use Closure;
-use Throwable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
+use Webong\Proxy\Contracts\EndpointProvider;
+use Webong\Proxy\Laravel\DefaultRegistryStore;
+use Webong\Proxy\Registry\Contracts\DestinationRepository;
+use Webong\Proxy\Registry\Contracts\EndpointRepository;
+use Webong\Proxy\Registry\Contracts\ProfileRepository;
 
+/** Laravel compatibility facade over storage-neutral repository ports. */
 class DatabaseEndpointProvider implements EndpointProvider
 {
+    private readonly EndpointRepository $endpoints;
+    private readonly DestinationRepository $destinations;
+    private readonly ProfileRepository $profiles;
+
     public function __construct(
-        private readonly DatabaseEndpointStore $endpointStore,
-        private readonly DatabaseDestinationAttacher $destinationAttacher,
-        private readonly EndpointUrlGenerator $urlGenerator,
+        DatabaseEndpointStore $endpointStore,
+        DatabaseDestinationAttacher $destinationAttacher,
+        EndpointUrlGenerator $urlGenerator,
+        ?EndpointRepository $endpoints = null,
+        ?DestinationRepository $destinations = null,
+        ?ProfileRepository $profiles = null,
     ) {
-    }
-
-    public function define(
-        EndpointDefinition $definition,
-        ProvisionedEndpoint $provisionedEndpoint,
-    ): Endpoint {
-        $record = $this->endpointStore->handle(new EndpointDefinition(
-            client: $definition->client,
-            externalId: $definition->externalId,
-            signingSecret: $definition->signingSecret,
-            verificationToken: $definition->verificationToken,
-            endpointKey: $provisionedEndpoint->endpointKey ?? $definition->endpointKey,
-            credentialOwnerId: $definition->credentialOwnerId,
-            managed: $definition->managed,
-            callbackUrl: $definition->callbackUrl,
-            registry: $definition->registry,
-            metadata: array_replace(
-                $definition->metadata,
-                $provisionedEndpoint->metadata,
-                array_filter([
-                    'callback_url' => $provisionedEndpoint->callbackUrl,
-                ], static fn (mixed $value): bool => is_string($value) && $value !== ''),
-            ),
-        ));
-
-        return new Endpoint($this->endpointRecord($record), $this);
+        // Container defaults must honor this constructor's original dependencies.
+        // Explicit application repositories retain precedence over those defaults.
+        $store = new LaravelRegistryStore($endpointStore, $destinationAttacher, $urlGenerator);
+        $this->endpoints = $endpoints instanceof DefaultRegistryStore ? $store : ($endpoints ?? $store);
+        $this->destinations = $destinations instanceof DefaultRegistryStore ? $store : ($destinations ?? $store);
+        $this->profiles = $profiles instanceof DefaultRegistryStore ? $store : ($profiles ?? $store);
     }
 
     /** @return array<string, mixed> */
@@ -60,273 +46,108 @@ class DatabaseEndpointProvider implements EndpointProvider
         return $closure();
     }
 
+    public function define(
+        EndpointDefinition $definition,
+        ProvisionedEndpoint $provisionedEndpoint,
+    ): Endpoint
+    {
+        return new Endpoint($this->endpoints->define($definition, $provisionedEndpoint), $this);
+    }
+
     public function find(EndpointDefinition $definition): ?Endpoint
     {
-        $record = WebProxyEndpoint::query()
-            ->where('client', $definition->client)
-            ->where('external_id', $definition->externalId)
-            ->where('is_active', true)
-            ->first();
+        $record = $this->endpoints->find($definition);
 
-        return $this->endpoint($record);
+        return $record === null ? null : new Endpoint($record, $this);
     }
 
     public function resolveByKey(string $endpointKey): ?Endpoint
     {
-        if ($endpointKey === '') {
-            return null;
-        }
+        $record = $this->endpoints->resolveByKey($endpointKey);
 
-        $record = WebProxyEndpoint::query()
-            ->where('endpoint_key', $endpointKey)
-            ->where('is_active', true)
-            ->first();
-
-        return $this->endpoint($record);
+        return $record === null ? null : new Endpoint($record, $this);
     }
 
     public function resolveById(string $id): ?Endpoint
     {
-        if ($id === '' || (! Str::isUuid($id) && ! Str::isUlid($id))) {
-            return null;
-        }
+        $record = $this->endpoints->resolveById($id);
 
-        $record = WebProxyEndpoint::query()
-            ->whereKey($id)
-            ->where('is_active', true)
-            ->first();
-
-        return $this->endpoint($record);
+        return $record === null ? null : new Endpoint($record, $this);
     }
 
     public function findManaged(string $client, string $externalId): ?EndpointRecord
     {
-        $record = WebProxyEndpoint::query()
-            ->where('client', $client)
-            ->where('external_id', $externalId)
-            ->where('is_managed', true)
-            ->where('is_active', true)
-            ->first();
-
-        return $record instanceof WebProxyEndpoint
-            ? $this->endpointRecord($record)
-            : null;
+        return $this->endpoints->findManaged($client, $externalId);
     }
 
     public function register(EndpointRecord $record, string $registry): void
     {
-        WebProxyEndpointRegistration::query()->updateOrCreate(
-            [
-                'owner_id' => (string) ($record->credential_owner_id ?? ''),
-                'endpoint_id' => $record->id,
-            ],
-            [
-                'endpoint_key' => $record->endpoint_key,
-                'client' => $record->client,
-                'registry' => $registry,
-                'callback_url' => $record->callback_url,
-                'is_active' => $record->is_active,
-            ],
-        );
+        $this->endpoints->register($record, $registry);
     }
 
     public function registryForKey(string $endpointKey): ?string
     {
-        if ($endpointKey === '') {
-            return null;
-        }
-
-        $registry = WebProxyEndpointRegistration::query()
-            ->where('endpoint_key', $endpointKey)
-            ->where('is_active', true)
-            ->value('registry');
-
-        return is_string($registry) && $registry !== '' ? $registry : null;
+        return $this->endpoints->registryForKey($endpointKey);
     }
 
     public function registryForId(string $id): ?string
     {
-        if ($id === '' || (! Str::isUuid($id) && ! Str::isUlid($id))) {
-            return null;
-        }
+        return $this->endpoints->registryForId($id);
+    }
 
-        $registry = WebProxyEndpointRegistration::query()
-            ->where('endpoint_id', $id)
-            ->where('is_active', true)
-            ->value('registry');
-
-        return is_string($registry) && $registry !== '' ? $registry : null;
+    /** @param array<string, mixed> $registration */
+    public function updateEndpoint(EndpointRecord $endpoint, array $registration): EndpointRecord
+    {
+        return $this->endpoints->updateEndpoint($endpoint, $registration);
     }
 
     public function attach(EndpointRecord $endpoint, DestinationDefinition $definition): DestinationRecord
     {
-        $model = WebProxyEndpoint::query()->findOrFail($endpoint->id);
-
-        return $this->destinationRecord(
-            $this->destinationAttacher->handle($model, $definition),
-        );
-    }
-
-    public function registerProfile(EndpointRecord $endpoint, ProfileDefinition $definition): ProfileRecord
-    {
-        $profile = ProxyProfile::query()->updateOrCreate(
-            [
-                'endpoint_id' => $endpoint->id,
-                'name' => $definition->name,
-            ],
-            [
-                'driver' => $definition->driver,
-                'configuration' => $definition->configuration,
-                'is_active' => true,
-            ],
-        );
-
-        return $this->profileRecord($profile);
-    }
-
-    public function profile(EndpointRecord $endpoint, string $name): ?ProfileRecord
-    {
-        if ($name === '') {
-            return null;
-        }
-
-        $profile = ProxyProfile::query()
-            ->where('endpoint_id', $endpoint->id)
-            ->where('name', $name)
-            ->where('is_active', true)
-            ->first();
-
-        return $profile instanceof ProxyProfile ? $this->profileRecord($profile) : null;
+        return $this->destinations->attach($endpoint, $definition);
     }
 
     /** @return Collection<int, DestinationRecord> */
     public function destinationsFor(EndpointRecord $endpoint, WebhookRoute $route): Collection
     {
-        return WebProxyDestination::query()
-            ->where('endpoint_id', $endpoint->id)
-            ->where('routing_scope', $route->scope)
-            ->where('routing_key', $route->key)
-            ->where('is_active', true)
-            ->oldest('created_at')
-            ->orderBy('id')
-            ->get()
-            ->map(fn (WebProxyDestination $destination): DestinationRecord => $this->destinationRecord($destination));
+        return new Collection($this->destinations->destinationsFor($endpoint, $route));
     }
 
     public function destinationById(string $id): ?DestinationRecord
     {
-        if ($id === '' || (! Str::isUuid($id) && ! Str::isUlid($id))) {
-            return null;
-        }
-
-        $destination = WebProxyDestination::query()
-            ->whereKey($id)
-            ->where('is_active', true)
-            ->first();
-
-        return $destination instanceof WebProxyDestination
-            ? $this->destinationRecord($destination)
-            : null;
+        return $this->destinations->destinationById($id);
     }
 
+    /** @param array<string, mixed> $attributes */
     public function updateDestination(DestinationRecord $destination, array $attributes): void
     {
-        WebProxyDestination::query()
-            ->whereKey($destination->id)
-            ->first()?->forceFill($attributes)->save();
-    }
-
-    public function updateEndpoint(EndpointRecord $endpoint, array $registration): EndpointRecord
-    {
-        $record = WebProxyEndpoint::query()->findOrFail($endpoint->id);
-        $record->update($registration);
-        $record->refresh();
-
-        return $this->endpointRecord($record);
+        $this->destinations->updateDestination($destination, $attributes);
     }
 
     public function deactivateDestinations(
         string $ownerId,
         string $registrationId,
         string $webhookGroup,
-    ): int {
-        return WebProxyDestination::query()
-            ->whereIdentity('owner_id', $ownerId)
-            ->whereIdentity('registration_id', $registrationId)
-            ->whereIdentity('webhook_group', $webhookGroup)
-            ->where('is_active', true)
-            ->update(['is_active' => false]);
+    ): int
+    {
+        return $this->destinations->deactivateDestinations($ownerId, $registrationId, $webhookGroup);
     }
 
     public function hasActiveDestination(
         string $ownerId,
         string $registrationId,
         string $webhookGroup,
-    ): bool {
-        return WebProxyDestination::query()
-            ->whereIdentity('owner_id', $ownerId)
-            ->whereIdentity('registration_id', $registrationId)
-            ->whereIdentity('webhook_group', $webhookGroup)
-            ->where('is_active', true)
-            ->exists();
+    ): bool
+    {
+        return $this->destinations->hasActiveDestination($ownerId, $registrationId, $webhookGroup);
     }
 
-    private function endpoint(?WebProxyEndpoint $record): ?Endpoint
+    public function registerProfile(EndpointRecord $endpoint, ProfileDefinition $definition): ProfileRecord
     {
-        return $record instanceof WebProxyEndpoint
-            ? new Endpoint($this->endpointRecord($record), $this)
-            : null;
+        return $this->profiles->registerProfile($endpoint, $definition);
     }
 
-    private function endpointRecord(WebProxyEndpoint $record): EndpointRecord
+    public function profile(EndpointRecord $endpoint, string $name): ?ProfileRecord
     {
-        $endpoint = new EndpointRecord(
-            id: (string) $record->getKey(),
-            client: (string) $record->client,
-            external_id: (string) $record->external_id,
-            endpoint_key: (string) $record->endpoint_key,
-            signing_secret: is_string($record->signing_secret) ? $record->signing_secret : null,
-            verification_token: is_string($record->verification_token) ? $record->verification_token : null,
-            credential_owner_id: is_string($record->credential_owner_id) ? $record->credential_owner_id : null,
-            metadata: is_array($record->metadata) ? $record->metadata : [],
-            is_managed: (bool) $record->is_managed,
-            is_active: (bool) $record->is_active,
-            callback_url: '',
-        );
-
-        try {
-            return $endpoint->withCallbackUrl($this->urlGenerator->for($endpoint));
-        } catch (Throwable) {
-            return $endpoint;
-        }
-    }
-
-    private function destinationRecord(WebProxyDestination $destination): DestinationRecord
-    {
-        return new DestinationRecord(
-            id: (string) $destination->getKey(),
-            endpoint_id: (string) $destination->endpoint_id,
-            owner_id: (string) $destination->owner_id,
-            registration_id: (string) $destination->registration_id,
-            webhook_group: (string) $destination->webhook_group,
-            routing_scope: (string) $destination->routing_scope,
-            routing_key: (string) $destination->routing_key,
-            target_type: $destination->target_type,
-            target: (string) $destination->target,
-            metadata: is_array($destination->metadata) ? $destination->metadata : [],
-            is_active: (bool) $destination->is_active,
-        );
-    }
-
-    private function profileRecord(ProxyProfile $profile): ProfileRecord
-    {
-        return new ProfileRecord(
-            id: (string) $profile->getKey(),
-            endpoint_id: (string) $profile->endpoint_id,
-            name: (string) $profile->name,
-            driver: (string) $profile->driver,
-            configuration: is_array($profile->configuration) ? $profile->configuration : [],
-            is_active: (bool) $profile->is_active,
-        );
+        return $this->profiles->profile($endpoint, $name);
     }
 }

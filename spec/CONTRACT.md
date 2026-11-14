@@ -123,3 +123,20 @@ regeneration runs in CI. Consumers should pin the reviewed readiness commit and
 commit their dependency lockfiles. Tagged releases must point to a head that passed the full readiness checks.
 The v0.3.0 tag is the immutable package identity; consumers should also retain
 the resolved commit in their dependency lockfiles.
+
+## Registry candidate contract (0.4)
+
+The dependency-free `webong/proxy-registry` package adds repository ports for
+endpoint ownership, destinations and named profiles. Its README defines adapter
+identity, atomicity and schema ownership semantics. Existing plain record
+namespaces and Laravel provider signatures remain available through the parent
+package; the legacy provider accepts optional repository overrides after its
+original three constructor arguments. Collection-returning compatibility APIs
+remain in the Laravel adapter; neutral selection returns a plain list.
+
+`php scripts/check_php_api.php --registry` checks the candidate snapshot in
+`spec/api/php-registry-v0.4.json`, including neutral types, ports, the Laravel store and the legacy
+provider interface/facade. `composer test` runs both PHP guards. After an explicit
+review, regenerate the registry snapshot with `--registry --write`; do not rewrite
+the immutable transport v0.3 baseline to accept registry changes. Snapshot checks
+are supplemented by custom-store, Laravel and clean archive consumer tests.

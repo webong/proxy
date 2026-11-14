@@ -1,0 +1,2867 @@
+{
+    "Webong\\Proxy\\Contracts\\EndpointProvider": {
+        "abstract": true,
+        "final": false,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [
+            "Webong\\Proxy\\Contracts\\ExecutionContext"
+        ],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "attach": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\DestinationRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\DestinationDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "capture": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "array",
+                "parameters": []
+            },
+            "deactivateDestinations": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "int",
+                "parameters": [
+                    {
+                        "name": "ownerId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registrationId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "webhookGroup",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "define": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\Endpoint",
+                "parameters": [
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\EndpointDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "provisionedEndpoint",
+                        "type": "Webong\\Proxy\\ProvisionedEndpoint",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "destinationById": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\DestinationRecord",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "destinationsFor": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Illuminate\\Support\\Collection",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "route",
+                        "type": "Webong\\Proxy\\WebhookRoute",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "find": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\Endpoint",
+                "parameters": [
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\EndpointDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "findManaged": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "client",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "externalId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "hasActiveDestination": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "bool",
+                "parameters": [
+                    {
+                        "name": "ownerId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registrationId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "webhookGroup",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "profile": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\ProfileRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "register": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "void",
+                "parameters": [
+                    {
+                        "name": "record",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registry",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registerProfile": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\ProfileRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\ProfileDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registryForId": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?string",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registryForKey": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?string",
+                "parameters": [
+                    {
+                        "name": "endpointKey",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "resolveById": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\Endpoint",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "resolveByKey": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\Endpoint",
+                "parameters": [
+                    {
+                        "name": "endpointKey",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "run": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "mixed",
+                "parameters": [
+                    {
+                        "name": "closure",
+                        "type": "Closure",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "context",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": []
+                    }
+                ]
+            },
+            "updateDestination": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "void",
+                "parameters": [
+                    {
+                        "name": "destination",
+                        "type": "Webong\\Proxy\\DestinationRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "attributes",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "updateEndpoint": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registration",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\DatabaseEndpointProvider": {
+        "abstract": false,
+        "final": false,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [
+            "Webong\\Proxy\\Contracts\\EndpointProvider",
+            "Webong\\Proxy\\Contracts\\ExecutionContext"
+        ],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "endpointStore",
+                        "type": "Webong\\Proxy\\DatabaseEndpointStore",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "destinationAttacher",
+                        "type": "Webong\\Proxy\\DatabaseDestinationAttacher",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "urlGenerator",
+                        "type": "Webong\\Proxy\\EndpointUrlGenerator",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "endpoints",
+                        "type": "?Webong\\Proxy\\Registry\\Contracts\\EndpointRepository",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "destinations",
+                        "type": "?Webong\\Proxy\\Registry\\Contracts\\DestinationRepository",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "profiles",
+                        "type": "?Webong\\Proxy\\Registry\\Contracts\\ProfileRepository",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "attach": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\DestinationRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\DestinationDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "capture": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "array",
+                "parameters": []
+            },
+            "deactivateDestinations": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "int",
+                "parameters": [
+                    {
+                        "name": "ownerId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registrationId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "webhookGroup",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "define": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\Endpoint",
+                "parameters": [
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\EndpointDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "provisionedEndpoint",
+                        "type": "Webong\\Proxy\\ProvisionedEndpoint",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "destinationById": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\DestinationRecord",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "destinationsFor": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Illuminate\\Support\\Collection",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "route",
+                        "type": "Webong\\Proxy\\WebhookRoute",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "find": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\Endpoint",
+                "parameters": [
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\EndpointDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "findManaged": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "client",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "externalId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "hasActiveDestination": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "bool",
+                "parameters": [
+                    {
+                        "name": "ownerId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registrationId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "webhookGroup",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "profile": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\ProfileRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "register": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "void",
+                "parameters": [
+                    {
+                        "name": "record",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registry",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registerProfile": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\ProfileRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\ProfileDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registryForId": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?string",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registryForKey": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?string",
+                "parameters": [
+                    {
+                        "name": "endpointKey",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "resolveById": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\Endpoint",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "resolveByKey": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\Endpoint",
+                "parameters": [
+                    {
+                        "name": "endpointKey",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "run": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "mixed",
+                "parameters": [
+                    {
+                        "name": "closure",
+                        "type": "Closure",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "context",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": []
+                    }
+                ]
+            },
+            "updateDestination": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "void",
+                "parameters": [
+                    {
+                        "name": "destination",
+                        "type": "Webong\\Proxy\\DestinationRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "attributes",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "updateEndpoint": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registration",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\DestinationDefinition": {
+        "abstract": false,
+        "final": true,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [],
+        "properties": {
+            "allowsMultipleSubscribers": {
+                "type": "bool",
+                "readonly": true,
+                "static": false
+            },
+            "context": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "metadata": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "ownerId": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "registrationId": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "routingKey": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "routingScope": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "target": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "targetType": {
+                "type": "Webong\\Proxy\\Enums\\WebhookProxyTargetType",
+                "readonly": true,
+                "static": false
+            },
+            "webhookGroup": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "ownerId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registrationId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "webhookGroup",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "routingScope",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "routingKey",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "target",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "targetType",
+                        "type": "Webong\\Proxy\\Enums\\WebhookProxyTargetType",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": "request"
+                    },
+                    {
+                        "name": "metadata",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": []
+                    },
+                    {
+                        "name": "context",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": []
+                    },
+                    {
+                        "name": "allowsMultipleSubscribers",
+                        "type": "bool",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": false
+                    }
+                ]
+            },
+            "withContext": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\DestinationDefinition",
+                "parameters": [
+                    {
+                        "name": "context",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\DestinationRecord": {
+        "abstract": false,
+        "final": true,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [],
+        "properties": {
+            "endpoint_id": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "id": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "is_active": {
+                "type": "bool",
+                "readonly": true,
+                "static": false
+            },
+            "metadata": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "owner_id": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "registration_id": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "routing_key": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "routing_scope": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "target": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "target_type": {
+                "type": "Webong\\Proxy\\Enums\\WebhookProxyTargetType",
+                "readonly": true,
+                "static": false
+            },
+            "webhook_group": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": {
+            "EXECUTION_CONTEXT_METADATA_KEY": "_execution_context",
+            "MULTIPLE_SUBSCRIBERS_METADATA_KEY": "_allows_multiple_subscribers"
+        },
+        "methods": {
+            "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "endpoint_id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "owner_id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registration_id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "webhook_group",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "routing_scope",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "routing_key",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "target_type",
+                        "type": "Webong\\Proxy\\Enums\\WebhookProxyTargetType",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "target",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "metadata",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "is_active",
+                        "type": "bool",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\EndpointDefinition": {
+        "abstract": false,
+        "final": true,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [],
+        "properties": {
+            "callbackUrl": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "client": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "credentialOwnerId": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "endpointKey": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "externalId": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "managed": {
+                "type": "bool",
+                "readonly": true,
+                "static": false
+            },
+            "metadata": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "registry": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "signingSecret": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "verificationToken": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "client",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "externalId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "signingSecret",
+                        "type": "?string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "verificationToken",
+                        "type": "?string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "endpointKey",
+                        "type": "?string",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "credentialOwnerId",
+                        "type": "?string",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "managed",
+                        "type": "bool",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": false
+                    },
+                    {
+                        "name": "callbackUrl",
+                        "type": "?string",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registry",
+                        "type": "?string",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "metadata",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": []
+                    }
+                ]
+            },
+            "withEndpointKey": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\EndpointDefinition",
+                "parameters": [
+                    {
+                        "name": "endpointKey",
+                        "type": "?string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\EndpointRecord": {
+        "abstract": false,
+        "final": true,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [],
+        "properties": {
+            "callback_url": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "client": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "credential_owner_id": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "endpoint_key": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "external_id": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "id": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "is_active": {
+                "type": "bool",
+                "readonly": true,
+                "static": false
+            },
+            "is_managed": {
+                "type": "bool",
+                "readonly": true,
+                "static": false
+            },
+            "metadata": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "signing_secret": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "verification_token": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": {
+            "REGISTRY_METADATA_KEY": "_registry"
+        },
+        "methods": {
+            "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "client",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "endpoint_key",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "signing_secret",
+                        "type": "?string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "verification_token",
+                        "type": "?string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "credential_owner_id",
+                        "type": "?string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "metadata",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "is_managed",
+                        "type": "bool",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "is_active",
+                        "type": "bool",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "callback_url",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "withCallbackUrl": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "callbackUrl",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Enums\\WebhookProxyTargetType": {
+        "abstract": false,
+        "final": true,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [
+            "BackedEnum",
+            "UnitEnum"
+        ],
+        "properties": {
+            "name": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "value": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": {
+            "EVENT": "event",
+            "JOB": "job",
+            "REQUEST": "request"
+        },
+        "methods": {
+            "cases": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": true,
+                "return_type": "array",
+                "parameters": []
+            },
+            "from": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": true,
+                "return_type": "static",
+                "parameters": [
+                    {
+                        "name": "value",
+                        "type": "string|int",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "tryFrom": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": true,
+                "return_type": "?static",
+                "parameters": [
+                    {
+                        "name": "value",
+                        "type": "string|int",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\LaravelRegistryStore": {
+        "abstract": false,
+        "final": false,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [
+            "Webong\\Proxy\\Registry\\Contracts\\DestinationRepository",
+            "Webong\\Proxy\\Registry\\Contracts\\EndpointRepository",
+            "Webong\\Proxy\\Registry\\Contracts\\ProfileRepository"
+        ],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "endpointStore",
+                        "type": "Webong\\Proxy\\DatabaseEndpointStore",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "destinationAttacher",
+                        "type": "Webong\\Proxy\\DatabaseDestinationAttacher",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "urlGenerator",
+                        "type": "Webong\\Proxy\\EndpointUrlGenerator",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "attach": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\DestinationRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\DestinationDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "deactivateDestinations": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "int",
+                "parameters": [
+                    {
+                        "name": "ownerId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registrationId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "webhookGroup",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "define": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\EndpointDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "provisionedEndpoint",
+                        "type": "Webong\\Proxy\\ProvisionedEndpoint",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "destinationById": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\DestinationRecord",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "destinationsFor": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "array",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "route",
+                        "type": "Webong\\Proxy\\WebhookRoute",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "find": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\EndpointDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "findManaged": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "client",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "externalId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "hasActiveDestination": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "bool",
+                "parameters": [
+                    {
+                        "name": "ownerId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registrationId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "webhookGroup",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "profile": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\ProfileRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "register": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "void",
+                "parameters": [
+                    {
+                        "name": "record",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registry",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registerProfile": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\ProfileRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\ProfileDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registryForId": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?string",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registryForKey": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?string",
+                "parameters": [
+                    {
+                        "name": "endpointKey",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "resolveById": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "resolveByKey": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "endpointKey",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "updateDestination": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "void",
+                "parameters": [
+                    {
+                        "name": "destination",
+                        "type": "Webong\\Proxy\\DestinationRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "attributes",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "updateEndpoint": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registration",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\ProfileDefinition": {
+        "abstract": false,
+        "final": true,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [],
+        "properties": {
+            "configuration": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "driver": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "name": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "configuration",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "driver",
+                        "type": "string",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": "guzzle"
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\ProfileRecord": {
+        "abstract": false,
+        "final": true,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [],
+        "properties": {
+            "configuration": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "driver": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "endpoint_id": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "id": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "is_active": {
+                "type": "bool",
+                "readonly": true,
+                "static": false
+            },
+            "name": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "endpoint_id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "driver",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "configuration",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "is_active",
+                        "type": "bool",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\ProvisionedEndpoint": {
+        "abstract": false,
+        "final": true,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [],
+        "properties": {
+            "callbackUrl": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "endpointKey": {
+                "type": "?string",
+                "readonly": true,
+                "static": false
+            },
+            "metadata": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "endpointKey",
+                        "type": "?string",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "callbackUrl",
+                        "type": "?string",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "metadata",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": []
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Registry\\Contracts\\DestinationRepository": {
+        "abstract": true,
+        "final": false,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "attach": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\DestinationRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\DestinationDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "deactivateDestinations": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "int",
+                "parameters": [
+                    {
+                        "name": "ownerId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registrationId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "webhookGroup",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "destinationById": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\DestinationRecord",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "destinationsFor": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "array",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "route",
+                        "type": "Webong\\Proxy\\WebhookRoute",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "hasActiveDestination": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "bool",
+                "parameters": [
+                    {
+                        "name": "ownerId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registrationId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "webhookGroup",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "updateDestination": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "void",
+                "parameters": [
+                    {
+                        "name": "destination",
+                        "type": "Webong\\Proxy\\DestinationRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "attributes",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Registry\\Contracts\\EndpointRepository": {
+        "abstract": true,
+        "final": false,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "define": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\EndpointDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "provisionedEndpoint",
+                        "type": "Webong\\Proxy\\ProvisionedEndpoint",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "find": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\EndpointDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "findManaged": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "client",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "externalId",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "register": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "void",
+                "parameters": [
+                    {
+                        "name": "record",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registry",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registryForId": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?string",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registryForKey": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?string",
+                "parameters": [
+                    {
+                        "name": "endpointKey",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "resolveById": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "resolveByKey": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "endpointKey",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "updateEndpoint": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\EndpointRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "registration",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\Registry\\Contracts\\ProfileRepository": {
+        "abstract": true,
+        "final": false,
+        "readonly": false,
+        "parent": null,
+        "interfaces": [],
+        "properties": [],
+        "constants": [],
+        "methods": {
+            "profile": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "?Webong\\Proxy\\ProfileRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            },
+            "registerProfile": {
+                "abstract": true,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "Webong\\Proxy\\ProfileRecord",
+                "parameters": [
+                    {
+                        "name": "endpoint",
+                        "type": "Webong\\Proxy\\EndpointRecord",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "definition",
+                        "type": "Webong\\Proxy\\ProfileDefinition",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\WebhookRoute": {
+        "abstract": false,
+        "final": true,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [],
+        "properties": {
+            "destinationMetadata": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "headers": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "key": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "payload": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "scope": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "scope",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "key",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "payload",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "headers",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": []
+                    },
+                    {
+                        "name": "destinationMetadata",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": []
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -27,6 +27,7 @@ return [
         'subscriptions' => env('PROXY_SUBSCRIPTIONS_TABLE', 'subscriptions'),
         'endpoint_registrations' => env('PROXY_ENDPOINT_REGISTRATIONS_TABLE', 'endpoint_registrations'),
         'profiles' => env('PROXY_PROFILES_TABLE', 'profiles'),
+        'subscription_locks' => env('PROXY_SUBSCRIPTION_LOCKS_TABLE', 'subscription_locks'),
     ],
 
     /*

@@ -26,6 +26,9 @@ spl_autoload_register(static function (string $class): void {
     $relative = str_replace('\\', '/', substr($class, strlen($prefix))).'.php';
     $transport = preg_match('~^(Connection|Http|Tcp|Udp)/~', $relative) === 1;
     $path = __DIR__.'/../'.($transport ? 'packages/transport/src/' : 'src/').$relative;
+    if (! is_file($path)) {
+        $path = __DIR__.'/../packages/registry/src/'.$relative;
+    }
     if (is_file($path)) {
         require $path;
     }
@@ -62,6 +65,26 @@ $classes = [
     UdpException::class,
     GuzzleClientFactory::class,
 ];
+$registry = in_array('--registry', $argv, true);
+if ($registry) {
+    $classes = [
+        \Webong\Proxy\EndpointDefinition::class,
+        \Webong\Proxy\EndpointRecord::class,
+        \Webong\Proxy\DestinationDefinition::class,
+        \Webong\Proxy\DestinationRecord::class,
+        \Webong\Proxy\ProfileDefinition::class,
+        \Webong\Proxy\ProfileRecord::class,
+        \Webong\Proxy\ProvisionedEndpoint::class,
+        \Webong\Proxy\WebhookRoute::class,
+        \Webong\Proxy\Enums\WebhookProxyTargetType::class,
+        \Webong\Proxy\Registry\Contracts\EndpointRepository::class,
+        \Webong\Proxy\Registry\Contracts\DestinationRepository::class,
+        \Webong\Proxy\Registry\Contracts\ProfileRepository::class,
+        \Webong\Proxy\Contracts\EndpointProvider::class,
+        \Webong\Proxy\DatabaseEndpointProvider::class,
+        \Webong\Proxy\LaravelRegistryStore::class,
+    ];
+}
 $api = [];
 foreach ($classes as $class) {
     $reflection = new ReflectionClass($class);
@@ -95,7 +118,10 @@ foreach ($classes as $class) {
     $api[$class] = $entry;
 }
 ksort($api);
-$path = __DIR__.'/../spec/api/php-v0.3.json';
+// Enum cases in constants and defaults compare by their JSON wire value.
+$api = json_decode(json_encode($api, JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR), true, flags: JSON_THROW_ON_ERROR);
+$baseline = $registry ? 'php-registry-v0.4.json' : 'php-v0.3.json';
+$path = __DIR__.'/../spec/api/'.$baseline;
 if (in_array('--dump', $argv, true)) {
     echo json_encode($api, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR)."\n";
 } elseif (in_array('--write', $argv, true)) {
@@ -107,8 +133,8 @@ if (in_array('--dump', $argv, true)) {
             fwrite(STDERR, 'Changed API: '.$class."\n");
         }
     }
-    fwrite(STDERR, "Public PHP API changed; review spec/CONTRACT.md before updating spec/api/php-v0.3.json.\n");
+    fwrite(STDERR, "Public PHP API changed; review spec/CONTRACT.md before updating spec/api/{$baseline}.\n");
     exit(1);
 } else {
-    echo "PHP transport API matches frozen v0.3 baseline.\n";
+    echo $registry ? "PHP registry API matches v0.4 candidate baseline.\n" : "PHP transport API matches frozen v0.3 baseline.\n";
 }

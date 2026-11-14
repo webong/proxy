@@ -66,6 +66,7 @@ final class LaravelConsumerTest extends TestCase
 
     public function testInstalledProviderRegistriesProfilesAndMigrations(): void
     {
+        self::assertTrue(\Illuminate\Support\Facades\Schema::hasTable('subscription_locks'));
         $endpoint = app(EnsureEndpoint::class)->handle(new EndpointDefinition(
             client: 'consumer', externalId: 'source', signingSecret: 'fixture-secret', verificationToken: null,
             credentialOwnerId: 'owner', managed: false,
@@ -92,5 +93,13 @@ final class LaravelConsumerTest extends TestCase
         $file = (new ReflectionClass(\Webong\Proxy\Http\HttpProfile::class))->getFileName();
         self::assertStringContainsString('vendor/webong/proxy-transport/', $file);
         self::assertFalse(is_link(InstalledVersions::getInstallPath('webong/proxy-transport')));
+        $recordFile = (new ReflectionClass(\Webong\Proxy\EndpointRecord::class))->getFileName();
+        self::assertStringContainsString('vendor/webong/proxy-registry/', $recordFile);
+        self::assertFalse(is_link(InstalledVersions::getInstallPath('webong/proxy-registry')));
+        foreach ([\Webong\Proxy\Registry\Contracts\EndpointRepository::class,
+            \Webong\Proxy\Registry\Contracts\DestinationRepository::class,
+            \Webong\Proxy\Registry\Contracts\ProfileRepository::class] as $port) {
+            self::assertInstanceOf(\Webong\Proxy\LaravelRegistryStore::class, app($port));
+        }
     }
 }

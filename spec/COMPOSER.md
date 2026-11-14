@@ -1,8 +1,8 @@
 # Composer package layout (unreleased)
 
 This checkout prepares the next package generation; it does not change the
-published v0.3.1 artifacts. `webong/proxy-transport` 0.4.0 is an unpublished
-candidate. Archive-based consumer tests use a temporary Composer repository,
+published v0.3.1 artifacts. `webong/proxy-transport` and `webong/proxy-registry` 0.4.0 are unpublished
+candidates. Archive-based consumer tests use a temporary Composer repository,
 not a claim that Packagist already serves the new package.
 
 ## Ownership and dependency installation
@@ -10,15 +10,17 @@ not a claim that Packagist already serves the new package.
 ```text
 webong/proxy (existing Laravel integration and compatibility entry point)
   ├── webong/proxy-transport (portable PHP code, Guzzle; no Illuminate/Spatie)
-  ├── Illuminate registry integration
+  ├── webong/proxy-registry (plain records and repository ports; PHP only)
+  ├── Illuminate registry adapter
   └── existing Spatie webhook integration
 ```
 
-Endpoint/destination registries, subscriptions, named profiles, ownership,
-models, persistence, configuration and migrations remain in `webong/proxy` in
-this repository. Its provider and every existing public namespace remain valid.
-No registry data migration is introduced by this packaging change. Existing
-SQL upgrade requirements still apply when upgrading from an earlier release.
+The registry contracts and plain data types live in `webong/proxy-registry`.
+The Laravel registry implementations, subscriptions, named profile storage, ownership
+indexes, models, persistence, configuration and migrations remain in `webong/proxy`. Its provider and every existing public namespace remain valid.
+The packaging change itself needs no data conversion. The accompanying Laravel
+concurrency fix adds an adapter-owned subscription-locks migration; publish/run it
+before using the candidate adapter. Existing SQL upgrade requirements still apply.
 
 The neutral package owns `Webong\Proxy\Http`, `Connection`, `Tcp` and `Udp`.
 These namespaces and signatures are unchanged; no aliases/rebases or duplicate
@@ -42,7 +44,7 @@ The Go module, imports, profiles and source layout do not change.
 The root requires `webong/composer-source-plugin:^0.4.0` in require-dev and
 explicitly permits it under allow-plugins. Version 0.4.0 is published and supports
 the configuration used here; README examples using ^1.0 must not be copied.
-`extra.source-plugin.workspaces` names `packages/transport` literally so a typo
+`extra.source-plugin.workspaces` names `packages/transport` and `packages/registry` literally so a typo
 fails rather than silently skipping a glob.
 
 On a fresh clone (no vendor or local lock):
@@ -124,13 +126,14 @@ Choose the neutral package for independent dependency installation.
 
 ## Release order and verification
 
-1. Publish the packages/transport subtree as the independent Composer package
-   webong/proxy-transport, with its own root manifest and matching 0.4.0 tag.
+1. Publish the packages/transport and packages/registry subtrees as independent
+   Composer packages webong/proxy-transport and webong/proxy-registry, each with
+   its own root manifest and matching 0.4.0 tag.
    Packagist does not discover a second package from a repository subdirectory;
    a split repository or equivalent artifact registry must be configured.
 2. Verify a clean install from the intended public registry.
 3. Only then publish the parent release that requires ^0.4.0. Do not merge/release
-   an unsatisfiable default-registry installation before that dependency exists.
+   an unsatisfiable default-registry installation before both dependencies exist.
 
 No new repository, tag or external registry is created by this implementation.
 Local ZIP fixtures demonstrate the dependency graph and runtime behavior, while
@@ -148,3 +151,27 @@ registry/profile/migration behavior, legacy class-owner conflicts, and a fresh
 workspace bootstrap. Neutral consumers make real loopback HTTP/TCP/UDP requests
 and check that no Illuminate, Laravel or Spatie dependency was resolved. The
 existing frozen interface and PHP/Go regression gates remain unchanged.
+
+## Storage-neutral registry package
+
+The workspace also contains `packages/registry` (`webong/proxy-registry`, candidate
+0.4.0). It owns the existing plain endpoint/destination/profile definitions and
+records, the target-type enum and route data, plus the three repository ports.
+It requires only PHP. See the `webong/proxy-registry` README
+for identity, atomicity, error and schema ownership requirements.
+
+The parent `webong/proxy` package remains the Laravel adapter. It owns the Eloquent
+models, `LaravelRegistryStore`, legacy provider facade, encryption, config and all
+migrations. Its existing API and migration filenames are preserved. Moving the
+plain types to the required registry dependency does not require a database
+migration or application namespace change. Separately, the adapter's concurrency
+fix requires publishing/running `2026_11_14_000001_create_subscription_locks_table`;
+its rollback affects only mutex state. See the registry README for deployment order
+and custom table configuration. Framework-free applications install
+only `webong/proxy-registry` and supply the ports they need; they own their schemas.
+
+Publish and verify **both** child packages (`proxy-transport` and `proxy-registry`)
+at 0.4.0 before releasing the parent requiring them. The parent remains unreleased
+until both dependencies are available. The optional `php` projection for the
+registry package retains its source, README and license. Fresh ZIP install,
+projection and lock-clone tests cover registry-only and full Laravel consumers.

@@ -38,6 +38,16 @@ class WebProxyServiceProvider extends ServiceProvider
         $this->app->singleton(WebProxyRegistryManager::class);
         $this->app->singleton(GuzzleClientFactory::class);
 
+        // Applications may replace any storage port before this provider loads.
+        $this->app->scoped(LaravelRegistryStore::class, \Webong\Proxy\Laravel\DefaultRegistryStore::class);
+        foreach ([
+            \Webong\Proxy\Registry\Contracts\EndpointRepository::class,
+            \Webong\Proxy\Registry\Contracts\DestinationRepository::class,
+            \Webong\Proxy\Registry\Contracts\ProfileRepository::class,
+        ] as $contract) {
+            $this->app->bindIf($contract, fn (Container $container): LaravelRegistryStore => $container->make(LaravelRegistryStore::class));
+        }
+
         $this->app->singleton(WebhookPathTemplates::class);
 
         $this->app->scoped(WebhookContext::class);
