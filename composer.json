@@ -1,23 +1,18 @@
 {
-    "name": "webong/proxy",
-    "description": "Framework-neutral HTTP profiles, TCP/UDP proxy transports and storage-neutral registry contracts.",
-    "type": "library",
+    "name": "webong/proxy-workspace",
+    "description": "Development workspace for Proxy PHP, Laravel and Go components.",
+    "type": "project",
     "license": "MIT",
     "require": {
-        "php": "^8.3",
-        "guzzlehttp/guzzle": "^7.10"
+        "php": "^8.3"
     },
     "require-dev": {
         "orchestra/testbench": "^10.0 || ^11.0",
         "pestphp/pest": "^4.0",
         "pestphp/pest-plugin-laravel": "^4.0",
         "webong/composer-source-plugin": "^0.4.0",
+        "webong/proxy": "^0.4.0",
         "webong/proxy-laravel": "^0.4.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Webong\\Proxy\\": "src/"
-        }
     },
     "autoload-dev": {
         "psr-4": {
@@ -34,19 +29,9 @@
     "extra": {
         "source-plugin": {
             "workspaces": [
-                "packages/laravel"
-            ],
-            "surfaces": {
-                "php": {
-                    "include": [
-                        "src/**",
-                        "README.md",
-                        "CHANGELOG.md",
-                        "LICENSE",
-                        "spec/**"
-                    ]
-                }
-            }
+                "php",
+                "adapters/laravel"
+            ]
         }
     },
     "minimum-stability": "dev",
@@ -57,33 +42,5 @@
             "webong/composer-source-plugin": true
         },
         "sort-packages": true
-    },
-    "archive": {
-        "exclude": [
-            "/packages",
-            "/tests",
-            "/scripts",
-            "/.github",
-            "/composer.bootstrap.json",
-            "/composer.bootstrap.lock",
-            "/composer.lock",
-            "/Makefile",
-            "/phpunit.xml.dist",
-            "/go.mod",
-            "/httpclient",
-            "/httpprofile",
-            "/socketprofile",
-            "/tcpdial",
-            "/udpdial",
-            "/internal",
-            "/vendor",
-            "/.phpunit.cache",
-            "/composer-source.lock"
-        ]
-    },
-    "version": "0.4.0",
-    "conflict": {
-        "webong/proxy-transport": "*",
-        "webong/proxy-registry": "*"
     }
 }

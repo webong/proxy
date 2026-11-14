@@ -2,12 +2,20 @@
 
 ## Unreleased — 0.4.0 candidate
 
+- Organize components as `php/`, `adapters/laravel/` and `go/`, with a development
+  Composer workspace at the repository root. Preserve PHP namespaces and schemas.
+- Reject linked/missing shared fixtures before syncing, safely repair file mirrors,
+  fail standalone Go tests on empty fixture groups, and exercise these guards in CI.
+- Move the Go module to `github.com/webong/proxy/go`; consumers must update imports.
+  Go tags use `go/v0.4.0`, independently of PHP component release tags. Preserve
+  transport API shapes and JSON wire version 1. Embed synchronized shared testdata
+  so Go module tests and external-consumer checks work outside the monorepo.
+
 - Make `webong/proxy` the framework-neutral PHP core: transports, plain registry
   records and repository contracts require only PHP and Guzzle.
 - Move all Laravel/Spatie integration, Eloquent persistence, encrypted storage,
   providers, configuration and migrations to `webong/proxy-laravel`.
-- Preserve PHP namespaces, transport API signatures, migration filenames and the
-  Go module. Laravel consumers change their Composer requirement to the adapter;
+- Preserve PHP namespaces, transport API shapes and migration filenames. Laravel consumers change their Composer requirement to the adapter;
   applications referencing vendor resource paths must use its new install path.
 - Adopt Composer Source Plugin ^0.4 workspaces for local adapter development;
   consumers do not require the plugin. Validate real ZIP installs, no-dev and

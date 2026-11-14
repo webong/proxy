@@ -1,124 +1,134 @@
-# Composer package layout (unreleased 0.4.0)
+# Components, packaging and releases (unreleased 0.4.0)
 
 ```text
-webong/proxy (repository root; PHP + Guzzle)
-├── src/Connection, Http, Tcp, Udp         portable transports
-├── src/Registry/Contracts               storage ports
-├── src/*Record, *Definition, WebhookRoute plain registry data
-└── packages/laravel → webong/proxy-laravel (requires core ^0.4)
-    ├── src/                              Laravel/Spatie implementation
-    ├── config/                           Laravel configuration
-    └── database/                         migrations and legacy adoption
+composer.json                  webong/proxy-workspace: development only
+php/composer.json              webong/proxy: PHP + Guzzle, no Laravel
+adapters/laravel/composer.json  webong/proxy-laravel: Laravel/Spatie + PHP core
+go/go.mod                      github.com/webong/proxy/go: Go 1.23+
 ```
 
-There are exactly two PHP packages. Transport and registry code are combined in
-`webong/proxy`, which has no Illuminate/Spatie dependency, provider discovery or
-migration resources. `webong/proxy-laravel` owns all framework integration and
-storage, while keeping its existing `Webong\Proxy` namespaces. The Go module path
-and code are unchanged. Earlier experimental child manifests for proxy-transport
-and proxy-registry are removed; the core rejects their coexistence to prevent
-ambiguous class ownership if stale candidate archives are used.
+Transport and storage-neutral registry contracts are combined in the PHP core.
+The Laravel adapter owns every Eloquent model, encrypted store, provider, config
+file and migration. PHP namespaces remain `Webong\Proxy`; no duplicate classes or
+aliases are introduced. Go has its own module root and import prefix ending in
+`/go`. There is no root Go module or go.work file.
 
-## Development bootstrap
-
-The root requires the adapter only in require-dev to test the complete integration.
-The adapter requires core ^0.4; consumers never inherit this development cycle.
-Both candidate manifests currently specify version 0.4.0 so fresh workspaces without
-Git metadata resolve the same dependency graph. Keep manifests and release tags
-aligned on future version changes.
+## Development workspace
 
 ```sh
 php scripts/bootstrap-composer.php
 composer test
+go -C go test -race ./...
+go -C go vet ./...
+python3 scripts/sync_go_testdata.py --check
 make packaging
 make readiness PYTHON=/path/to/python-with-jsonschema
 ```
 
-The bootstrap seeds published Composer Source Plugin ^0.4.0 before installing the
-real manifest. It discovers the literal `packages/laravel` workspace and records a
-relative path, so fresh locked clones can recreate it. A checkout carrying the old
-ignored development composer.lock needs `composer update --prefer-dist` after the
-bootstrap seed; do not reuse that old graph as release evidence.
+Composer Source Plugin ^0.4 is development tooling. Bootstrap seeds the plugin,
+then resolves literal `php` and `adapters/laravel` workspaces. Their manifests use
+candidate version 0.4.0, so fresh checkouts without Git metadata resolve the same
+local graph. The root project is not a publishable library and has no version
+requirement from either component. Update the ignored old composer.lock after a
+layout change with `composer update --prefer-dist`.
 
-The plugin is development-only. Production consumers install normal archives
-without a plugin, custom path repositories, symlinks or any bootstrap script.
+Consumers use normal installed packages without the plugin, bootstrap script or
+path repositories. Root dev dependencies and scripts are never inherited.
 
-## Optional projections
+## Isolated distributions
 
-After installing the optional Composer Source Plugin, consumers may project `php`:
+PHP consumers resolve ZIPs whose root is the corresponding component directory.
+Both Composer archives and Git subtree archives are tested. Each PHP component's
+own .gitattributes and archive.exclude remove development vendor/lock/cache files.
+Core archives contain no adapter, Go, configuration or migration directories.
 
-```json
-{
-  "extra": {
-    "source-plugin": {
-      "projections": {
-        "webong/proxy": {"surfaces": ["php"]},
-        "webong/proxy-laravel": {"surfaces": ["php"]}
-      }
-    }
-  }
-}
-```
+Go module ZIPs contain only `go/` content, with paths relative to that directory.
+All Go source, internal packages, contract tests, snapshot tooling, README and
+LICENSE live there. Checked-in `go/testdata` mirrors make tests independent of
+parent directories. The repository's `spec` and shared TLS fixtures are canonical;
+`scripts/sync_go_testdata.py --check` rejects drift. Update canonical fixtures,
+then run the sync script. The checker rejects linked files/directories, missing
+canonical groups and stale mirrors; sync replaces file links without following
+them and refuses linked directories. Isolated regression tests run in schema CI
+and readiness. Standalone Go fixture suites also fail on missing/empty groups.
+Packaging extracts the isolated Go subtree and runs
+race tests and vet. A separate consumer downloads a correctly prefixed module ZIP
+through a temporary file GOPROXY with an empty private module cache and no replace
+or go.work. This validates Go's real module download/ZIP handling without creating
+a public version or polluting the user's module cache. Internal consumer guards
+also use GOPROXY=off and local replacement to isolate compile-time API checks.
 
-Core-only consumers omit the adapter entry. Surfaces preserve all runtime source,
-README/license and, for the adapter, config/migration resources. Projection only
-prunes files after dependency resolution; choose the core package itself to avoid
-Laravel and Spatie dependencies. Projection cannot target a package that is also a
-workspace; consumer projection tests therefore use installed ZIP copies.
+## Optional PHP projections
 
-## Upgrade and migration ownership
+After installing the optional Composer Source Plugin, consumers may select the
+`php` surface for `webong/proxy` and, when installed, `webong/proxy-laravel`.
+Core surfaces retain source, README and license; adapter surfaces also retain
+configuration and migrations. Projection prunes files after dependency resolution;
+it is not a substitute for choosing the framework-neutral core. Projection tests
+use installed archives, not development workspace symlinks.
 
-Existing Laravel consumers change their direct requirement from `webong/proxy:^0.3`
-to `webong/proxy-laravel:^0.4`; update any retained direct core constraint to ^0.4.
-If discovery was disabled for `webong/proxy`, rename that `dont-discover` entry to
-`webong/proxy-laravel`; `*` continues to disable all package discovery.
-Provider namespaces, publish tags, config keys, models, table names and recorded
-migration filenames are preserved. No database conversion is caused by moving
-files. Direct references to vendor config/migration paths must change from
-`vendor/webong/proxy` to `vendor/webong/proxy-laravel`.
+## PHP upgrade and schema ownership
 
-The previously introduced concurrency fix adds
-`2026_11_14_000001_create_subscription_locks_table`. Publish/run it before using the
-new adapter and upgrade subscription writers together. Durable mutex rows contain
-only framed registration-identity hashes; stop writers before cleanup or rollback.
-Rollback removes only mutex state. Earlier SQL migration safeguards still apply;
-see [SQL upgrades](SQL.md). The core owns no schema. Custom applications implement
-[registry ports](REGISTRY.md) and own their stores and migrations.
+Existing Laravel consumers replace their direct `webong/proxy:^0.3` requirement
+with `webong/proxy-laravel:^0.4`. Update any retained direct core constraint to
+^0.4 too. Rename an old `extra.laravel.dont-discover` entry for `webong/proxy` to
+`webong/proxy-laravel`; wildcard opt-outs remain effective. The adapter explicitly
+requires Laravel Framework ^12 or ^13, including Foundation traits used by jobs.
 
-## Publication order
+Provider namespaces, publish tags, config keys, table names and recorded migration
+filenames are unchanged. Direct vendor resource paths move from
+`vendor/webong/proxy` to `vendor/webong/proxy-laravel`. No data conversion is caused
+by moving source directories. Existing app-published migrations remain valid.
 
-1. Publish/verify core `webong/proxy` v0.4.0 from the existing repository root.
-2. Publish `packages/laravel` as independent `webong/proxy-laravel` 0.4.0, with its
-   manifest at the published repository/archive root. Packagist does not discover
-   subdirectory manifests automatically; configure a split repository or equivalent
-   artifact registry before releasing the adapter.
-3. Verify both packages from the intended public registry, plus a fresh Go module
-   consumer at v0.4.0. Local ZIP tests do not establish public availability.
+The concurrency fix requires publishing/running
+`2026_11_14_000001_create_subscription_locks_table` before using the new adapter.
+Upgrade subscription writers together. Durable mutex rows store identity hashes;
+stop writers before cleanup or rollback. The neutral core owns no schema; custom
+adapters own theirs. See [SQL upgrades](SQL.md) and [registry contracts](REGISTRY.md).
 
-No new tag, repository, registry registration or release is created by this layout
-implementation. Candidate publication remains a separate action.
+## Go upgrade
+
+Update imports from `github.com/webong/proxy/...` to
+`github.com/webong/proxy/go/...`, require the new module, then run `go mod tidy`
+in the consuming application. Old v0.3.x tags and imports remain immutable and
+available. Transport API shapes and JSON profile version 1 remain unchanged.
+The Go module uses tags such as **`go/v0.4.0`**. A root `v0.4.0` tag does not
+publish the nested Go module. See [the Go guide](../go/README.md).
+
+## Release prerequisites and order
+
+1. Configure an independent Composer VCS repository or artifact distribution for
+   the `php` subtree, retaining the package name **webong/proxy**. The existing
+   Packagist package must point to that distribution rather than this repository's
+   root development composer.json. Preserve all historical PHP versions and their
+   original source/dist references: old v0.3.x tags must never be recreated against
+   split subtree content. Verify fresh v0.3.1 installs and an existing locked v0.3.1
+   consumer both before and after changing the package's distribution configuration.
+   If the chosen distribution cannot retain historical versions, resolve that
+   publication strategy before retargeting; local 0.4 fixture tests do not prove a
+   future registry configuration preserves them. Packagist does not discover subdirectory
+   manifests automatically. Tag the PHP component distribution **v0.4.0** and
+   verify a public core-only install.
+2. Publish the `adapters/laravel` subtree as **webong/proxy-laravel**, with its
+   manifest at the published root and **v0.4.0** tag. It requires core ^0.4. Verify
+   a public fresh production install, Laravel boot, migrations and a v0.3.1 upgrade.
+3. Tag this repository **go/v0.4.0** at the validated commit. In a fresh external
+   module, run `go get github.com/webong/proxy/go@v0.4.0`, then exercise HTTP/TCP/UDP
+   with no replace directive, go.work, parent files or local module cache shortcut.
+
+Do not publish the root development Composer project as webong/proxy. PHP and Go
+have separate module/package tags and publication steps. No tag, repository,
+Packagist change or release is created by this layout implementation. Local ZIPs
+and local-replace consumer tests establish readiness, not public publication.
 
 ## Verification
 
-`make packaging` requires Git, Go, PHP ZIP and PDO SQLite support. It creates real Composer ZIP artifacts for the core and adapter.
-Composer-archive guards reject vendored dependencies, tests and adapter resources.
-A separate VCS archive test applies Git export rules rather than Composer filters:
-`.gitattributes` excludes `/packages`, so root VCS dist archives omit the Laravel
-adapter. Go sources, shared fixtures and scripts remain in that archive; its Go
-module is race-tested and vetted after extraction. Source clones intentionally
-contain the complete development repository; only runtime autoload/dependencies
-are isolated there. Actual consumers resolve the VCS-style core ZIP, not a smaller
-custom Composer archive.
-Neutral consumers exercise HTTP/TCP/UDP/SOCKS and a custom-schema profile repository
-in one installation, with no framework classes, migration resources or providers.
-Laravel 12/13 consumers discover only the adapter's provider, migrate its installed
-resources, use encrypted registries/profiles and transport clients, and verify
-actual class ownership. Tests also cover no-dev production installs, plugin-free
-lock clones, projections and fresh projected clones, old-release solver rejection,
-cold development bootstrap and portable workspace lock recreation. A fresh
-runtime-only adapter solve (without a Testbench-generated lock) loads queue jobs
-and delivery events. An actual public v0.3.1 consumer is seeded with persisted
-SQLite data and app-published migrations, upgraded to the adapter, and checked for
-unchanged IDs, ciphertext, configuration and migration history; only the pending
-mutex migration runs. Actual Laravel PackageManifest discovery checks cover
-normal discovery, renamed opt-outs and wildcard opt-outs.
+`make packaging` requires Composer, Git, Go, PHP ZIP and PDO SQLite. It creates
+real Composer and Git-subtree artifacts for both PHP components and an isolated
+Go archive. It tests neutral transport/registry use, no-dev production solves
+without Testbench, Laravel 12/13 discovery and opt-outs, encryption and stored
+profiles, fresh plugin-free lock clones, projections, cold two-workspace bootstrap
+and portable lock recreation. A public v0.3.1 consumer is seeded and upgraded;
+raw rows, ciphertexts, IDs and migration history are preserved, with only the
+pending mutex migration applied. Exported Go tests retain the frozen API-shape
+baseline and include independent-consumer compilation/execution on the new path.

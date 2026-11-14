@@ -1,0 +1,1 @@
+{"version": 1, "proxy": {"http": "socks5h://proxy.example", "https": "socks5h://proxy.example"}}

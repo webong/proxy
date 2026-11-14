@@ -1,0 +1,213 @@
+[
+  {
+    "name": "success-and-banner",
+    "response_hex": "485454502f312e312032303020436f6e6e656374696f6e2065737461626c69736865640d0a0d0a",
+    "success": true,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "all-2xx",
+    "response_hex": "485454502f312e31203239392054756e6e656c0d0a436f6e74656e742d4c656e6774683a203939390d0a5472616e736665722d456e636f64696e673a206368756e6b65640d0a0d0a",
+    "success": true,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "http10",
+    "response_hex": "485454502f312e3020323030204f4b0d0a0d0a",
+    "success": true,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "informational",
+    "response_hex": "485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e3120313033204561726c792048696e74730d0a4c696e6b3a20780d0a0d0a485454502f312e3120323030204f4b0d0a0d0a",
+    "success": true,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "fragmented",
+    "response_hex": "485454502f312e3120323030204f4b0d0a582d546573743a207965730d0a0d0a",
+    "success": true,
+    "host": "unresolved.example",
+    "port": 443,
+    "fragment": true
+  },
+  {
+    "name": "basic-auth",
+    "response_hex": "485454502f312e3120323030204f4b0d0a0d0a",
+    "success": true,
+    "host": "unresolved.example",
+    "port": 443,
+    "credentials": "u%40ser:p%3Ass"
+  },
+  {
+    "name": "empty-password",
+    "response_hex": "485454502f312e3120323030204f4b0d0a0d0a",
+    "success": true,
+    "host": "unresolved.example",
+    "port": 443,
+    "credentials": "user:"
+  },
+  {
+    "name": "ipv4",
+    "response_hex": "485454502f312e3120323030204f4b0d0a0d0a",
+    "success": true,
+    "host": "192.0.2.1",
+    "port": 443
+  },
+  {
+    "name": "ipv6",
+    "response_hex": "485454502f312e3120323030204f4b0d0a0d0a",
+    "success": true,
+    "host": "2001:db8::1",
+    "port": 443
+  },
+  {
+    "name": "auth-rejected",
+    "response_hex": "485454502f312e31203430372050726f78792041757468656e7469636174696f6e2052657175697265640d0a0d0a",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "redirect",
+    "response_hex": "485454502f312e312033303220466f756e640d0a4c6f636174696f6e3a20687474703a2f2f6f746865720d0a0d0a",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "rejected",
+    "response_hex": "485454502f312e3120353032204661696c7572650d0a0d0a",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "upgrade",
+    "response_hex": "485454502f312e312031303120537769746368696e672050726f746f636f6c730d0a0d0a",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "bad-status",
+    "response_hex": "485454502f3220323030204f4b0d0a0d0a",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "bad-code",
+    "response_hex": "485454502f312e3120323078204f4b0d0a0d0a",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "bare-lf",
+    "response_hex": "485454502f312e3120323030204f4b0a0a",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "folded",
+    "response_hex": "485454502f312e3120323030204f4b0d0a20583a206261640d0a0d0a",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "bad-header",
+    "response_hex": "485454502f312e3120323030204f4b0d0a426164204865616465723a20780d0a0d0a",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "control-header",
+    "response_hex": "485454502f312e3120323030204f4b0d0a583a206261640076616c75650d0a0d0a",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "truncated",
+    "response_hex": "485454502f312e3120323030204f4b0d0a583a20756e66696e6973686564",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "empty",
+    "response_hex": "",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "too-many-interim",
+    "response_hex": "485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443
+  },
+  {
+    "name": "oversized-headers",
+    "response_hex": "",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443,
+    "large": true
+  },
+  {
+    "name": "setup-timeout",
+    "response_hex": "",
+    "success": false,
+    "host": "unresolved.example",
+    "port": 443,
+    "stall": true
+  },
+  {
+    "name": "opaque-header-bytes",
+    "host": "unresolved.example",
+    "port": 443,
+    "response_hex": "485454502f312e312032303020ff0d0a583a2080ff0d0a0d0a",
+    "success": true
+  },
+  {
+    "name": "deadline-cleared",
+    "host": "unresolved.example",
+    "port": 443,
+    "response_hex": "485454502f312e3120323030204f4b0d0a0d0a",
+    "success": true,
+    "deadline_cleared": true
+  },
+  {
+    "name": "header-boundary-32768",
+    "host": "unresolved.example",
+    "port": 443,
+    "response_hex": "",
+    "header_bytes": 32768,
+    "success": true
+  },
+  {
+    "name": "header-boundary-32769",
+    "host": "unresolved.example",
+    "port": 443,
+    "response_hex": "",
+    "header_bytes": 32769,
+    "success": false
+  },
+  {
+    "name": "eight-informational",
+    "host": "unresolved.example",
+    "port": 443,
+    "response_hex": "485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e312031303020436f6e74696e75650d0a0d0a485454502f312e3120323030204f4b0d0a0d0a",
+    "success": true
+  }
+]

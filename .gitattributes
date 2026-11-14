@@ -1,3 +1,0 @@
-# Core VCS distributions must not contain the Laravel adapter.
-# Keep Go sources, tests/fixtures and scripts: Go's module archive needs them.
-/packages export-ignore

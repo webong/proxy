@@ -1,209 +1,51 @@
 # Proxy
 
-Framework-neutral PHP transport tools and storage-neutral registry contracts,
-with matching Go transport libraries. The PHP core requires PHP 8.3+ and Guzzle;
-it does not install Laravel, Illuminate, Spatie, a service provider or migrations.
+Transport libraries and storage-neutral registry contracts, with an optional
+Laravel adapter. The repository is a development workspace, not a Composer library
+package at its root.
 
-## Install
-
-```sh
-composer require webong/proxy:^0.4
+```text
+proxy/
+├── php/                 webong/proxy: PHP transports + registry contracts
+├── adapters/laravel/     webong/proxy-laravel: Laravel, Spatie, persistence, migrations
+├── go/                  github.com/webong/proxy/go: Go transports
+├── spec/                canonical shared wire contracts and fixtures
+├── tests/               PHP/integration tests and shared TLS fixtures
+└── scripts/             workspace bootstrap, API/schema and fixture-sync tools
 ```
 
-Version 0.4.0 is an unreleased candidate. Fresh archive tests verify this layout;
-public installation requires publishing the release first.
+- PHP core: `composer require webong/proxy:^0.4` — [guide](php/README.md).
+- Laravel: `composer require webong/proxy-laravel:^0.4` — [guide](adapters/laravel/README.md).
+- Go: `go get github.com/webong/proxy/go@v0.4.0` — [guide](go/README.md).
 
-For Laravel persistence and Spatie webhook integration, install
-`webong/proxy-laravel:^0.4` instead. That package requires this core and owns
-Eloquent models, encryption, providers, configuration and migrations. See the
-[Laravel integration guide](https://github.com/webong/proxy/blob/main/packages/laravel/README.md).
+These are unreleased 0.4.0 candidates; the commands require public publication.
+PHP namespaces remain unchanged. Go imports move from `github.com/webong/proxy/...`
+to `github.com/webong/proxy/go/...`; Go releases use `go/v0.4.0` tags. Existing
+v0.3.x tags remain immutable. Wire profiles remain JSON version 1.
 
-## Registry contracts
-
-The core includes endpoint, destination and profile records/definitions and
-`Webong\Proxy\Registry\Contracts\EndpointRepository`, `DestinationRepository`
-and `ProfileRepository`. Applications implement these ports using their own
-storage, schema and transaction strategy. No production store is bundled in the
-core. [Registry semantics](spec/REGISTRY.md) document identity and atomicity rules.
-The Laravel store is the first adapter; its classes retain their existing
-`Webong\Proxy` namespaces when the adapter is installed.
-
-## Portable HTTP profiles (PHP and Go)
-
-Proxy now includes a versioned HTTP connection profile shared by both libraries.
-See [the profile contract](spec/README.md) for supported settings and validation.
-Laravel registry/webhook APIs and the stored-profile `GuzzleClientFactory` live
-in `webong/proxy-laravel`, retaining their existing namespaces. Core normalization
-extracts portable connection settings; headers, TLS options and other Guzzle-only
-fields are not exported.
-The PHP classes under `Webong\Proxy\Http` do not require a Laravel application.
-
-```php
-use Webong\Proxy\Http\HttpProfileNormalizer;
-use Webong\Proxy\Http\GuzzleOptions;
-
-$profile = (new HttpProfileNormalizer())->normalize([
-    'proxy' => ['https' => 'http://proxy.example.test:8080'],
-    'options' => ['connect_timeout' => 5, 'timeout' => 15],
-]);
-$json = $profile->toJson();
-$client = new \GuzzleHttp\Client(GuzzleOptions::fromProfile($profile));
-```
-
-The Go module is `github.com/webong/proxy`:
-
-```go
-import (
-    "github.com/webong/proxy/httpprofile"
-    "github.com/webong/proxy/httpclient"
-)
-
-profile, err := httpprofile.Parse(profileJSON)
-if err != nil { return err }
-client, err := httpclient.New(profile, nil)
-if err != nil { return err }
-defer client.CloseIdleConnections()
-// Reuse client for requests made with this profile.
-```
-
-`httpclient.New` clones an optional base `*http.Transport`, preserving its TLS
-settings and dialer. Connect deadlines wrap supplied context-aware dialers, including TLS dialers.
-The adapters round positive deadlines up to milliseconds. Custom Go dialers
-must honor their context; legacy `Dial` and `DialTLS` are rejected with a connect timeout. With a nil base,
-it uses package-owned standard transport defaults, independent of later changes
-to `http.DefaultTransport`. Missing timeouts use the underlying
-transport defaults and no overall request deadline. Caller-supplied clients own
-redirect and destination authorization policies. No queue or registry persistence is included in the Go library.
-
-Run the Go checks with `go test -race ./...` and `go vet ./...`.
-
-## TCP dialers and SOCKS5
-
-The v0.3.0 transport contract is frozen for its patch line. See [the public
-contract](spec/CONTRACT.md), [adoption guide](spec/ADOPTING.md), and
-[release notes](CHANGELOG.md). Package v0.3.0 retains wire `version: 1`;
-it does not declare a package v1 API.
-
-Both libraries now provide direct TCP, SOCKS5 CONNECT, and HTTP/HTTPS CONNECT dialers.
-For HTTP CONNECT use `http://user:password@proxy.example:8080` in a TCP profile;
-credentials are optional, Basic authentication is supported, and the proxy resolves
-the target hostname.
-
-Use `https://` to secure the proxy hop (default port 443); certificate and
-hostname verification are always enabled. Private CAs use Go's
-`tcpdial.WithProxyRootCAs(roots)` or PHP's `proxyCaFile` constructor argument.
-Go supports nesting target TLS inside this tunnel; the PHP native stream API
-provides the proxy TLS layer only. See the TCP contract for that limitation.
-
-`socks5://` resolves destination names locally; `socks5h://` resolves them at the proxy.
-Both support IPv4, IPv6, and optional username/password authentication.
-
-```php
-use Webong\Proxy\Tcp\TcpProfile;
-use Webong\Proxy\Tcp\TcpDialer;
-
-$profile = TcpProfile::fromArray([
-    'version' => 1,
-    'proxy' => 'socks5h://proxy.example.test:1080',
-    'connect_timeout_seconds' => 5,
-]);
-$stream = (new TcpDialer($profile))->dial('service.example.test', 9000);
-try {
-    // Set application I/O timeouts and perform the application protocol here.
-} finally {
-    fclose($stream);
-}
-```
-
-```go
-import "github.com/webong/proxy/tcpdial"
-
-profile := tcpdial.Profile{
-    Version: 1,
-    Proxy: "socks5h://proxy.example.test:1080",
-    ConnectTimeoutSeconds: 5,
-}
-dialer, err := tcpdial.New(profile, nil, nil)
-if err != nil { return err }
-conn, err := dialer.DialContext(ctx, "tcp", "service.example.test:9000")
-if err != nil { return err }
-defer conn.Close()
-// Set application deadlines and perform the application protocol here.
-```
-
-Go callers that previously passed `socketprofile.Profile` into `tcpdial.New`
-should convert with `tcpdial.Profile(sharedProfile)`, or construct a
-`tcpdial.Profile` directly. TCP profiles now validate HTTP CONNECT independently
-of the shared SOCKS-only UDP profile.
-
-The HTTP profile adapters also accept SOCKS proxy URLs. PHP SOCKS HTTP requires
-ext-curl; mandatory authenticated SOCKS HTTP additionally requires libcurl 8.23+.
-The raw PHP TCP dialer supports authentication without cURL. Read the
-[TCP contract](spec/tcp.md) for setup timeouts, PHP blocking DNS limitations,
-custom connectors/resolvers, TLS ownership, and protocol boundaries.
-
-## UDP and SOCKS5 UDP ASSOCIATE
-
-Both libraries provide direct UDP sockets and owning SOCKS5 UDP associations.
-They preserve datagram boundaries, binary/empty payloads, and source addresses.
-The TCP control connection remains open until the association closes.
-
-```php
-use Webong\Proxy\Udp\UdpProfile;
-use Webong\Proxy\Udp\UdpDialer;
-
-$profile = UdpProfile::fromArray([
-    'version' => 1,
-    'proxy' => 'socks5h://proxy.example.test:1080',
-]);
-$udp = (new UdpDialer($profile))->open();
-try {
-    $udp->sendTo('ping', 'service.example.test', 9000);
-    $reply = $udp->receive(5); // payload, host, port
-} finally {
-    $udp->close();
-}
-```
-
-```go
-import "github.com/webong/proxy/udpdial"
-
-profile := udpdial.Profile{Version: 1, Proxy: "socks5h://proxy.example.test:1080"}
-dialer, err := udpdial.New(profile, nil, nil)
-if err != nil { return err }
-udp, err := dialer.Open(ctx, "")
-if err != nil { return err }
-defer udp.Close()
-udp.SetDeadline(time.Now().Add(5 * time.Second))
-_, err = udp.WriteTo([]byte("ping"), udpdial.Address{Host: "service.example.test", Port: 9000})
-if err != nil { return err }
-buffer := make([]byte, udpdial.MaxWireSize)
-n, source, err := udp.ReadFrom(buffer)
-// Handle err, buffer[:n], and source here.
-```
-
-Omit `proxy` for direct UDP. Raw UDP authentication needs no cURL extension.
-The [UDP contract](spec/udp.md) explains DNS modes, IPv6 bindings, payload limits,
-control-connection lifetime, source filtering, and unsupported SOCKS fragmentation.
-
-## Development and upgrade
-
-The repository root is the `webong/proxy` Composer package. `packages/laravel` is
-its `webong/proxy-laravel` development workspace, linked with Composer Source
-Plugin. The adapter is a development dependency of this checkout, never a runtime
-dependency of the core. Ordinary consumers do not need the plugin.
+## Development
 
 ```sh
 php scripts/bootstrap-composer.php
 composer test
+go -C go test -race ./...
+go -C go vet ./...
+python3 scripts/sync_go_testdata.py --check
 make packaging
+make readiness PYTHON=/path/to/python-with-jsonschema
 ```
 
-PHP namespaces and the Go module path `github.com/webong/proxy` are unchanged.
-Existing Laravel consumers must replace their old direct `webong/proxy:^0.3`
-requirement with `webong/proxy-laravel:^0.4` (or update both constraints if retaining
-a direct core requirement). The package split does not convert registry data.
-The Laravel adapter still requires the subscription-lock migration introduced by
-the concurrency fix; publish/run it before using the new adapter.
-See [Composer packaging and release order](spec/COMPOSER.md),
-[public contracts](spec/CONTRACT.md) and [SQL upgrades](spec/SQL.md).
+Composer Source Plugin links `php` and `adapters/laravel` as local development
+workspaces. Consumers do not need the plugin. A checkout carrying the previous
+layout's ignored composer.lock needs `composer update --prefer-dist` after seeding
+the plugin. All language tests run without a root go.mod or go.work file.
+
+Shared fixtures remain canonical under `spec/` and `tests/fixtures/tls`. The Go
+module contains checked-in, byte-identical mirrors under `go/testdata` so its
+published module ZIP and independent tests never need files outside `go/`. After
+editing shared fixtures, run `python3 scripts/sync_go_testdata.py`; CI checks drift.
+
+See [packaging, upgrades and release order](spec/COMPOSER.md),
+[transport contracts](spec/CONTRACT.md), and [registry contracts](spec/REGISTRY.md).
+No root Composer package or tag is a substitute for publishing the PHP component
+subtrees through their configured Composer repositories.

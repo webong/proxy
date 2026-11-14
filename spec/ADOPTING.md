@@ -1,6 +1,8 @@
 # Adopting Proxy v0.3.0
 
 For the unreleased v0.4 package split, use [the Composer upgrade guide](COMPOSER.md).
+The Go module now lives in `go/` with import prefix `github.com/webong/proxy/go`
+and tags such as `go/v0.4.0`; [the Go guide](../go/README.md) describes that change.
 The migration statements below apply to the historical v0.3.0 transport release.
 
 ## Why this guide exists

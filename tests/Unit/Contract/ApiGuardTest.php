@@ -14,7 +14,7 @@ function withTransportApiFixture(callable $test): void
             }
             copy(__DIR__.'/../../../'.$file, $root.'/'.$file);
         }
-        foreach (['src', 'packages/laravel/src'] as $directory) {
+        foreach (['php/src', 'adapters/laravel/src'] as $directory) {
             $source = __DIR__.'/../../../'.$directory;
             $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS));
             foreach ($files as $file) {
@@ -62,16 +62,16 @@ it('rejects source-breaking PHP API mutations', function (string $path, string $
         expect($status)->toBe(1)->and($output)->toContain('Public PHP API changed');
     });
 })->with([
-    'abstract class' => ['src/Connection/SocketProfile.php', 'readonly class SocketProfile', 'abstract readonly class SocketProfile'],
-    'reference return' => ['src/Http/HttpProfile.php', 'public function toArray(): array', 'public function &toArray(): array'],
-    'named argument' => ['src/Http/HttpProfile.php', 'proxyFor(string $scheme', 'proxyFor(string $changedName'],
+    'abstract class' => ['php/src/Connection/SocketProfile.php', 'readonly class SocketProfile', 'abstract readonly class SocketProfile'],
+    'reference return' => ['php/src/Http/HttpProfile.php', 'public function toArray(): array', 'public function &toArray(): array'],
+    'named argument' => ['php/src/Http/HttpProfile.php', 'proxyFor(string $scheme', 'proxyFor(string $changedName'],
 ]);
 
 
 it('guards neutral repository and legacy record signatures', function (): void {
     withTransportApiFixture(function (string $root): void {
         expect(runTransportApiGuard($root, true)[0])->toBe(0);
-        $file = $root.'/src/Registry/Contracts/DestinationRepository.php';
+        $file = $root.'/php/src/Registry/Contracts/DestinationRepository.php';
         file_put_contents($file, str_replace('): array;', '): iterable;', file_get_contents($file)));
         [$status, $output] = runTransportApiGuard($root, true);
         expect($status)->toBe(1)->and($output)->toContain('DestinationRepository');
