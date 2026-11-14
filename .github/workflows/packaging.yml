@@ -1,0 +1,29 @@
+name: Composer packaging
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  consumers:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.3'
+            laravel: '12'
+          - php: '8.5'
+            laravel: '13'
+    env:
+      PROXY_PACKAGING_LARAVEL: ${{ matrix.laravel }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, pdo_sqlite, curl, zip
+          coverage: none
+      - run: php scripts/bootstrap-composer.php
+      - run: composer validate --strict
+      - run: composer validate packages/transport/composer.json --strict --no-check-version
+      - run: composer validate packages/registry/composer.json --strict --no-check-version
+      - run: php tests/packaging/run.php

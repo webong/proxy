@@ -1,0 +1,15 @@
+{
+    "name": "webong/proxy-workspace-bootstrap",
+    "description": "Development bootstrap for the Proxy Composer workspace.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "webong/composer-source-plugin": "^0.4.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "webong/composer-source-plugin": true,
+            "pestphp/pest-plugin": true
+        }
+    }
+}

@@ -206,6 +206,7 @@ if (getenv('PROXY_TEST_DB') === 'pgsql') {
         }
         $model = \Webong\Proxy\Models\WebProxyDestination::create($attributes);
         $before = (array) DB::table('subscriptions')->where('id', $model->id)->first();
+        $this->artisan('migrate:rollback', ['--step' => 1, '--force' => true])->assertSuccessful();
         expect(fn () => $this->artisan('migrate:rollback', ['--step' => 1, '--force' => true])->run())
             ->toThrow(\Illuminate\Database\QueryException::class);
         expect((array) DB::table('subscriptions')->where('id', $model->id)->first())->toBe($before)
@@ -222,6 +223,9 @@ it('preserves populated migration history through rollback or explicit refusal',
         'target_type' => 'request', 'target' => 'https://example.test/hook',
     ];
     $row = \Webong\Proxy\Models\WebProxyDestination::create($values);
+    // The new lock migration rolls back independently before the older identity migration.
+    $this->artisan('migrate:rollback', ['--step' => 1, '--force' => true])->assertSuccessful();
+    expect(Schema::hasTable('subscription_locks'))->toBeFalse();
     $migration = '2026_11_12_000001_use_portable_subscription_identity';
     if (in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
         expect(fn () => $this->artisan('migrate:rollback', ['--step' => 1, '--force' => true])->run())
@@ -235,4 +239,31 @@ it('preserves populated migration history through rollback or explicit refusal',
         expect(DB::table('migrations')->where('migration', $migration)->exists())->toBeTrue();
     }
     expect(DB::table('subscriptions')->where('id', $row->id)->value('registration_hash'))->toBe($row->registration_hash);
+});
+
+
+it('upgrades and rolls back the adapter mutex schema without changing registry data', function (): void {
+    $endpoint = \Webong\Proxy\Tests\Support\WebhookFixtures::endpoint();
+    $destination = \Webong\Proxy\Tests\Support\WebhookFixtures::destination($endpoint);
+    $before = (array) DB::table('subscriptions')->where('id', $destination->id)->first();
+    $migration = require __DIR__.'/../../database/migrations/2026_11_14_000001_create_subscription_locks_table.php';
+    $migration->down();
+    expect(Schema::hasTable('subscription_locks'))->toBeFalse();
+    $migration->up();
+    expect(DB::table('subscription_locks')->count())->toBe(0)
+        ->and((array) DB::table('subscriptions')->where('id', $destination->id)->first())->toBe($before);
+    config()->set('proxy.tables.subscription_locks', 'app_subscription_mutexes');
+    try {
+        $migration->up();
+        DB::transaction(fn () => \Webong\Proxy\Database\SubscriptionLock::acquire(new \Webong\Proxy\DestinationDefinition(
+            'owner', 'registration', 'events', 'scope', 'key', 'https://receiver.test',
+        )));
+        expect(DB::table('app_subscription_mutexes')->count())->toBe(1);
+        $migration->down();
+        expect(Schema::hasTable('app_subscription_mutexes'))->toBeFalse()
+            ->and(Schema::hasTable('subscription_locks'))->toBeTrue();
+    } finally {
+        Schema::dropIfExists('app_subscription_mutexes');
+        config()->set('proxy.tables.subscription_locks', 'subscription_locks');
+    }
 });

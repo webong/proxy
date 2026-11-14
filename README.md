@@ -28,6 +28,7 @@ The normal migration set creates:
 - `subscriptions`
 - `endpoint_registrations`
 - `profiles`
+- `subscription_locks` (Laravel adapter transaction mutexes, unreleased)
 
 All table names are configurable in `config/proxy.php` or through the matching
 `PROXY_*_TABLE` environment variables.
@@ -153,6 +154,19 @@ not included in `proxy-migrations`.
 ```bash
 composer test
 ```
+
+## Composer development packaging (unreleased)
+
+The next package candidate keeps this full Laravel integration in
+`webong/proxy` and provides `webong/proxy-transport` for PHP transport-only
+consumers. Registries and persistence remain here; public namespaces and the Go
+module are unchanged. The new transport package is not published yet.
+
+For local development, run `php scripts/bootstrap-composer.php` on a fresh clone.
+The Composer Source Plugin links `packages/transport` as a workspace. Ordinary
+published-package consumers will not need the plugin. See
+[package installation, bootstrap and release order](spec/COMPOSER.md) before
+changing dependencies; projection alone cannot remove Laravel requirements.
 
 ## Portable HTTP profiles (PHP and Go)
 
@@ -320,3 +334,20 @@ MariaDB. Existing registries require an additive subscription-identity migration
 [SQL storage and upgrade notes](spec/SQL.md) for supported versions, the portable
 subscription identity migration, partial MySQL migration recovery and rollback
 requirements.
+
+### Storage-neutral registry contracts (unreleased)
+
+`packages/registry` provides `webong/proxy-registry`: plain endpoint, destination
+and profile records and repository contracts, requiring only PHP. Custom apps own
+their stores and schemas. This package (`webong/proxy`) remains the first Laravel
+adapter, owning Eloquent persistence, encryption and migrations while preserving
+its existing public APIs. See the `webong/proxy-registry` README for the storage contract.
+
+
+The unreleased Laravel adapter concurrency fix also adds
+`2026_11_14_000001_create_subscription_locks_table`. Existing Laravel installations
+must publish the new `proxy-migrations` file and run `php artisan migrate` before
+using the new adapter. It creates only registration mutex rows; it does not rewrite
+endpoint, subscription or profile data. Configure `proxy.tables.subscription_locks`
+(or `PROXY_SUBSCRIPTION_LOCKS_TABLE`) before migrating if a custom table name is
+needed. The neutral registry package has no migration dependency.

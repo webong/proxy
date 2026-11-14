@@ -29,6 +29,13 @@ class DatabaseDestinationAttacher
         $this->validate($endpoint, $definition);
 
         return DB::transaction(function () use ($endpoint, $definition): WebProxyDestination {
+            \Webong\Proxy\Database\SubscriptionLock::acquire($definition);
+
+            // Lock a persistent row even when the route has no subscribers yet.
+            // Locking only subscription rows cannot serialize first attachments.
+            $endpoint = WebProxyEndpoint::query()->lockForUpdate()->findOrFail($endpoint->getKey());
+            $this->validate($endpoint, $definition);
+
             WebProxyDestination::query()
                 ->whereIdentity('owner_id', $definition->ownerId)
                 ->whereIdentity('registration_id', $definition->registrationId)
