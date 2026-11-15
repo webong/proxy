@@ -18,7 +18,7 @@ proxy/
 - Laravel: `composer require webong/proxy-laravel:^0.4` — [guide](adapters/laravel/README.md).
 - Go: `go get github.com/webong/proxy/go@v0.4.0` — [guide](go/README.md).
 
-These are unreleased 0.4.0 candidates; the commands require public publication.
+Version 0.4.0 uses independent PHP distributions and the nested Go module.
 PHP namespaces remain unchanged. Go imports move from `github.com/webong/proxy/...`
 to `github.com/webong/proxy/go/...`; Go releases use `go/v0.4.0` tags. Existing
 v0.3.x tags remain immutable. Wire profiles remain JSON version 1.

@@ -10,8 +10,8 @@ it does not install Laravel, Illuminate, Spatie, a service provider or migration
 composer require webong/proxy:^0.4
 ```
 
-Version 0.4.0 is an unreleased candidate. Fresh archive tests verify this layout;
-public installation requires publishing the release first.
+Version 0.4.0 is distributed from [proxy-php](https://github.com/webong/proxy-php).
+Development and issue tracking remain in [proxy](https://github.com/webong/proxy).
 
 For Laravel persistence and Spatie webhook integration, install
 `webong/proxy-laravel:^0.4` instead. That package requires this core and owns

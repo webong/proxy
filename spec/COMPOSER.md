@@ -1,4 +1,4 @@
-# Components, packaging and releases (unreleased 0.4.0)
+# Components, packaging and releases (0.4.0)
 
 ```text
 composer.json                  webong/proxy-workspace: development only
@@ -27,7 +27,7 @@ make readiness PYTHON=/path/to/python-with-jsonschema
 
 Composer Source Plugin ^0.4 is development tooling. Bootstrap seeds the plugin,
 then resolves literal `php` and `adapters/laravel` workspaces. Their manifests use
-candidate version 0.4.0, so fresh checkouts without Git metadata resolve the same
+workspace version 0.4.0, so fresh checkouts without Git metadata resolve the same
 local graph. The root project is not a publishable library and has no version
 requirement from either component. Update the ignored old composer.lock after a
 layout change with `composer update --prefer-dist`.
@@ -117,9 +117,14 @@ publish the nested Go module. See [the Go guide](../go/README.md).
    with no replace directive, go.work, parent files or local module cache shortcut.
 
 Do not publish the root development Composer project as webong/proxy. PHP and Go
-have separate module/package tags and publication steps. No tag, repository,
-Packagist change or release is created by this layout implementation. Local ZIPs
-and local-replace consumer tests establish readiness, not public publication.
+have separate module/package tags and publication steps. Local ZIPs and local-replace consumer tests establish readiness, not public
+publication. Verify public installs after publishing each release.
+
+The PHP core distribution is [webong/proxy-php](https://github.com/webong/proxy-php);
+the adapter distribution is [webong/proxy-laravel](https://github.com/webong/proxy-laravel).
+Both are generated from this monorepo. Submit changes and issues here. Preserve
+all historical core tags at their original references and use normal Packagist
+updates, not source/dist URL rewrites, when changing the registry source.
 
 ## Verification
 
