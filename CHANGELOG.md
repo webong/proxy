@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — 0.4.0 candidate
+## v0.4.0 — 2026-11-15
 
 - Organize components as `php/`, `adapters/laravel/` and `go/`, with a development
   Composer workspace at the repository root. Preserve PHP namespaces and schemas.

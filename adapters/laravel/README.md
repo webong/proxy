@@ -27,7 +27,7 @@ The normal migration set creates:
 - `subscriptions`
 - `endpoint_registrations`
 - `profiles`
-- `subscription_locks` (Laravel adapter transaction mutexes, unreleased)
+- `subscription_locks` (Laravel adapter transaction mutexes)
 
 All table names are configurable in `config/proxy.php` or through the matching
 `PROXY_*_TABLE` environment variables.
@@ -150,7 +150,7 @@ not included in `proxy-migrations`.
 
 ## Upgrade from Proxy 0.3
 
-Version 0.4.0 is an unreleased candidate. Change the application's Composer
+For version 0.4.0, change the application's Composer
 requirement from `webong/proxy:^0.3` to `webong/proxy-laravel:^0.4`. The adapter
 requires `webong/proxy:^0.4`, which now combines transports and registry contracts.
 If a direct core requirement is retained, update it to ^0.4 as well. Applications

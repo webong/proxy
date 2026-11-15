@@ -8,7 +8,7 @@ ASSOCIATE. The module has no external Go dependencies and no registry store.
 go get github.com/webong/proxy/go@v0.4.0
 ```
 
-Version 0.4.0 is unreleased. Publication requires the repository tag
+Version 0.4.0 uses the repository tag
 **`go/v0.4.0`**, whose module root is this directory. Root `v0.4.0` tags do not
 release this nested Go module.
 
