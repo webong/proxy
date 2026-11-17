@@ -189,8 +189,18 @@ for kind, name in [("core", "webong/proxy"), ("adapter", "webong/proxy-laravel")
             assert not (zipped / "vendor" / package["name"] / ".git").exists()
     fixture = "neutral.php" if kind == "core" else "production.php"
     print(run("php", str(SOURCE / "tests/packaging" / fixture), cwd=zipped), flush=True)
+# Relocate historical downloads only inside this disposable test index. Frozen
+# production metadata remains untouched; this is not a public installation test.
+run("python3", str(SOURCE / "tests/packaging/materialize_history.py"),
+    "--output-dir", str(LAB / "historical"))
+historical_fixtures = LAB / "historical/packages.json"
+local_history = json.loads(historical_fixtures.read_text())["packages"]
+for name, versions in local_history.items():
+    for version, record in versions.items():
+        packages[name][version] = record
+write(index, {"packages": packages})
 print(run("python3", str(SOURCE / "tests/packaging/history.py"),
-          "--index", str(index)), flush=True)
+          "--index", str(index), "--historical-fixtures", str(historical_fixtures)), flush=True)
 major = os.environ.get("PROXY_PACKAGING_LARAVEL", "12")
 run("composer", "require", "--dev", "orchestra/testbench:" + ("^10.0" if major == "12" else "^11.0"),
     "--with-all-dependencies", "--no-interaction", cwd=consumer)

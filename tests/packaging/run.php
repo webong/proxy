@@ -165,6 +165,11 @@ $moduleInfo = json_decode(command(['go', 'list', '-m', '-json', $module], $consu
 check(! isset($moduleInfo['Replace']) && str_starts_with($moduleInfo['Dir'], $lab.'/go-module-cache/'),
     'Go consumer bypassed the fresh module download.');
 echo "PASS Go module ZIP: empty cache download and independent consumer without replace\n";
+// Historical upgrades use immutable monorepo trees, not deleted public hosts.
+command(['python3', $source.'/tests/packaging/materialize_history.py', '--output-dir='.$lab.'/historical'],
+    $source, $lab.'/archive-home');
+$historical = json_decode(file_get_contents($lab.'/historical/packages.json'), true, flags: JSON_THROW_ON_ERROR);
+$packages['webong/proxy']['v0.3.1'] = $historical['packages']['webong/proxy']['v0.3.1'];
 writeJson($lab.'/artifacts/packages.json', ['packages' => $packages]);
 echo "PASS component VCS exports: isolated PHP packages and standalone Go race/vet\n";
 
@@ -263,7 +268,7 @@ foreach (['neutral', 'full'] as $kind) {
     echo "PASS {$kind}: projection and fresh locked clone retain runtime and metadata\n";
 }
 
-// Upgrade a real public 0.3.1 consumer with application-owned published migrations.
+// Upgrade the exact historical 0.3.1 package tree with application-owned published migrations.
 $upgrade = $lab.'/upgrade';
 mkdir($upgrade);
 touch($upgrade.'/upgrade.sqlite');
@@ -282,7 +287,7 @@ writeJson($upgrade.'/composer.json', $manifest);
 command(['composer', 'update', '--with-all-dependencies', '--prefer-dist', '--no-plugins', '--no-interaction'], $upgrade, $upgrade.'/home');
 command([PHP_BINARY, 'vendor/bin/phpunit', '--no-configuration', '--bootstrap', 'vendor/autoload.php', $source.'/tests/packaging/UpgradeConsumerTest.php'],
     $upgrade, $upgrade.'/home', ['PROXY_UPGRADE_PHASE' => 'verify']);
-echo "PASS upgrade: public 0.3.1 data, ciphertext, identities and migration history preserved\n";
+echo "PASS upgrade: historical monorepo 0.3.1 data, ciphertext, identities and migration history preserved\n";
 
 // The adapter cannot coexist with legacy Proxy releases owning its classes.
 $dir = $lab.'/legacy-conflict';

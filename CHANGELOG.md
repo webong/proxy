@@ -15,6 +15,8 @@
   signed tag workflow and pending reference recovery after the separate
   distribution repositories were deleted. No package publication or registry
   repair is included; PHP APIs and Go module versions remain unchanged.
+- Run historical compatibility tests from exact monorepo release trees, avoiding
+  deleted download hosts without claiming public install availability.
 
 ## v0.4.0 — 2026-11-15
 

@@ -112,14 +112,20 @@ def check_data_upgrade(index):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--index", type=Path, required=True)
+    parser.add_argument("--historical-fixtures", type=Path, required=True)
     args = parser.parse_args()
     index = args.index.resolve()
     print(f"Historical install fixtures: {LAB}", flush=True)
     history = json.loads((SOURCE / "spec/composer/history.json").read_text())["packages"]
     merged = json.loads(index.read_text())["packages"]
+    relocated = json.loads(args.historical_fixtures.read_text())["packages"]
     for name, versions in history.items():
         for version, record in versions.items():
-            assert merged[name][version] == record, "Historical metadata was changed"
+            fixture = relocated[name][version]
+            assert {k: v for k, v in fixture.items() if k != "dist"} == {k: v for k, v in record.items() if k != "dist"}
+            assert fixture["dist"]["url"].startswith("file://")
+            assert fixture["dist"]["reference"] == record["source"]["reference"]
+            assert merged[name][version] == fixture, "Unexpected historical fixture metadata"
     check_inventory(index, history)
     check_partial_updates(index)
     check_data_upgrade(index)

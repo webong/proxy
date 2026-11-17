@@ -14,7 +14,10 @@ A reviewed migration must restore the exact component commits inside the monorep
 and prepare installable metadata without recreating separate repositories or
 moving existing tags. That migration is not implemented here. Existing lockfiles
 with deleted URLs need explicit updates; catalog registration alone cannot fix
-them. Historical cold-install tests must be rerun after recovery.
+them. Public historical cold installs must be reverified after recovery. Compatibility
+CI uses test-only ZIPs reconstructed from immutable monorepo trees; it does not
+verify the deleted public download URLs. The 0.4.0 subtree IDs are pinned to the
+original component trees, rather than using current source files.
 
 Generate new metadata into `.publication/generated/`, then run:
 

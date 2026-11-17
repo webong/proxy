@@ -17,6 +17,8 @@ jobs:
       PROXY_PACKAGING_LARAVEL: ${{ matrix.laravel }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'

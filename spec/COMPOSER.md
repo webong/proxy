@@ -189,7 +189,8 @@ The user requested deletion of `webong/proxy-php` and `webong/proxy-laravel`;
 both repositories were deleted on 2026-11-16 after Git/release backups were
 verified. Do not recreate separate distribution repositories. Packagist records
 and existing locks still point to those deleted URLs, so clean PHP installs and
-cold historical-install tests are currently blocked. Local preservation tests
+public cold historical installs are currently blocked. Compatibility CI uses
+exact historical monorepo trees instead of those unavailable hosts. Local preservation tests
 passed before deletion; that evidence does not establish post-deletion availability.
 
 Before publishing this catalog, recover the exact historical component commits
@@ -215,9 +216,13 @@ not fix them. Do not publish the generated index while it retains dead URLs.
    Never refresh the frozen baseline to rewrite a release; add new versions via
    generated records, retaining the prior published index. Inspect and retain
    all previous catalog versions/refs before first publication or any recovery.
-   Before deletion, local tests solved old exact versions through a canonical catalog, replayed
-   old locks from empty caches, exercised partial updates and performed a real
-   0.3.1 data upgrade. Repeat these tests after historical-reference recovery;
+   Compatibility tests solve old exact versions through a disposable index,
+   replay locks from empty caches and exercise partial updates/data upgrades.
+   Historical ZIPs are created from immutable monorepo trees: pre-split releases
+   use their original commits; 0.4.0 components use pinned subtree IDs from the
+   original release commit. Only fixture download URLs change; the frozen public
+   metadata remains unchanged. These are compatibility tests, not public install
+   verification. Repeat public installation tests after reference recovery;
    their current public download URLs are unavailable. Public URL availability
    and Packagist catalog registration need verification at the authorized release step.
 3. With explicit publication approval, push new split refs before committing and
@@ -259,3 +264,17 @@ dependency graphs, source/ZIP installs, Laravel behavior, cold plugin-free lock 
 solves/partial updates/data upgrades, historical metadata retention and refusal
 to move stable versions. Separate bootstrap scenarios cover old developer locks,
 valid seed-lock replay and damaged vendor repairs. No actual Proxy refs or registry state change.
+
+## Using one checkout without package publication
+
+The current plugin can link both libraries from a single cloned Proxy checkout
+using consumer-root workspaces pointing to `ext/proxy/php` and (only for Laravel
+hosts) `ext/proxy/adapters/laravel`. Install/trust the plugin before resolving
+those local package requirements. This requires no split refs, package tags or
+public catalog. Keep local path locks out of production release locks unless the
+checkout provisioning is an explicit supported part of that consumer's build.
+
+This local workspace route is distinct from automatically downloading a remote
+carrier package and discovering its nested manifests. The present adoption does
+not implement that remote bootstrap inside the plugin. Merging these sources
+does not by itself make `composer require` discover the nested packages.
