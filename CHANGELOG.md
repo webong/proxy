@@ -2,21 +2,14 @@
 
 ## Unreleased
 
-- Adopt Composer Source Plugin ^0.5 author tooling and prepare a scoped
-  `webong/proxy-workspace` catalog for same-repository PHP component publication.
-- Upgrade incompatible plugin 0.4 bootstrap locks, preserve compatible seed locks,
-  and repair missing plugin/autoload files without silently changing the root lock.
-- Preserve complete historical stable metadata when generating the canonical
-  catalog; reject immutable-version conflicts and retain prior catalog releases.
-- Test real package splitting, annotated release tags, catalog registration,
-  independent core/Laravel source and ZIP installs, plugin-free lock replay and
-  immutable versions with the released plugin; run the checks in packaging CI.
-- Document the pending corrective patch release, historical metadata retention,
-  signed tag workflow and pending reference recovery after the separate
-  distribution repositories were deleted. No package publication or registry
-  repair is included; PHP APIs and Go module versions remain unchanged.
-- Run historical compatibility tests from exact monorepo release trees, avoiding
-  deleted download hosts without claiming public install availability.
+- Make the repository root the installable `webong/proxy` PHP core, with source
+  under `php/src/` and the optional `webong/proxy-laravel` adapter unchanged.
+- Use Composer Source Plugin ^0.5 to install both libraries from one provisioned
+  checkout, without a third package or a generated package catalog.
+- Test standalone installs, copied and linked workspaces, cold lock replay,
+  bootstrap upgrades, archive contents and historical compatibility.
+- Preserve PHP namespaces, APIs, migration ownership and Go module versions.
+  No package publication or public download repair is included.
 
 ## v0.4.0 — 2026-11-15
 

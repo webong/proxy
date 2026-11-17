@@ -68,7 +68,7 @@ function installed(string $consumer): array
 
 mkdir($lab.'/artifacts');
 $packages = [];
-foreach (['webong/proxy' => $source.'/php', 'webong/proxy-laravel' => $source.'/adapters/laravel'] as $name => $path) {
+foreach (['webong/proxy' => $source, 'webong/proxy-laravel' => $source.'/adapters/laravel'] as $name => $path) {
     $manifest = json_decode(file_get_contents($path.'/composer.json'), true, flags: JSON_THROW_ON_ERROR);
     $file = str_replace('/', '-', $name);
     command(['composer', 'archive', '--format=zip', '--dir='.$lab.'/artifacts', '--file='.$file, '--no-interaction'],
@@ -81,9 +81,13 @@ foreach (['webong/proxy' => $source.'/php', 'webong/proxy-laravel' => $source.'/
         check(! preg_match('~^(vendor|tests|\.git|\.phpunit.cache)(/|$)~', $entryName),
             'Development files leaked into '.$name.': '.$entryName);
         if ($name === 'webong/proxy') {
-            check(! preg_match('~^(adapters|go|packages|database|config)(/|$)~', $entryName),
-                'Adapter resources leaked into core ZIP: '.$entryName);
+            check(! preg_match('~^(database|config)(/|$)~', $entryName),
+                'Laravel resources must stay inside the optional adapter: '.$entryName);
         }
+    }
+    if ($name === 'webong/proxy') {
+        check($archive->locateName('php/src/Http/HttpProfile.php') !== false, 'Root package lost core source.');
+        check($archive->locateName('adapters/laravel/composer.json') !== false, 'Source bundle lost its optional package.');
     }
     $archive->close();
     $manifest['version'] = '0.4.0';
@@ -97,16 +101,19 @@ copyCheckout($source, $snapshot);
 command(['git', 'init', '--quiet'], $snapshot, $lab.'/archive-home');
 command(['git', 'add', '--all'], $snapshot, $lab.'/archive-home');
 $tree = trim(command(['git', 'write-tree'], $snapshot, $lab.'/archive-home'));
-// Publishable PHP distributions are the component subtrees, not the workspace.
-foreach (['webong/proxy' => 'php', 'webong/proxy-laravel' => 'adapters/laravel'] as $name => $subtree) {
+// The installable root owns core; its bundle retains the optional adapter.
+foreach (['webong/proxy' => '', 'webong/proxy-laravel' => 'adapters/laravel'] as $name => $subtree) {
     $zip = $lab.'/artifacts/'.str_replace('/', '-', $name).'-vcs.zip';
-    command(['git', 'archive', '--format=zip', '--output='.$zip, $tree.':'.$subtree], $snapshot, $lab.'/archive-home');
+    command(['git', 'archive', '--format=zip', '--output='.$zip, $subtree === '' ? $tree : $tree.':'.$subtree], $snapshot, $lab.'/archive-home');
     $archive = new ZipArchive();
     check($archive->open($zip) === true, 'Cannot inspect component VCS ZIP.');
     check($archive->locateName('composer.json') !== false, 'Component manifest missing.');
     for ($entry = 0; $entry < $archive->numFiles; $entry++) {
         $entryName = $archive->getNameIndex($entry);
-        check(! preg_match('~^(vendor|tests|adapters|go|php|packages)(/|$)~', $entryName), 'Unrelated component leaked into '.$name);
+        check(! preg_match('~^(vendor|tests|packages)(/|$)~', $entryName), 'Development files leaked into '.$name);
+        if ($name === 'webong/proxy-laravel') {
+            check(! preg_match('~^(adapters|go|php)(/|$)~', $entryName), 'Unrelated source in adapter ZIP.');
+        }
         if ($name === 'webong/proxy') {
             check(! preg_match('~^(config|database)(/|$)~', $entryName), 'Adapter resources leaked into PHP core.');
         }
@@ -306,10 +313,10 @@ echo "PASS legacy coexistence: adapter rejects old Proxy class ownership\n";
 $workspace = $lab.'/workspace';
 copyCheckout($source, $workspace);
 command([PHP_BINARY, 'scripts/bootstrap-composer.php'], $workspace, $workspace.'/home');
-check(is_link($workspace.'/vendor/webong/proxy'), 'PHP core workspace was not linked.');
+check(! file_exists($workspace.'/vendor/webong/proxy'), 'Root core must not install a second copy of itself.');
 check(is_link($workspace.'/vendor/webong/proxy-laravel'), 'Laravel workspace was not linked.');
 $resolved = installed($workspace);
-check($resolved['webong/proxy']['dist']['url'] === 'php', 'PHP core workspace path is not portable.');
+check(! isset($resolved['webong/proxy']), 'Root core must not be a dependency.');
 check($resolved['webong/proxy-laravel']['dist']['url'] === 'adapters/laravel', 'Workspace path is not portable.');
 check(! isset($resolved['webong/proxy-transport']) && ! isset($resolved['webong/proxy-registry']), 'Obsolete child packages remain.');
 command(['composer', 'source:workspaces', '--json'], $workspace, $workspace.'/home');
@@ -320,7 +327,7 @@ command(['composer', 'install', '--no-plugins', '--no-interaction'], $clone, $cl
 check(is_link($clone.'/vendor/webong/proxy-laravel')
     && realpath($clone.'/vendor/webong/proxy-laravel') === realpath($clone.'/adapters/laravel'),
     'Fresh clone did not recreate the portable adapter workspace link.');
-check(realpath($clone.'/vendor/webong/proxy') === realpath($clone.'/php'), 'PHP core clone workspace link is not portable.');
+check(! file_exists($clone.'/vendor/webong/proxy'), 'Root core was installed twice after lock replay.');
 command([PHP_BINARY, 'scripts/check_php_api.php'], $workspace, $workspace.'/home');
 command([PHP_BINARY, 'scripts/check_php_api.php', '--registry'], $workspace, $workspace.'/home');
 echo "PASS workspace: fresh bootstrap, relative lock, linked sources, frozen interfaces\n";

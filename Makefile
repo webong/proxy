@@ -6,7 +6,7 @@ DOCKER ?= docker
 PEST := vendor/bin/pest
 PHPUNIT_CONFIG := phpunit.xml.dist
 
-.PHONY: install test test-filter readiness packaging publication-check
+.PHONY: install test test-filter readiness packaging workspace-check
 
 install:
 	PROXY_COMPOSER_BINARY="$(COMPOSER)" $(PHP) scripts/bootstrap-composer.php
@@ -40,8 +40,8 @@ packaging:
 	$(PYTHON) scripts/sync_go_testdata.py --check
 	$(PHP) tests/packaging/run.php
 
-# Disposable same-repository publication using the released Composer plugin.
-publication-check: vendor/autoload.php
+# One source checkout supplies core and the optional Laravel package.
+workspace-check: vendor/autoload.php
 	$(PYTHON) -m unittest discover -s tests/tooling -p 'test_*.py'
 	$(PYTHON) tests/packaging/bootstrap.py
-	$(PYTHON) tests/packaging/publication.py
+	$(PYTHON) tests/packaging/workspaces.py

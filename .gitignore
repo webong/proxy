@@ -11,4 +11,3 @@
 __pycache__/
 
 # Publication staging is merged into the reviewed root index before commit.
-/.publication/

@@ -1,17 +1,67 @@
 {
-    "name": "webong/proxy-workspace",
-    "description": "Development workspace and Composer publication catalog for Proxy components.",
-    "type": "metapackage",
+    "name": "webong/proxy",
+    "description": "Framework-neutral HTTP profiles, TCP/UDP proxy transports and storage-neutral registry contracts.",
+    "type": "library",
     "license": "MIT",
     "require": {
-        "php": "^8.3"
+        "php": "^8.3",
+        "guzzlehttp/guzzle": "^7.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webong\\Proxy\\": "php/src/"
+        }
+    },
+    "extra": {
+        "source-plugin": {
+            "surfaces": {
+                "php": {
+                    "include": [
+                        "php/src/**",
+                        "php/README.md",
+                        "README.md",
+                        "LICENSE"
+                    ]
+                }
+            },
+            "workspaces": [
+                "adapters/laravel"
+            ]
+        },
+        "branch-alias": {
+            "dev-main": "0.4.x-dev"
+        }
+    },
+    "archive": {
+        "exclude": [
+            "/vendor",
+            "/tests",
+            "/.github",
+            "/go",
+            "/scripts",
+            "/spec",
+            "/composer.lock",
+            "/composer.bootstrap.*",
+            "/composer-source.lock",
+            "/.phpunit.cache",
+            "/Makefile",
+            "/php/vendor",
+            "/php/composer.lock",
+            "/adapters/laravel/vendor",
+            "/adapters/laravel/composer.lock",
+            "/.git"
+        ]
+    },
+    "version": "0.4.0",
+    "conflict": {
+        "webong/proxy-transport": "*",
+        "webong/proxy-registry": "*"
     },
     "require-dev": {
         "orchestra/testbench": "^10.0 || ^11.0",
         "pestphp/pest": "^4.0",
         "pestphp/pest-plugin-laravel": "^4.0",
         "webong/composer-source-plugin": "^0.5.0",
-        "webong/proxy": "^0.4.0",
         "webong/proxy-laravel": "^0.4.0"
     },
     "autoload-dev": {
@@ -26,28 +76,13 @@
             "pest"
         ]
     },
-    "extra": {
-        "source-plugin": {
-            "workspaces": [
-                "php",
-                "adapters/laravel"
-            ],
-            "catalog": {
-                "url": "https://raw.githubusercontent.com/webong/proxy/main/composer-packages.json",
-                "packages": [
-                    "webong/proxy",
-                    "webong/proxy-laravel"
-                ]
-            }
-        }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "config": {
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "webong/composer-source-plugin": true
         },
         "sort-packages": true
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

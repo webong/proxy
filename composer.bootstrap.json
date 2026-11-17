@@ -1,6 +1,6 @@
 {
-    "name": "webong/proxy-workspace-bootstrap",
-    "description": "Development bootstrap for the Proxy Composer workspace.",
+    "name": "webong/proxy-bootstrap",
+    "description": "Install development tooling before resolving the optional Laravel package.",
     "type": "project",
     "license": "MIT",
     "require": {

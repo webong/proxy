@@ -18,7 +18,7 @@ COMPONENTS = {
 
 
 def materialize(output):
-    original = json.loads((SOURCE / "spec/composer/history.json").read_text())
+    original = json.loads((SOURCE / "tests/fixtures/composer/history.json").read_text())
     fixtures = copy.deepcopy(original)
     output.mkdir(parents=True, exist_ok=True)
     provenance = {}

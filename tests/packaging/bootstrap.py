@@ -30,31 +30,163 @@ def write(path, value):
     path.write_text(json.dumps(value, indent=2)+'\n')
 
 
-# Construct the real prior developer graph with both old seed and root locks.
-original = {}
-for name, section in [('composer.json', 'require-dev'), ('composer.bootstrap.json', 'require')]:
-    path = ROOT/name
-    original[name] = json.loads(path.read_text())
-    old = json.loads(path.read_text())
-    old[section]['webong/composer-source-plugin'] = '^0.4.0'
-    write(path, old)
+# A brand-new checkout resolves the root core and optional adapter without a
+# vendor copy of the core or any preinstalled plugin.
+run('php', 'scripts/bootstrap-composer.php')
+assert not (ROOT/'vendor/webong/proxy').exists()
+assert (ROOT/'vendor/webong/proxy-laravel').resolve() == (ROOT/'adapters/laravel').resolve()
+run('php', '-r', "require 'vendor/autoload.php'; if (Composer\\InstalledVersions::getRootPackage()['name'] !== 'webong/proxy' || !class_exists(Webong\\Proxy\\Http\\HttpProfileNormalizer::class)) exit(1);")
+print('PASS cold checkout: root core and optional adapter install', flush=True)
+shutil.rmtree(ROOT/'vendor')
+for name in ['composer.lock', 'composer.bootstrap.lock']:
+    (ROOT/name).unlink()
+
+# Historical manifests captured from committed workspace layout 5613ed63cd1b48e1f0878fbd0e53306a404641f7.
+# Embed the snapshot so shallow CI clones do not need historical Git objects.
+previous = {
+    'composer.json': json.loads(r'''{
+    "name": "webong/proxy-workspace",
+    "description": "Development workspace and Composer publication catalog for Proxy components.",
+    "type": "metapackage",
+    "license": "MIT",
+    "require": {
+        "php": "^8.3"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0 || ^11.0",
+        "pestphp/pest": "^4.0",
+        "pestphp/pest-plugin-laravel": "^4.0",
+        "webong/composer-source-plugin": "^0.5.0",
+        "webong/proxy": "^0.4.0",
+        "webong/proxy-laravel": "^0.4.0"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webong\\Proxy\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": [
+            "@php scripts/check_php_api.php",
+            "@php scripts/check_php_api.php --registry",
+            "pest"
+        ]
+    },
+    "extra": {
+        "source-plugin": {
+            "workspaces": [
+                "php",
+                "adapters/laravel"
+            ],
+            "catalog": {
+                "url": "https://raw.githubusercontent.com/webong/proxy/main/composer-packages.json",
+                "packages": [
+                    "webong/proxy",
+                    "webong/proxy-laravel"
+                ]
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "webong/composer-source-plugin": true
+        },
+        "sort-packages": true
+    }
+}
+'''),
+    'composer.bootstrap.json': json.loads(r'''{
+    "name": "webong/proxy-workspace-bootstrap",
+    "description": "Development bootstrap for the Proxy Composer workspace.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "webong/composer-source-plugin": "^0.5.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "webong/composer-source-plugin": true,
+            "pestphp/pest-plugin": true
+        }
+    }
+}
+'''),
+    'php/composer.json': json.loads(r'''{
+    "name": "webong/proxy",
+    "description": "Framework-neutral HTTP profiles, TCP/UDP proxy transports and storage-neutral registry contracts.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.3",
+        "guzzlehttp/guzzle": "^7.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webong\\Proxy\\": "src/"
+        }
+    },
+    "extra": {
+        "source-plugin": {
+            "surfaces": {
+                "php": {
+                    "include": [
+                        "src/**",
+                        "README.md",
+                        "LICENSE"
+                    ]
+                }
+            }
+        }
+    },
+    "archive": {
+        "exclude": [
+            "/vendor",
+            "/tests",
+            "/.phpunit.cache",
+            "/composer.lock",
+            "/composer-source.lock"
+        ]
+    },
+    "version": "0.4.0",
+    "conflict": {
+        "webong/proxy-transport": "*",
+        "webong/proxy-registry": "*"
+    }
+}
+'''),
+}
+original = {name: (ROOT/name).read_bytes() if (ROOT/name).exists() else None
+            for name in previous}
+for name, value in previous.items():
+    if name in ['composer.json', 'composer.bootstrap.json']:
+        section = 'require-dev' if name == 'composer.json' else 'require'
+        value[section]['webong/composer-source-plugin'] = '^0.4.0'
+    write(ROOT/name, value)
 run('composer', 'install', '--prefer-dist', '--no-interaction', manifest='composer.bootstrap.json')
 run('composer', 'install', '--prefer-dist', '--no-interaction')
 root_lock = (ROOT/'composer.lock').read_bytes()
 for name, value in original.items():
-    write(ROOT/name, value)
+    if value is None:
+        (ROOT/name).unlink()
+    else:
+        (ROOT/name).write_bytes(value)
 run('php', 'scripts/bootstrap-composer.php', '--plugin-only')
 assert (ROOT/'composer.lock').read_bytes() == root_lock
 # The normal entry point must not silently rewrite the incompatible root lock.
 run('php', 'scripts/bootstrap-composer.php', success=False)
 assert (ROOT/'composer.lock').read_bytes() == root_lock
 run('composer', 'update', '--prefer-dist', '--no-interaction')
-assert (ROOT/'vendor/webong/proxy').resolve() == (ROOT/'php').resolve()
+assert not (ROOT/'vendor/webong/proxy').exists(), 'Core must be supplied by the root package'
+assert (ROOT/'vendor/webong/proxy-laravel').resolve() == (ROOT/'adapters/laravel').resolve()
+run('php', '-r', "require 'vendor/autoload.php'; if (Composer\\InstalledVersions::getRootPackage()['name'] !== 'webong/proxy' || !class_exists(Webong\\Proxy\\Http\\HttpProfileNormalizer::class)) exit(1);")
 seed_lock = (ROOT/'composer.bootstrap.lock').read_bytes()
 root_lock = (ROOT/'composer.lock').read_bytes()
 run('php', 'scripts/bootstrap-composer.php')
 assert (ROOT/'composer.lock').read_bytes() == root_lock
-print('PASS old seed/root migration, explicit root update, linked workspaces and idempotence', flush=True)
+print('PASS old seed/root migration, explicit root update, root-owned core, linked adapter and idempotence', flush=True)
 
 # Observe actual Composer arguments; a no-op update at the latest version must
 # not be mistaken for lock-preserving install behavior.

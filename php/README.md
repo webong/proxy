@@ -6,16 +6,12 @@ it does not install Laravel, Illuminate, Spatie, a service provider or migration
 
 ## Install
 
-```sh
-composer require webong/proxy:^0.4
-```
+Use the [one-checkout Composer setup](https://github.com/webong/proxy/blob/main/spec/COMPOSER.md).
+Both PHP libraries come from this repository. The root manifest owns the neutral
+core; `adapters/laravel/composer.json` owns the optional Laravel package.
+Existing public PHP 0.4.0 download URLs point to deleted repositories, so use the
+checkout setup until those URLs are repaired.
 
-Packagist still lists 0.4.0, but its download URLs reference deleted distribution
-repositories. Public PHP installation is blocked until the monorepo publication
-and historical-reference recovery are completed. Future releases require the
-one-time catalog setup described in the
-[publication guide](https://github.com/webong/proxy/blob/main/spec/COMPOSER.md).
-That catalog is prepared but not yet publicly registered.
 
 Development, issue tracking and future distribution use the
 [Proxy monorepo](https://github.com/webong/proxy).
