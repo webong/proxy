@@ -6,12 +6,15 @@ it does not install Laravel, Illuminate, Spatie, a service provider or migration
 
 ## Install
 
-```sh
-composer require webong/proxy:^0.4
-```
+Use the [one-checkout Composer setup](https://github.com/webong/proxy/blob/main/spec/COMPOSER.md).
+Both PHP libraries come from this repository. The root manifest owns the neutral
+core; `adapters/laravel/composer.json` owns the optional Laravel package.
+Existing public PHP 0.4.0 download URLs point to deleted repositories, so use the
+checkout setup until those URLs are repaired.
 
-Version 0.4.0 is distributed from [proxy-php](https://github.com/webong/proxy-php).
-Development and issue tracking remain in [proxy](https://github.com/webong/proxy).
+
+Development, issue tracking and future distribution use the
+[Proxy monorepo](https://github.com/webong/proxy).
 
 For Laravel persistence and Spatie webhook integration, install
 `webong/proxy-laravel:^0.4` instead. That package requires this core and owns

@@ -35,5 +35,5 @@ registryCheck(! class_exists(Illuminate\Support\Collection::class));
 registryCheck(! class_exists(Webong\Proxy\Models\WebProxyEndpoint::class));
 $root = Composer\InstalledVersions::getInstallPath('webong/proxy');
 registryCheck(! is_dir($root.'/database') && ! is_dir($root.'/config'));
-registryCheck(str_contains((new ReflectionClass($endpoint))->getFileName(), 'vendor/webong/proxy/'));
+registryCheck(str_starts_with(realpath((new ReflectionClass($endpoint))->getFileName()), realpath($root).DIRECTORY_SEPARATOR));
 echo "Standalone registry: custom application-owned SQLite store, records and contracts; no framework or migrations.\n";

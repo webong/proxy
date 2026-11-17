@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Make the repository root the installable `webong/proxy` PHP core, with source
+  under `php/src/` and the optional `webong/proxy-laravel` adapter unchanged.
+- Use Composer Source Plugin ^0.5 to install both libraries from one provisioned
+  checkout, without a third package or a generated package catalog.
+- Test standalone installs, copied and linked workspaces, cold lock replay,
+  bootstrap upgrades, archive contents and historical compatibility.
+- Preserve PHP namespaces, APIs, migration ownership and Go module versions.
+  No package publication or public download repair is included.
+
 ## v0.4.0 — 2026-11-15
 
 - Organize components as `php/`, `adapters/laravel/` and `go/`, with a development

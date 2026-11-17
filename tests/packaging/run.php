@@ -68,7 +68,7 @@ function installed(string $consumer): array
 
 mkdir($lab.'/artifacts');
 $packages = [];
-foreach (['webong/proxy' => $source.'/php', 'webong/proxy-laravel' => $source.'/adapters/laravel'] as $name => $path) {
+foreach (['webong/proxy' => $source, 'webong/proxy-laravel' => $source.'/adapters/laravel'] as $name => $path) {
     $manifest = json_decode(file_get_contents($path.'/composer.json'), true, flags: JSON_THROW_ON_ERROR);
     $file = str_replace('/', '-', $name);
     command(['composer', 'archive', '--format=zip', '--dir='.$lab.'/artifacts', '--file='.$file, '--no-interaction'],
@@ -81,9 +81,13 @@ foreach (['webong/proxy' => $source.'/php', 'webong/proxy-laravel' => $source.'/
         check(! preg_match('~^(vendor|tests|\.git|\.phpunit.cache)(/|$)~', $entryName),
             'Development files leaked into '.$name.': '.$entryName);
         if ($name === 'webong/proxy') {
-            check(! preg_match('~^(adapters|go|packages|database|config)(/|$)~', $entryName),
-                'Adapter resources leaked into core ZIP: '.$entryName);
+            check(! preg_match('~^(database|config)(/|$)~', $entryName),
+                'Laravel resources must stay inside the optional adapter: '.$entryName);
         }
+    }
+    if ($name === 'webong/proxy') {
+        check($archive->locateName('php/src/Http/HttpProfile.php') !== false, 'Root package lost core source.');
+        check($archive->locateName('adapters/laravel/composer.json') !== false, 'Source bundle lost its optional package.');
     }
     $archive->close();
     $manifest['version'] = '0.4.0';
@@ -97,16 +101,19 @@ copyCheckout($source, $snapshot);
 command(['git', 'init', '--quiet'], $snapshot, $lab.'/archive-home');
 command(['git', 'add', '--all'], $snapshot, $lab.'/archive-home');
 $tree = trim(command(['git', 'write-tree'], $snapshot, $lab.'/archive-home'));
-// Publishable PHP distributions are the component subtrees, not the workspace.
-foreach (['webong/proxy' => 'php', 'webong/proxy-laravel' => 'adapters/laravel'] as $name => $subtree) {
+// The installable root owns core; its bundle retains the optional adapter.
+foreach (['webong/proxy' => '', 'webong/proxy-laravel' => 'adapters/laravel'] as $name => $subtree) {
     $zip = $lab.'/artifacts/'.str_replace('/', '-', $name).'-vcs.zip';
-    command(['git', 'archive', '--format=zip', '--output='.$zip, $tree.':'.$subtree], $snapshot, $lab.'/archive-home');
+    command(['git', 'archive', '--format=zip', '--output='.$zip, $subtree === '' ? $tree : $tree.':'.$subtree], $snapshot, $lab.'/archive-home');
     $archive = new ZipArchive();
     check($archive->open($zip) === true, 'Cannot inspect component VCS ZIP.');
     check($archive->locateName('composer.json') !== false, 'Component manifest missing.');
     for ($entry = 0; $entry < $archive->numFiles; $entry++) {
         $entryName = $archive->getNameIndex($entry);
-        check(! preg_match('~^(vendor|tests|adapters|go|php|packages)(/|$)~', $entryName), 'Unrelated component leaked into '.$name);
+        check(! preg_match('~^(vendor|tests|packages)(/|$)~', $entryName), 'Development files leaked into '.$name);
+        if ($name === 'webong/proxy-laravel') {
+            check(! preg_match('~^(adapters|go|php)(/|$)~', $entryName), 'Unrelated source in adapter ZIP.');
+        }
         if ($name === 'webong/proxy') {
             check(! preg_match('~^(config|database)(/|$)~', $entryName), 'Adapter resources leaked into PHP core.');
         }
@@ -165,6 +172,11 @@ $moduleInfo = json_decode(command(['go', 'list', '-m', '-json', $module], $consu
 check(! isset($moduleInfo['Replace']) && str_starts_with($moduleInfo['Dir'], $lab.'/go-module-cache/'),
     'Go consumer bypassed the fresh module download.');
 echo "PASS Go module ZIP: empty cache download and independent consumer without replace\n";
+// Historical upgrades use immutable monorepo trees, not deleted public hosts.
+command(['python3', $source.'/tests/packaging/materialize_history.py', '--output-dir='.$lab.'/historical'],
+    $source, $lab.'/archive-home');
+$historical = json_decode(file_get_contents($lab.'/historical/packages.json'), true, flags: JSON_THROW_ON_ERROR);
+$packages['webong/proxy']['v0.3.1'] = $historical['packages']['webong/proxy']['v0.3.1'];
 writeJson($lab.'/artifacts/packages.json', ['packages' => $packages]);
 echo "PASS component VCS exports: isolated PHP packages and standalone Go race/vet\n";
 
@@ -228,7 +240,7 @@ foreach (['neutral', 'full'] as $kind) {
     echo "PASS {$kind}: ZIP resolution, runtime, fresh no-plugin lock clone\n";
 
     // The plugin is optional for consumers. Install it BEFORE enabling projection.
-    $manifest['require']['webong/composer-source-plugin'] = '^0.4.0';
+    $manifest['require']['webong/composer-source-plugin'] = '^0.5.0';
     $manifest['config']['allow-plugins'] = ['webong/composer-source-plugin' => true];
     writeJson($dir.'/composer.json', $manifest);
     command(['composer', 'update', '--prefer-dist', '--no-interaction'], $dir, $dir.'/home');
@@ -263,7 +275,7 @@ foreach (['neutral', 'full'] as $kind) {
     echo "PASS {$kind}: projection and fresh locked clone retain runtime and metadata\n";
 }
 
-// Upgrade a real public 0.3.1 consumer with application-owned published migrations.
+// Upgrade the exact historical 0.3.1 package tree with application-owned published migrations.
 $upgrade = $lab.'/upgrade';
 mkdir($upgrade);
 touch($upgrade.'/upgrade.sqlite');
@@ -282,7 +294,7 @@ writeJson($upgrade.'/composer.json', $manifest);
 command(['composer', 'update', '--with-all-dependencies', '--prefer-dist', '--no-plugins', '--no-interaction'], $upgrade, $upgrade.'/home');
 command([PHP_BINARY, 'vendor/bin/phpunit', '--no-configuration', '--bootstrap', 'vendor/autoload.php', $source.'/tests/packaging/UpgradeConsumerTest.php'],
     $upgrade, $upgrade.'/home', ['PROXY_UPGRADE_PHASE' => 'verify']);
-echo "PASS upgrade: public 0.3.1 data, ciphertext, identities and migration history preserved\n";
+echo "PASS upgrade: historical monorepo 0.3.1 data, ciphertext, identities and migration history preserved\n";
 
 // The adapter cannot coexist with legacy Proxy releases owning its classes.
 $dir = $lab.'/legacy-conflict';
@@ -301,10 +313,10 @@ echo "PASS legacy coexistence: adapter rejects old Proxy class ownership\n";
 $workspace = $lab.'/workspace';
 copyCheckout($source, $workspace);
 command([PHP_BINARY, 'scripts/bootstrap-composer.php'], $workspace, $workspace.'/home');
-check(is_link($workspace.'/vendor/webong/proxy'), 'PHP core workspace was not linked.');
+check(! file_exists($workspace.'/vendor/webong/proxy'), 'Root core must not install a second copy of itself.');
 check(is_link($workspace.'/vendor/webong/proxy-laravel'), 'Laravel workspace was not linked.');
 $resolved = installed($workspace);
-check($resolved['webong/proxy']['dist']['url'] === 'php', 'PHP core workspace path is not portable.');
+check(! isset($resolved['webong/proxy']), 'Root core must not be a dependency.');
 check($resolved['webong/proxy-laravel']['dist']['url'] === 'adapters/laravel', 'Workspace path is not portable.');
 check(! isset($resolved['webong/proxy-transport']) && ! isset($resolved['webong/proxy-registry']), 'Obsolete child packages remain.');
 command(['composer', 'source:workspaces', '--json'], $workspace, $workspace.'/home');
@@ -315,7 +327,7 @@ command(['composer', 'install', '--no-plugins', '--no-interaction'], $clone, $cl
 check(is_link($clone.'/vendor/webong/proxy-laravel')
     && realpath($clone.'/vendor/webong/proxy-laravel') === realpath($clone.'/adapters/laravel'),
     'Fresh clone did not recreate the portable adapter workspace link.');
-check(realpath($clone.'/vendor/webong/proxy') === realpath($clone.'/php'), 'PHP core clone workspace link is not portable.');
+check(! file_exists($clone.'/vendor/webong/proxy'), 'Root core was installed twice after lock replay.');
 command([PHP_BINARY, 'scripts/check_php_api.php'], $workspace, $workspace.'/home');
 command([PHP_BINARY, 'scripts/check_php_api.php', '--registry'], $workspace, $workspace.'/home');
 echo "PASS workspace: fresh bootstrap, relative lock, linked sources, frozen interfaces\n";

@@ -8,9 +8,12 @@ PHP/Go networking; this adapter provides the Laravel store and application APIs.
 
 ## Install
 
-```bash
-composer require webong/proxy-laravel:^0.4
-```
+Use the [one-checkout Composer setup](https://github.com/webong/proxy/blob/main/spec/COMPOSER.md).
+Both PHP libraries come from this repository. The root manifest owns the neutral
+core; `adapters/laravel/composer.json` owns the optional Laravel package.
+Existing public PHP 0.4.0 download URLs point to deleted repositories, so use the
+checkout setup until those URLs are repaired.
+
 
 Laravel discovers `Webong\Proxy\WebProxyServiceProvider` automatically.
 Publish the package configuration and normal migrations, then migrate:

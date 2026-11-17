@@ -1,0 +1,15 @@
+/vendor export-ignore
+/composer.lock export-ignore
+/composer-source.lock export-ignore
+/composer.bootstrap.json export-ignore
+/composer.bootstrap.lock export-ignore
+/.phpunit.cache export-ignore
+/php/vendor export-ignore
+/php/composer.lock export-ignore
+/adapters/laravel/vendor export-ignore
+/adapters/laravel/composer.lock export-ignore
+/tests export-ignore
+/scripts export-ignore
+/spec export-ignore
+/.github export-ignore
+/Makefile export-ignore
