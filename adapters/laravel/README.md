@@ -12,6 +12,13 @@ PHP/Go networking; this adapter provides the Laravel store and application APIs.
 composer require webong/proxy-laravel:^0.4
 ```
 
+Packagist still lists 0.4.0, but its download URLs reference deleted distribution
+repositories. Public PHP installation is blocked until the monorepo publication
+and historical-reference recovery are completed. Future releases require the
+one-time catalog setup described in the
+[publication guide](https://github.com/webong/proxy/blob/main/spec/COMPOSER.md).
+That catalog is prepared but not yet publicly registered.
+
 Laravel discovers `Webong\Proxy\WebProxyServiceProvider` automatically.
 Publish the package configuration and normal migrations, then migrate:
 

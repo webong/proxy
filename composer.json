@@ -1,7 +1,7 @@
 {
     "name": "webong/proxy-workspace",
-    "description": "Development workspace for Proxy PHP, Laravel and Go components.",
-    "type": "project",
+    "description": "Development workspace and Composer publication catalog for Proxy components.",
+    "type": "metapackage",
     "license": "MIT",
     "require": {
         "php": "^8.3"
@@ -10,7 +10,7 @@
         "orchestra/testbench": "^10.0 || ^11.0",
         "pestphp/pest": "^4.0",
         "pestphp/pest-plugin-laravel": "^4.0",
-        "webong/composer-source-plugin": "^0.4.0",
+        "webong/composer-source-plugin": "^0.5.0",
         "webong/proxy": "^0.4.0",
         "webong/proxy-laravel": "^0.4.0"
     },
@@ -31,7 +31,14 @@
             "workspaces": [
                 "php",
                 "adapters/laravel"
-            ]
+            ],
+            "catalog": {
+                "url": "https://raw.githubusercontent.com/webong/proxy/main/composer-packages.json",
+                "packages": [
+                    "webong/proxy",
+                    "webong/proxy-laravel"
+                ]
+            }
         }
     },
     "minimum-stability": "dev",

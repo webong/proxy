@@ -228,7 +228,7 @@ foreach (['neutral', 'full'] as $kind) {
     echo "PASS {$kind}: ZIP resolution, runtime, fresh no-plugin lock clone\n";
 
     // The plugin is optional for consumers. Install it BEFORE enabling projection.
-    $manifest['require']['webong/composer-source-plugin'] = '^0.4.0';
+    $manifest['require']['webong/composer-source-plugin'] = '^0.5.0';
     $manifest['config']['allow-plugins'] = ['webong/composer-source-plugin' => true];
     writeJson($dir.'/composer.json', $manifest);
     command(['composer', 'update', '--prefer-dist', '--no-interaction'], $dir, $dir.'/home');

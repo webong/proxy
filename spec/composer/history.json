@@ -1,0 +1,463 @@
+{
+  "packages": {
+    "webong/proxy": {
+      "0.4.0": {
+        "authors": [],
+        "autoload": {
+          "psr-4": {
+            "Webong\\Proxy\\": "src/"
+          }
+        },
+        "conflict": {
+          "webong/proxy-registry": "*",
+          "webong/proxy-transport": "*"
+        },
+        "description": "Framework-neutral HTTP profiles, TCP/UDP proxy transports and storage-neutral registry contracts.",
+        "dist": {
+          "reference": "64108c8071d41ebbd35b0d88e008d09281a57a97",
+          "shasum": "",
+          "type": "zip",
+          "url": "https://api.github.com/repos/webong/proxy-php/zipball/64108c8071d41ebbd35b0d88e008d09281a57a97"
+        },
+        "extra": {
+          "source-plugin": {
+            "surfaces": {
+              "php": {
+                "include": [
+                  "src/**",
+                  "README.md",
+                  "LICENSE"
+                ]
+              }
+            }
+          }
+        },
+        "funding": [],
+        "homepage": "",
+        "keywords": [],
+        "license": [
+          "MIT"
+        ],
+        "name": "webong/proxy",
+        "published-time": "2026-11-15T22:54:30+00:00",
+        "require": {
+          "guzzlehttp/guzzle": "^7.10",
+          "php": "^8.3"
+        },
+        "source": {
+          "reference": "64108c8071d41ebbd35b0d88e008d09281a57a97",
+          "type": "git",
+          "url": "https://github.com/webong/proxy-php.git"
+        },
+        "support": {
+          "source": "https://github.com/webong/proxy-php/tree/v0.4.0"
+        },
+        "time": "2026-11-15T22:51:53+00:00",
+        "type": "library",
+        "version": "0.4.0",
+        "version_normalized": "0.4.0.0"
+      },
+      "v0.1.0": {
+        "authors": [],
+        "autoload": {
+          "psr-4": {
+            "Webong\\WebProxy\\": "src/"
+          }
+        },
+        "description": "Webhook proxy system for scoped webhook routing and delivery",
+        "dist": {
+          "reference": "26f4080b357686a0e20d74327eccc78cc0d0bfbf",
+          "shasum": "",
+          "type": "zip",
+          "url": "https://api.github.com/repos/webong/proxy-php/zipball/26f4080b357686a0e20d74327eccc78cc0d0bfbf"
+        },
+        "extra": {
+          "laravel": {
+            "providers": [
+              "Webong\\WebProxy\\WebProxyServiceProvider"
+            ]
+          }
+        },
+        "funding": [],
+        "homepage": "",
+        "keywords": [],
+        "license": [
+          "MIT"
+        ],
+        "name": "webong/proxy",
+        "published-time": "2026-10-02T16:59:51+00:00",
+        "require": {
+          "illuminate/contracts": "^12.0",
+          "illuminate/support": "^12.0",
+          "php": "^8.3 || ^8.4",
+          "spatie/laravel-webhook-client": "^3.5",
+          "spatie/laravel-webhook-server": "^3.10"
+        },
+        "require-dev": {
+          "orchestra/testbench": "^10.0",
+          "pestphp/pest": "^4.0",
+          "pestphp/pest-plugin-laravel": "^4.0"
+        },
+        "source": {
+          "reference": "26f4080b357686a0e20d74327eccc78cc0d0bfbf",
+          "type": "git",
+          "url": "https://github.com/webong/proxy-php.git"
+        },
+        "support": {
+          "issues": "https://github.com/webong/proxy/issues",
+          "source": "https://github.com/webong/proxy/tree/v0.1.0"
+        },
+        "time": "2026-10-02T16:59:19+00:00",
+        "type": "library",
+        "version": "v0.1.0",
+        "version_normalized": "0.1.0.0"
+      },
+      "v0.1.1": {
+        "authors": [],
+        "autoload": {
+          "psr-4": {
+            "Webong\\WebProxy\\": "src/"
+          }
+        },
+        "description": "Webhook proxy system for scoped webhook routing and delivery",
+        "dist": {
+          "reference": "3db54f2711845cb75f23bff244f207893da06cca",
+          "shasum": "",
+          "type": "zip",
+          "url": "https://api.github.com/repos/webong/proxy-php/zipball/3db54f2711845cb75f23bff244f207893da06cca"
+        },
+        "extra": {
+          "laravel": {
+            "providers": [
+              "Webong\\WebProxy\\WebProxyServiceProvider"
+            ]
+          }
+        },
+        "funding": [],
+        "homepage": "",
+        "keywords": [],
+        "license": [
+          "MIT"
+        ],
+        "name": "webong/proxy",
+        "published-time": "2026-10-23T08:37:38+00:00",
+        "require": {
+          "illuminate/contracts": "^12.0 || ^13.0",
+          "illuminate/support": "^12.0 || ^13.0",
+          "php": "^8.3 || ^8.4",
+          "spatie/laravel-webhook-client": "^3.5",
+          "spatie/laravel-webhook-server": "^3.10"
+        },
+        "require-dev": {
+          "orchestra/testbench": "^10.0 || ^11.0",
+          "pestphp/pest": "^4.0",
+          "pestphp/pest-plugin-laravel": "^4.0"
+        },
+        "source": {
+          "reference": "3db54f2711845cb75f23bff244f207893da06cca",
+          "type": "git",
+          "url": "https://github.com/webong/proxy-php.git"
+        },
+        "support": {
+          "issues": "https://github.com/webong/proxy/issues",
+          "source": "https://github.com/webong/proxy/tree/v0.1.1"
+        },
+        "time": "2026-10-23T08:37:13+00:00",
+        "type": "library",
+        "version": "v0.1.1",
+        "version_normalized": "0.1.1.0"
+      },
+      "v0.2.0": {
+        "authors": [],
+        "autoload": {
+          "psr-4": {
+            "Webong\\Proxy\\": "src/"
+          }
+        },
+        "description": "Webhook proxy system for scoped webhook routing and delivery",
+        "dist": {
+          "reference": "8fa2e84fd6a9bb3090997d22076963b5c08184cd",
+          "shasum": "",
+          "type": "zip",
+          "url": "https://api.github.com/repos/webong/proxy-php/zipball/8fa2e84fd6a9bb3090997d22076963b5c08184cd"
+        },
+        "extra": {
+          "laravel": {
+            "providers": [
+              "Webong\\Proxy\\WebProxyServiceProvider"
+            ]
+          }
+        },
+        "funding": [],
+        "homepage": "",
+        "keywords": [],
+        "license": [
+          "MIT"
+        ],
+        "name": "webong/proxy",
+        "published-time": "2026-10-22T10:43:12+00:00",
+        "require": {
+          "guzzlehttp/guzzle": "^7.10",
+          "illuminate/contracts": "^12.0",
+          "illuminate/support": "^12.0",
+          "php": "^8.3 || ^8.4",
+          "spatie/laravel-webhook-client": "^3.5",
+          "spatie/laravel-webhook-server": "^3.10"
+        },
+        "require-dev": {
+          "orchestra/testbench": "^10.0",
+          "pestphp/pest": "^4.0",
+          "pestphp/pest-plugin-laravel": "^4.0"
+        },
+        "source": {
+          "reference": "8fa2e84fd6a9bb3090997d22076963b5c08184cd",
+          "type": "git",
+          "url": "https://github.com/webong/proxy-php.git"
+        },
+        "support": {
+          "issues": "https://github.com/webong/proxy/issues",
+          "source": "https://github.com/webong/proxy/tree/v0.2.0"
+        },
+        "time": "2026-10-22T10:42:07+00:00",
+        "type": "library",
+        "version": "v0.2.0",
+        "version_normalized": "0.2.0.0"
+      },
+      "v0.2.1": {
+        "authors": [],
+        "autoload": {
+          "psr-4": {
+            "Webong\\Proxy\\": "src/"
+          }
+        },
+        "description": "Webhook proxy system for scoped webhook routing and delivery",
+        "dist": {
+          "reference": "3cac662914fd770af672e339ddb597a8eba2c0b1",
+          "shasum": "",
+          "type": "zip",
+          "url": "https://api.github.com/repos/webong/proxy-php/zipball/3cac662914fd770af672e339ddb597a8eba2c0b1"
+        },
+        "extra": {
+          "laravel": {
+            "providers": [
+              "Webong\\Proxy\\WebProxyServiceProvider"
+            ]
+          }
+        },
+        "funding": [],
+        "homepage": "",
+        "keywords": [],
+        "license": [
+          "MIT"
+        ],
+        "name": "webong/proxy",
+        "published-time": "2026-10-23T08:37:38+00:00",
+        "require": {
+          "guzzlehttp/guzzle": "^7.10",
+          "illuminate/contracts": "^12.0 || ^13.0",
+          "illuminate/support": "^12.0 || ^13.0",
+          "php": "^8.3 || ^8.4",
+          "spatie/laravel-webhook-client": "^3.5",
+          "spatie/laravel-webhook-server": "^3.10"
+        },
+        "require-dev": {
+          "orchestra/testbench": "^10.0 || ^11.0",
+          "pestphp/pest": "^4.0",
+          "pestphp/pest-plugin-laravel": "^4.0"
+        },
+        "source": {
+          "reference": "3cac662914fd770af672e339ddb597a8eba2c0b1",
+          "type": "git",
+          "url": "https://github.com/webong/proxy-php.git"
+        },
+        "support": {
+          "issues": "https://github.com/webong/proxy/issues",
+          "source": "https://github.com/webong/proxy/tree/v0.2.1"
+        },
+        "time": "2026-10-23T08:35:37+00:00",
+        "type": "library",
+        "version": "v0.2.1",
+        "version_normalized": "0.2.1.0"
+      },
+      "v0.3.0": {
+        "authors": [],
+        "autoload": {
+          "psr-4": {
+            "Webong\\Proxy\\": "src/"
+          }
+        },
+        "description": "Webhook proxy system for scoped webhook routing and delivery",
+        "dist": {
+          "reference": "2c8ef93d3bb73e9850a3026f2e2d6f3d7e12db3a",
+          "shasum": "",
+          "type": "zip",
+          "url": "https://api.github.com/repos/webong/proxy-php/zipball/2c8ef93d3bb73e9850a3026f2e2d6f3d7e12db3a"
+        },
+        "extra": {
+          "laravel": {
+            "providers": [
+              "Webong\\Proxy\\WebProxyServiceProvider"
+            ]
+          }
+        },
+        "funding": [],
+        "homepage": "",
+        "keywords": [],
+        "license": [
+          "MIT"
+        ],
+        "name": "webong/proxy",
+        "published-time": "2026-11-12T22:09:55+00:00",
+        "require": {
+          "guzzlehttp/guzzle": "^7.10",
+          "illuminate/contracts": "^12.0 || ^13.0",
+          "illuminate/support": "^12.0 || ^13.0",
+          "php": "^8.3 || ^8.4",
+          "spatie/laravel-webhook-client": "^3.5",
+          "spatie/laravel-webhook-server": "^3.10"
+        },
+        "require-dev": {
+          "orchestra/testbench": "^10.0 || ^11.0",
+          "pestphp/pest": "^4.0",
+          "pestphp/pest-plugin-laravel": "^4.0"
+        },
+        "source": {
+          "reference": "2c8ef93d3bb73e9850a3026f2e2d6f3d7e12db3a",
+          "type": "git",
+          "url": "https://github.com/webong/proxy-php.git"
+        },
+        "support": {
+          "issues": "https://github.com/webong/proxy/issues",
+          "source": "https://github.com/webong/proxy/tree/v0.3.0"
+        },
+        "time": "2026-11-12T22:08:00+00:00",
+        "type": "library",
+        "version": "v0.3.0",
+        "version_normalized": "0.3.0.0"
+      },
+      "v0.3.1": {
+        "authors": [],
+        "autoload": {
+          "psr-4": {
+            "Webong\\Proxy\\": "src/"
+          }
+        },
+        "description": "Webhook proxy system for scoped webhook routing and delivery",
+        "dist": {
+          "reference": "8362bbe98fcff9c549c062cd0088d38da9a32bbd",
+          "shasum": "",
+          "type": "zip",
+          "url": "https://api.github.com/repos/webong/proxy-php/zipball/8362bbe98fcff9c549c062cd0088d38da9a32bbd"
+        },
+        "extra": {
+          "laravel": {
+            "providers": [
+              "Webong\\Proxy\\WebProxyServiceProvider"
+            ]
+          }
+        },
+        "funding": [],
+        "homepage": "",
+        "keywords": [],
+        "license": [
+          "MIT"
+        ],
+        "name": "webong/proxy",
+        "published-time": "2026-11-13T20:08:10+00:00",
+        "require": {
+          "guzzlehttp/guzzle": "^7.10",
+          "illuminate/contracts": "^12.0 || ^13.0",
+          "illuminate/support": "^12.0 || ^13.0",
+          "php": "^8.3 || ^8.4",
+          "spatie/laravel-webhook-client": "^3.5",
+          "spatie/laravel-webhook-server": "^3.10"
+        },
+        "require-dev": {
+          "orchestra/testbench": "^10.0 || ^11.0",
+          "pestphp/pest": "^4.0",
+          "pestphp/pest-plugin-laravel": "^4.0"
+        },
+        "source": {
+          "reference": "8362bbe98fcff9c549c062cd0088d38da9a32bbd",
+          "type": "git",
+          "url": "https://github.com/webong/proxy-php.git"
+        },
+        "support": {
+          "issues": "https://github.com/webong/proxy/issues",
+          "source": "https://github.com/webong/proxy/tree/v0.3.1"
+        },
+        "time": "2026-11-13T20:05:20+00:00",
+        "type": "library",
+        "version": "v0.3.1",
+        "version_normalized": "0.3.1.0"
+      }
+    },
+    "webong/proxy-laravel": {
+      "0.4.0": {
+        "authors": [],
+        "autoload": {
+          "psr-4": {
+            "Webong\\Proxy\\": "src/"
+          }
+        },
+        "description": "Laravel registry persistence, migrations and Spatie webhook integration for Proxy.",
+        "dist": {
+          "reference": "863916ccdfb8899ee26e47b3bee62a2843f00106",
+          "shasum": "",
+          "type": "zip",
+          "url": "https://api.github.com/repos/webong/proxy-laravel/zipball/863916ccdfb8899ee26e47b3bee62a2843f00106"
+        },
+        "extra": {
+          "laravel": {
+            "providers": [
+              "Webong\\Proxy\\WebProxyServiceProvider"
+            ]
+          },
+          "source-plugin": {
+            "surfaces": {
+              "php": {
+                "include": [
+                  "src/**",
+                  "config/**",
+                  "database/**",
+                  "README.md",
+                  "LICENSE"
+                ]
+              }
+            }
+          }
+        },
+        "funding": [],
+        "homepage": "",
+        "keywords": [],
+        "license": [
+          "MIT"
+        ],
+        "name": "webong/proxy-laravel",
+        "published-time": "2026-11-15T22:55:49+00:00",
+        "require": {
+          "guzzlehttp/guzzle": "^7.10",
+          "illuminate/contracts": "^12.0 || ^13.0",
+          "illuminate/support": "^12.0 || ^13.0",
+          "laravel/framework": "^12.0 || ^13.0",
+          "php": "^8.3 || ^8.4",
+          "spatie/laravel-webhook-client": "^3.5",
+          "spatie/laravel-webhook-server": "^3.10",
+          "webong/proxy": "^0.4.0"
+        },
+        "source": {
+          "reference": "863916ccdfb8899ee26e47b3bee62a2843f00106",
+          "type": "git",
+          "url": "https://github.com/webong/proxy-laravel.git"
+        },
+        "support": {
+          "source": "https://github.com/webong/proxy-laravel/tree/v0.4.0"
+        },
+        "time": "2026-11-15T22:51:58+00:00",
+        "type": "library",
+        "version": "0.4.0",
+        "version_normalized": "0.4.0.0"
+      }
+    }
+  }
+}
