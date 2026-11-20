@@ -25,6 +25,18 @@ validation is a policy of the Laravel adapter, not a requirement for custom stor
 Destination selection returns a plain list of records. The route payload and
 headers are carried as data; they do not imply a webhook execution dependency.
 
+## Destination types
+
+Core destination definitions and records carry a string target type, allowing
+custom stores to define their own meanings. The Laravel adapter owns
+`Enums\DestinationTargetType` (`request`, `event`, `job`) and validates those
+values. Pass enum `->value` strings to core definitions. The previous enum name
+is removed without an alias. Stored string values remain unchanged.
+
+Core selection uses `DestinationRoute`. The webhook-specific `WebhookRoute`
+envelope belongs to the Laravel adapter and extends that neutral route.
+These are intentional registry API changes requiring consumer updates.
+
 ## Adapter semantics
 
 Implementations must document their validation and exception types. Reads return

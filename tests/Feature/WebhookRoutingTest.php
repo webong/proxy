@@ -10,7 +10,7 @@ use Webong\Proxy\Contracts\WebhookJob;
 use Webong\Proxy\DatabaseEndpointProvider;
 use Webong\Proxy\DestinationDefinition;
 use Webong\Proxy\DispatchWebhookProxyDestination;
-use Webong\Proxy\Enums\WebhookProxyTargetType;
+use Webong\Proxy\Enums\DestinationTargetType;
 use Webong\Proxy\Jobs\ForwardWebhookJob;
 use Webong\Proxy\Models\WebProxyDestination;
 use Webong\Proxy\Tests\Support\WebhookFixtures;
@@ -120,7 +120,7 @@ it('dispatches event and job destinations', function (): void {
         routingScope: 'account',
         routingKey: 'account-1',
         target: PackageWebhookEvent::class,
-        targetType: WebhookProxyTargetType::EVENT,
+        targetType: DestinationTargetType::EVENT->value,
     ));
     $jobDestination = $endpoint->attach(new DestinationDefinition(
         ownerId: 'owner-1',
@@ -129,7 +129,7 @@ it('dispatches event and job destinations', function (): void {
         routingScope: 'account',
         routingKey: 'account-1',
         target: PackageWebhookJob::class,
-        targetType: WebhookProxyTargetType::JOB,
+        targetType: DestinationTargetType::JOB->value,
     ));
 
     Event::fake([PackageWebhookEvent::class]);

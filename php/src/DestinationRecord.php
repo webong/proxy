@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Webong\Proxy;
 
-use Webong\Proxy\Enums\WebhookProxyTargetType;
-
 final readonly class DestinationRecord
 {
     public const string EXECUTION_CONTEXT_METADATA_KEY = '_execution_context';
@@ -21,7 +19,7 @@ final readonly class DestinationRecord
         public string $webhook_group,
         public string $routing_scope,
         public string $routing_key,
-        public WebhookProxyTargetType $target_type,
+        public string $target_type,
         public string $target,
         public array $metadata,
         public bool $is_active,

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Webong\Proxy;
 
-use Webong\Proxy\Enums\WebhookProxyTargetType;
-
 final readonly class DestinationDefinition
 {
     /**
@@ -19,7 +17,7 @@ final readonly class DestinationDefinition
         public string $routingScope,
         public string $routingKey,
         public string $target,
-        public WebhookProxyTargetType $targetType = WebhookProxyTargetType::REQUEST,
+        public string $targetType = 'request',
         public array $metadata = [],
         public array $context = [],
         public bool $allowsMultipleSubscribers = false,

@@ -85,7 +85,7 @@ request, event, or job:
 
 ```php
 use Webong\Proxy\DestinationDefinition;
-use Webong\Proxy\Enums\WebhookProxyTargetType;
+use Webong\Proxy\Enums\DestinationTargetType;
 
 $endpoint->attach(new DestinationDefinition(
     ownerId: 'account-123',
@@ -94,7 +94,7 @@ $endpoint->attach(new DestinationDefinition(
     routingScope: 'account',
     routingKey: 'account-123',
     target: 'https://receiver.example.test/webhooks/partner',
-    targetType: WebhookProxyTargetType::REQUEST,
+    targetType: DestinationTargetType::REQUEST->value,
 ));
 ```
 

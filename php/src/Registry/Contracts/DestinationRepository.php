@@ -7,7 +7,7 @@ namespace Webong\Proxy\Registry\Contracts;
 use Webong\Proxy\DestinationDefinition;
 use Webong\Proxy\DestinationRecord;
 use Webong\Proxy\EndpointRecord;
-use Webong\Proxy\WebhookRoute;
+use Webong\Proxy\DestinationRoute;
 
 /**
  * Storage port; implementations own persistence, transactions and schema.
@@ -18,7 +18,7 @@ interface DestinationRepository
     public function attach(EndpointRecord $endpoint, DestinationDefinition $definition): DestinationRecord;
 
     /** @return list<DestinationRecord> Active records in stable creation order. */
-    public function destinationsFor(EndpointRecord $endpoint, WebhookRoute $route): array;
+    public function destinationsFor(EndpointRecord $endpoint, DestinationRoute $route): array;
 
     public function destinationById(string $id): ?DestinationRecord;
 
