@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Move destination execution types and `WebhookRoute` into the Laravel adapter.
+  Core uses string target types and `DestinationRoute`; remove the old enum name
+  without a compatibility alias. This changes registry API signatures.
+
 - Make the repository root the installable `webong/proxy` PHP core, with source
   under `php/src/` and the optional `webong/proxy-laravel` adapter unchanged.
 - Use Composer Source Plugin ^0.5 to install both libraries from one provisioned

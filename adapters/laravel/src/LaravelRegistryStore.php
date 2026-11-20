@@ -189,7 +189,7 @@ class LaravelRegistryStore implements EndpointRepository, DestinationRepository,
     }
 
     /** @return list<DestinationRecord> */
-    public function destinationsFor(EndpointRecord $endpoint, WebhookRoute $route): array
+    public function destinationsFor(EndpointRecord $endpoint, DestinationRoute $route): array
     {
         return WebProxyDestination::query()
             ->where('endpoint_id', $endpoint->id)
@@ -301,7 +301,7 @@ class LaravelRegistryStore implements EndpointRepository, DestinationRepository,
             webhook_group: (string) $destination->webhook_group,
             routing_scope: (string) $destination->routing_scope,
             routing_key: (string) $destination->routing_key,
-            target_type: $destination->target_type,
+            target_type: $destination->target_type->value,
             target: (string) $destination->target,
             metadata: is_array($destination->metadata) ? $destination->metadata : [],
             is_active: (bool) $destination->is_active,

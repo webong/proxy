@@ -126,7 +126,7 @@ it('supports application-owned endpoint and destination identities through the l
     $record = new EndpointRecord('app:endpoint', 'app', 'external', 'key', null, null, null, [], true, true, 'https://app.test');
     $destination = new \Webong\Proxy\DestinationRecord(
         'app:destination', $record->id, 'owner', 'registration', 'events', 'account', 'one',
-        \Webong\Proxy\Enums\WebhookProxyTargetType::REQUEST, 'https://receiver.test', [], true,
+        \Webong\Proxy\Enums\DestinationTargetType::REQUEST->value, 'https://receiver.test', [], true,
     );
     $endpoints = Mockery::mock(EndpointRepository::class);
     $endpoints->shouldReceive('resolveById')->once()->with('app:endpoint')->andReturn($record);

@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Webong\Proxy;
 
 use InvalidArgumentException;
-use Webong\Proxy\Enums\WebhookProxyTargetType;
+use Webong\Proxy\Enums\DestinationTargetType;
 
 final class WebhookTargetRegistry
 {
     /**
      * @return class-string
      */
-    public function resolve(WebhookProxyTargetType $type, string $key): string
+    public function resolve(DestinationTargetType $type, string $key): string
     {
         $target = $this->all()[$type->value][$key] ?? null;
 

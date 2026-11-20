@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Webong\Proxy\Models;
 
 use Webong\Proxy\Database\SubscriptionIdentity;
-use Webong\Proxy\Enums\WebhookProxyTargetType;
+use Webong\Proxy\Enums\DestinationTargetType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property WebhookProxyTargetType $target_type
+ * @property DestinationTargetType $target_type
  * @property array<string, mixed>|null $metadata
  */
 class WebProxyDestination extends Model
@@ -117,7 +117,7 @@ class WebProxyDestination extends Model
     protected function casts(): array
     {
         return [
-            'target_type' => WebhookProxyTargetType::class,
+            'target_type' => DestinationTargetType::class,
             'metadata' => 'array',
             'is_active' => 'boolean',
             'last_delivered_at' => 'immutable_datetime',

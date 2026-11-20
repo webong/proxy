@@ -7,7 +7,7 @@ namespace Webong\Proxy;
 use Webong\Proxy\Contracts\WebhookEvent;
 use Webong\Proxy\Contracts\WebhookJob;
 use Webong\Proxy\Database\SubscriptionIdentity;
-use Webong\Proxy\Enums\WebhookProxyTargetType;
+use Webong\Proxy\Enums\DestinationTargetType;
 use Webong\Proxy\Models\WebProxyDestination;
 use Webong\Proxy\Models\WebProxyEndpoint;
 use Illuminate\Support\Collection;
@@ -78,7 +78,7 @@ class DatabaseDestinationAttacher
                 'webhook_group' => $definition->webhookGroup,
                 'routing_scope' => $definition->routingScope,
                 'routing_key' => $definition->routingKey,
-                'target_type' => $definition->targetType->value,
+                'target_type' => $definition->targetType,
             ];
 
             return WebProxyDestination::query()->updateOrCreate(
@@ -183,14 +183,15 @@ class DatabaseDestinationAttacher
             }
         }
 
-        $isValidTarget = match ($definition->targetType) {
-            WebhookProxyTargetType::REQUEST => filter_var($definition->target, FILTER_VALIDATE_URL) !== false,
-            WebhookProxyTargetType::EVENT => is_a($definition->target, WebhookEvent::class, true),
-            WebhookProxyTargetType::JOB => $this->isValidJobTarget($definition->target),
+        $isValidTarget = match (DestinationTargetType::tryFrom($definition->targetType)) {
+            DestinationTargetType::REQUEST => filter_var($definition->target, FILTER_VALIDATE_URL) !== false,
+            DestinationTargetType::EVENT => is_a($definition->target, WebhookEvent::class, true),
+            DestinationTargetType::JOB => $this->isValidJobTarget($definition->target),
+            default => false,
         };
 
         if (! $isValidTarget) {
-            throw new RuntimeException("The webhook proxy {$definition->targetType->value} target is invalid.");
+            throw new RuntimeException("The webhook proxy {$definition->targetType} target is invalid.");
         }
     }
 

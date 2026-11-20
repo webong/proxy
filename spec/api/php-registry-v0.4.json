@@ -983,7 +983,7 @@
                 "static": false
             },
             "targetType": {
-                "type": "Webong\\Proxy\\Enums\\WebhookProxyTargetType",
+                "type": "string",
                 "readonly": true,
                 "static": false
             },
@@ -1052,7 +1052,7 @@
                     },
                     {
                         "name": "targetType",
-                        "type": "Webong\\Proxy\\Enums\\WebhookProxyTargetType",
+                        "type": "string",
                         "optional": true,
                         "variadic": false,
                         "by_reference": false,
@@ -1156,7 +1156,7 @@
                 "static": false
             },
             "target_type": {
-                "type": "Webong\\Proxy\\Enums\\WebhookProxyTargetType",
+                "type": "string",
                 "readonly": true,
                 "static": false
             },
@@ -1236,7 +1236,7 @@
                     },
                     {
                         "name": "target_type",
-                        "type": "Webong\\Proxy\\Enums\\WebhookProxyTargetType",
+                        "type": "string",
                         "optional": false,
                         "variadic": false,
                         "by_reference": false,
@@ -1265,6 +1265,92 @@
                         "variadic": false,
                         "by_reference": false,
                         "default": null
+                    }
+                ]
+            }
+        }
+    },
+    "Webong\\Proxy\\DestinationRoute": {
+        "abstract": false,
+        "final": false,
+        "readonly": true,
+        "parent": null,
+        "interfaces": [],
+        "properties": {
+            "destinationMetadata": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "headers": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "key": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            },
+            "payload": {
+                "type": "array",
+                "readonly": true,
+                "static": false
+            },
+            "scope": {
+                "type": "string",
+                "readonly": true,
+                "static": false
+            }
+        },
+        "constants": [],
+        "methods": {
+            "__construct": {
+                "abstract": false,
+                "final": false,
+                "returns_reference": false,
+                "static": false,
+                "return_type": "",
+                "parameters": [
+                    {
+                        "name": "scope",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "key",
+                        "type": "string",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "payload",
+                        "type": "array",
+                        "optional": false,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": null
+                    },
+                    {
+                        "name": "headers",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": []
+                    },
+                    {
+                        "name": "destinationMetadata",
+                        "type": "array",
+                        "optional": true,
+                        "variadic": false,
+                        "by_reference": false,
+                        "default": []
                     }
                 ]
             }
@@ -1621,7 +1707,7 @@
             }
         }
     },
-    "Webong\\Proxy\\Enums\\WebhookProxyTargetType": {
+    "Webong\\Proxy\\Enums\\DestinationTargetType": {
         "abstract": false,
         "final": true,
         "readonly": false,
@@ -1855,7 +1941,7 @@
                     },
                     {
                         "name": "route",
-                        "type": "Webong\\Proxy\\WebhookRoute",
+                        "type": "Webong\\Proxy\\DestinationRoute",
                         "optional": false,
                         "variadic": false,
                         "by_reference": false,
@@ -2453,7 +2539,7 @@
                     },
                     {
                         "name": "route",
-                        "type": "Webong\\Proxy\\WebhookRoute",
+                        "type": "Webong\\Proxy\\DestinationRoute",
                         "optional": false,
                         "variadic": false,
                         "by_reference": false,
@@ -2782,7 +2868,7 @@
         "abstract": false,
         "final": true,
         "readonly": true,
-        "parent": null,
+        "parent": "Webong\\Proxy\\DestinationRoute",
         "interfaces": [],
         "properties": {
             "destinationMetadata": {

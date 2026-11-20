@@ -13,7 +13,7 @@ use Webong\Proxy\Attributes\WebhookTarget;
 use Webong\Proxy\Contracts\Router;
 use Webong\Proxy\Contracts\WebhookEvent;
 use Webong\Proxy\Contracts\WebhookJob;
-use Webong\Proxy\Enums\WebhookProxyTargetType;
+use Webong\Proxy\Enums\DestinationTargetType;
 
 final class WebhookDiscovery
 {
@@ -47,14 +47,14 @@ final class WebhookDiscovery
                 }
                 $target = $attribute->newInstance();
                 $type = $target->type ?? match (true) {
-                    is_a($class, WebhookJob::class, true) => WebhookProxyTargetType::JOB,
-                    is_a($class, WebhookEvent::class, true) => WebhookProxyTargetType::EVENT,
+                    is_a($class, WebhookJob::class, true) => DestinationTargetType::JOB,
+                    is_a($class, WebhookEvent::class, true) => DestinationTargetType::EVENT,
                     default => null,
                 };
                 $valid = match ($type) {
-                    WebhookProxyTargetType::JOB => is_a($class, WebhookJob::class, true),
-                    WebhookProxyTargetType::EVENT => is_a($class, WebhookEvent::class, true),
-                    WebhookProxyTargetType::REQUEST, null => false,
+                    DestinationTargetType::JOB => is_a($class, WebhookJob::class, true),
+                    DestinationTargetType::EVENT => is_a($class, WebhookEvent::class, true),
+                    DestinationTargetType::REQUEST, null => false,
                 };
                 if (! $valid) {
                     throw new RuntimeException("Webhook target [{$class}] must implement a WebhookJob or WebhookEvent contract.");
