@@ -1,7 +1,7 @@
 # PHP setup and upgrades
 
-The repository root is `webong/proxy`. Its source lives in `php/src/` and its
-runtime dependencies are PHP and Guzzle. `adapters/laravel/` is the optional
+The repository root is `webong/proxy`. Its source lives in `src/php/` and its
+runtime dependencies are PHP and Guzzle. `pkg/laravel/` is the optional
 `webong/proxy-laravel` package, which requires the core and owns Laravel, Spatie,
 configuration, persistence and migrations. PHP namespaces and public APIs stay
 unchanged. There is no third workspace package.
@@ -27,7 +27,7 @@ Then add this configuration to the application's root `composer.json`:
     "extra": {
         "source-plugin": {
             "workspaces": {
-                "include": ["ext/proxy", "ext/proxy/adapters/laravel"],
+                "include": ["ext/proxy", "ext/proxy/pkg/laravel"],
                 "symlink": false
             }
         }
@@ -57,6 +57,17 @@ With `symlink: false`, Composer copies the libraries into vendor. Reinstall them
 after changing the checkout. Use `symlink: true` for local development if you want
 source edits to take effect immediately.
 
+## Upgrade an existing checkout
+
+The source directories are now `src/php/`, `src/go/` and `pkg/laravel/`.
+Update consumer workspace entries from `ext/proxy/adapters/laravel` to
+`ext/proxy/pkg/laravel` before refreshing the lock. In Proxy itself, run
+`composer update --prefer-dist` to replace the old adapter path in the ignored
+root lock and regenerate the core autoloader. Consumers should update their
+Proxy requirements and reinstall copied packages after provisioning the new
+checkout. Preserve existing migration history and application data; only source
+paths change. Old release metadata and tags retain their original directories.
+
 ## Work on Proxy
 
 ```sh
@@ -67,7 +78,7 @@ make workspace-check
 ```
 
 The bootstrap seeds a compatible plugin before resolving the root project. The
-root supplies the core itself and links only `adapters/laravel`; there should be
+root supplies the core itself and links only `pkg/laravel`; there should be
 no `vendor/webong/proxy` dependency inside this repository. When upgrading an old
 checkout, run `composer update --prefer-dist` explicitly after bootstrap to refresh
 its existing root lock. Bootstrap repairs missing seed files and upgrades an
@@ -85,9 +96,10 @@ neutral core contains registry interfaces and records; custom stores implement
 those interfaces and own their own schema. The adapter continues to own its
 existing migrations and encrypted Eloquent store. This layout change does not
 move application data or require a new database migration. See the
-[Laravel guide](../adapters/laravel/README.md) for installation and upgrades.
+[Laravel guide](../pkg/laravel/README.md) for installation and upgrades.
 
-Go remains `github.com/webong/proxy/go`, with tags such as `go/v0.4.0`. Legacy
+Go now uses `github.com/webong/proxy/src/go`, with future tags `src/go/vX.Y.Z`.
+This module path is not yet released; existing `go/v0.4.0` stays unchanged. Legacy
 root Go versions remain immutable. Shared wire profiles retain JSON version 1.
 Canonical fixtures live under `spec/` and `tests/fixtures/tls`; run
 `python3 scripts/sync_go_testdata.py` after editing them. The checked-in Go copies

@@ -68,7 +68,7 @@ function installed(string $consumer): array
 
 mkdir($lab.'/artifacts');
 $packages = [];
-foreach (['webong/proxy' => $source, 'webong/proxy-laravel' => $source.'/adapters/laravel'] as $name => $path) {
+foreach (['webong/proxy' => $source, 'webong/proxy-laravel' => $source.'/pkg/laravel'] as $name => $path) {
     $manifest = json_decode(file_get_contents($path.'/composer.json'), true, flags: JSON_THROW_ON_ERROR);
     $file = str_replace('/', '-', $name);
     command(['composer', 'archive', '--format=zip', '--dir='.$lab.'/artifacts', '--file='.$file, '--no-interaction'],
@@ -86,8 +86,8 @@ foreach (['webong/proxy' => $source, 'webong/proxy-laravel' => $source.'/adapter
         }
     }
     if ($name === 'webong/proxy') {
-        check($archive->locateName('php/src/Http/HttpProfile.php') !== false, 'Root package lost core source.');
-        check($archive->locateName('adapters/laravel/composer.json') !== false, 'Source bundle lost its optional package.');
+        check($archive->locateName('src/php/Http/HttpProfile.php') !== false, 'Root package lost core source.');
+        check($archive->locateName('pkg/laravel/composer.json') !== false, 'Source bundle lost its optional package.');
     }
     $archive->close();
     $manifest['version'] = '0.4.0';
@@ -102,7 +102,7 @@ command(['git', 'init', '--quiet'], $snapshot, $lab.'/archive-home');
 command(['git', 'add', '--all'], $snapshot, $lab.'/archive-home');
 $tree = trim(command(['git', 'write-tree'], $snapshot, $lab.'/archive-home'));
 // The installable root owns core; its bundle retains the optional adapter.
-foreach (['webong/proxy' => '', 'webong/proxy-laravel' => 'adapters/laravel'] as $name => $subtree) {
+foreach (['webong/proxy' => '', 'webong/proxy-laravel' => 'pkg/laravel'] as $name => $subtree) {
     $zip = $lab.'/artifacts/'.str_replace('/', '-', $name).'-vcs.zip';
     command(['git', 'archive', '--format=zip', '--output='.$zip, $subtree === '' ? $tree : $tree.':'.$subtree], $snapshot, $lab.'/archive-home');
     $archive = new ZipArchive();
@@ -112,7 +112,7 @@ foreach (['webong/proxy' => '', 'webong/proxy-laravel' => 'adapters/laravel'] as
         $entryName = $archive->getNameIndex($entry);
         check(! preg_match('~^(vendor|tests|packages)(/|$)~', $entryName), 'Development files leaked into '.$name);
         if ($name === 'webong/proxy-laravel') {
-            check(! preg_match('~^(adapters|go|php)(/|$)~', $entryName), 'Unrelated source in adapter ZIP.');
+            check(! preg_match('~^(pkg|go|php)(/|$)~', $entryName), 'Unrelated source in adapter ZIP.');
         }
         if ($name === 'webong/proxy') {
             check(! preg_match('~^(config|database)(/|$)~', $entryName), 'Adapter resources leaked into PHP core.');
@@ -124,7 +124,7 @@ foreach (['webong/proxy' => '', 'webong/proxy-laravel' => 'adapters/laravel'] as
     ];
 }
 $goZip = $lab.'/artifacts/proxy-go-vcs.zip';
-command(['git', 'archive', '--format=zip', '--output='.$goZip, $tree.':go'], $snapshot, $lab.'/archive-home');
+command(['git', 'archive', '--format=zip', '--output='.$goZip, $tree.':src/go'], $snapshot, $lab.'/archive-home');
 $archive = new ZipArchive();
 check($archive->open($goZip) === true, 'Cannot inspect Go module ZIP.');
 foreach (['go.mod', 'httpclient/factory.go', 'testdata/tls/ca.pem', 'testdata/spec/api/go-v0.3.json'] as $resource) {
@@ -135,14 +135,14 @@ $goCheckout = $lab.'/vcs-go';
 mkdir($goCheckout);
 $archive->extractTo($goCheckout);
 $archive->close();
-check(str_contains(file_get_contents($goCheckout.'/go.mod'), 'module github.com/webong/proxy/go'), 'Go module path is incorrect.');
+check(str_contains(file_get_contents($goCheckout.'/go.mod'), 'module github.com/webong/proxy/src/go'), 'Go module path is incorrect.');
 command(['go', 'test', '-race', './...'], $goCheckout, $lab.'/go-home',
     ['GOCACHE' => getenv('GOCACHE') ?: $lab.'/go-cache', 'GOWORK' => 'off']);
 command(['go', 'vet', './...'], $goCheckout, $lab.'/go-home',
     ['GOCACHE' => getenv('GOCACHE') ?: $lab.'/go-cache', 'GOWORK' => 'off']);
 // Exercise the Go module ZIP/proxy protocol with an empty module cache and no
 // replace directive. Never write synthetic candidate versions to the user's cache.
-$module = 'github.com/webong/proxy/go';
+$module = 'github.com/webong/proxy/src/go';
 $proxy = $lab.'/go-proxy/'.$module.'/@v';
 mkdir($proxy, 0700, true);
 writeJson($proxy.'/v0.4.0.info', ['Version' => 'v0.4.0', 'Time' => gmdate('Y-m-d\TH:i:s\Z')]);
@@ -317,7 +317,7 @@ check(! file_exists($workspace.'/vendor/webong/proxy'), 'Root core must not inst
 check(is_link($workspace.'/vendor/webong/proxy-laravel'), 'Laravel workspace was not linked.');
 $resolved = installed($workspace);
 check(! isset($resolved['webong/proxy']), 'Root core must not be a dependency.');
-check($resolved['webong/proxy-laravel']['dist']['url'] === 'adapters/laravel', 'Workspace path is not portable.');
+check($resolved['webong/proxy-laravel']['dist']['url'] === 'pkg/laravel', 'Workspace path is not portable.');
 check(! isset($resolved['webong/proxy-transport']) && ! isset($resolved['webong/proxy-registry']), 'Obsolete child packages remain.');
 command(['composer', 'source:workspaces', '--json'], $workspace, $workspace.'/home');
 $clone = $lab.'/workspace-lock-clone';
@@ -325,7 +325,7 @@ copyCheckout($source, $clone);
 copy($workspace.'/composer.lock', $clone.'/composer.lock');
 command(['composer', 'install', '--no-plugins', '--no-interaction'], $clone, $clone.'/home');
 check(is_link($clone.'/vendor/webong/proxy-laravel')
-    && realpath($clone.'/vendor/webong/proxy-laravel') === realpath($clone.'/adapters/laravel'),
+    && realpath($clone.'/vendor/webong/proxy-laravel') === realpath($clone.'/pkg/laravel'),
     'Fresh clone did not recreate the portable adapter workspace link.');
 check(! file_exists($clone.'/vendor/webong/proxy'), 'Root core was installed twice after lock replay.');
 command([PHP_BINARY, 'scripts/check_php_api.php'], $workspace, $workspace.'/home');

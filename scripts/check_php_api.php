@@ -24,9 +24,9 @@ spl_autoload_register(static function (string $class): void {
         return;
     }
     $relative = str_replace('\\', '/', substr($class, strlen($prefix))).'.php';
-    $path = __DIR__.'/../php/src/'.$relative;
+    $path = __DIR__.'/../src/php/'.$relative;
     if (! is_file($path)) {
-        $path = __DIR__.'/../adapters/laravel/src/'.$relative;
+        $path = __DIR__.'/../pkg/laravel/src/'.$relative;
     }
     if (is_file($path)) {
         require $path;

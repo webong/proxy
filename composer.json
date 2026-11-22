@@ -9,7 +9,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Webong\\Proxy\\": "php/src/"
+            "Webong\\Proxy\\": "src/php/"
         }
     },
     "extra": {
@@ -17,15 +17,15 @@
             "surfaces": {
                 "php": {
                     "include": [
-                        "php/src/**",
-                        "php/README.md",
+                        "src/php/**",
+                        "src/php/README.md",
                         "README.md",
                         "LICENSE"
                     ]
                 }
             },
             "workspaces": [
-                "adapters/laravel"
+                "pkg/laravel"
             ]
         },
         "branch-alias": {
@@ -37,7 +37,7 @@
             "/vendor",
             "/tests",
             "/.github",
-            "/go",
+            "/src/go",
             "/scripts",
             "/spec",
             "/composer.lock",
@@ -45,10 +45,10 @@
             "/composer-source.lock",
             "/.phpunit.cache",
             "/Makefile",
-            "/php/vendor",
-            "/php/composer.lock",
-            "/adapters/laravel/vendor",
-            "/adapters/laravel/composer.lock",
+            "/src/php/vendor",
+            "/src/php/composer.lock",
+            "/pkg/laravel/vendor",
+            "/pkg/laravel/composer.lock",
             "/.git"
         ]
     },

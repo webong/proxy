@@ -3,11 +3,9 @@
 /vendor/
 /composer.bootstrap.lock
 
-/php/vendor/
-/php/composer.lock
-/adapters/*/vendor/
-/adapters/*/composer.lock
+/src/php/vendor/
+/src/php/composer.lock
+/pkg/*/vendor/
+/pkg/*/composer.lock
 
 __pycache__/
-
-# Publication staging is merged into the reviewed root index before commit.

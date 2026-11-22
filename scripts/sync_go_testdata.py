@@ -46,7 +46,7 @@ def fixture_sources(root):
 
 def synchronize(root, check):
     files = fixture_sources(root)
-    target = root / 'go/testdata'
+    target = root / 'src/go/testdata'
     for path in [target / 'spec', target / 'tls', *((target / p).parent for p in files)]:
         require_real_directory(path, root)
     actual = {p.relative_to(target) for folder in ['spec', 'tls']

@@ -15,20 +15,21 @@ The PHP core requires PHP 8.3+ and Guzzle. Laravel is optional.
 
 PHP applications can install both libraries from one checkout using Composer
 Source Plugin. Follow the [PHP setup guide](spec/COMPOSER.md), then see the
-[PHP API](php/README.md) or [Laravel integration](adapters/laravel/README.md).
+[PHP API](src/php/README.md) or [Laravel integration](pkg/laravel/README.md).
 Existing public PHP 0.4.0 download links need repair; use the checkout setup.
 
-For Go, use `go get github.com/webong/proxy/go@v0.4.0`.
-See the [Go guide](go/README.md) for examples.
+The Go source now uses `github.com/webong/proxy/src/go`. This path has not yet
+been released; existing `go/v0.4.0` remains at its old module path.
+See the [Go guide](src/go/README.md) for examples.
 
 ## Repository
 
 ```text
 proxy/
 ├── composer.json        webong/proxy: neutral PHP package
-├── php/src/             PHP transports and registry contracts
-├── adapters/laravel/    webong/proxy-laravel: Laravel and Spatie integration
-├── go/                  github.com/webong/proxy/go
+├── src/php/             PHP transports and registry contracts
+├── pkg/laravel/         webong/proxy-laravel: Laravel and Spatie integration
+├── src/go/              github.com/webong/proxy/src/go
 ├── spec/                shared contracts and fixtures
 ├── tests/               PHP and integration tests
 └── scripts/             development tools
@@ -39,8 +40,8 @@ proxy/
 ```sh
 php scripts/bootstrap-composer.php
 composer test
-go -C go test -race ./...
-go -C go vet ./...
+go -C src/go test -race ./...
+go -C src/go vet ./...
 make packaging
 make workspace-check
 ```

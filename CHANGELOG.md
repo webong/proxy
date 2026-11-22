@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Move neutral PHP source to `src/php/`, Go to `src/go/` and the Laravel package
+  to `pkg/laravel/`. Root remains the `webong/proxy` Composer package.
+- Change the Go module path to `github.com/webong/proxy/src/go`; future tags use
+  `src/go/vX.Y.Z`. Existing releases and tags remain immutable. Update imports
+  and provision the new Laravel workspace path before refreshing consumer locks.
+
 - Move destination execution types and `WebhookRoute` into the Laravel adapter.
   Core uses string target types and `DestinationRoute`; remove the old enum name
   without a compatibility alias. This changes registry API signatures.

@@ -4,10 +4,10 @@
 /composer.bootstrap.json export-ignore
 /composer.bootstrap.lock export-ignore
 /.phpunit.cache export-ignore
-/php/vendor export-ignore
-/php/composer.lock export-ignore
-/adapters/laravel/vendor export-ignore
-/adapters/laravel/composer.lock export-ignore
+/src/php/vendor export-ignore
+/src/php/composer.lock export-ignore
+/pkg/laravel/vendor export-ignore
+/pkg/laravel/composer.lock export-ignore
 /tests export-ignore
 /scripts export-ignore
 /spec export-ignore
