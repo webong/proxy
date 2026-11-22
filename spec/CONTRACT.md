@@ -13,12 +13,12 @@ the existing Laravel registry/webhook APIs. See [adoption guide](ADOPTING.md) an
 | HTTP profile JSON v1 | `http-profile.schema.json`, [HTTP semantics](README.md), shared profile/bypass/credential fixtures |
 | TCP profile JSON v1 | `tcp-profile.schema.json`, [TCP semantics](tcp.md), TCP/CONNECT fixtures |
 | UDP profile JSON v1 | `udp-profile.schema.json`, [UDP semantics](udp.md), UDP/frame fixtures |
-| Go source API | `api/go-v0.3.json`, external consumer tests in `go/tests/contract` |
+| Go source API | `api/go-v0.3.json`, external consumer tests in `src/go/tests/contract` |
 | PHP source API | `api/php-v0.3.json`, standalone `scripts/check_php_api.php`, public consumer tests |
 | Schema identity | `api/schemas-v0.3.json`, checked by the schema CI job |
 
 The Go packages are `httpprofile`, `httpclient`, `socketprofile`, `tcpdial` and
-`udpdial` under `github.com/webong/proxy/go` (the v0.4 module location).
+`udpdial` under `github.com/webong/proxy/src/go` (the v0.5 module location).
 The pre-v0.4 module used `github.com/webong/proxy`; update import prefixes when
 upgrading. API shapes and the existing v0.3 snapshot remain unchanged. The snapshot also records the fields
 and methods of the internal types exposed through public Address/ReplyError
@@ -98,7 +98,7 @@ consumer integration.
 
 ## Updating the baseline
 
-Normal checks are `go -C go test -race ./...`, `go -C go vet ./...`, `composer test`, and
+Normal checks are `go -C src/go test -race ./...`, `go -C src/go vet ./...`, `composer test`, and
 `python scripts/check_profile_schemas.py` (Python requires `jsonschema>=4,<5`).
 Go source snapshots exclude implementation fields, bodies and error strings.
 They record exported variable names; exact public error-variable types are
@@ -115,7 +115,7 @@ compatibility by themselves.
 Only after an explicit contract review:
 
 ```sh
-go -C go run ./scripts/snapshot-api -write -baseline ../spec/api/go-v0.3.json
+go -C src/go run ./scripts/snapshot-api -write -baseline ../../spec/api/go-v0.3.json
 python3 scripts/sync_go_testdata.py
 php scripts/check_php_api.php --write
 ```
@@ -138,7 +138,7 @@ original three constructor arguments. Collection-returning compatibility APIs
 remain in the Laravel adapter; neutral selection returns a plain list.
 
 `php scripts/check_php_api.php --registry` checks the candidate snapshot in
-`spec/api/php-registry-v0.4.json`, including neutral types, ports, the Laravel store and the legacy
+`spec/api/php-registry-v0.5.json`, including neutral types, ports, the Laravel store and the legacy
 provider interface/facade. `composer test` runs both PHP guards. After an explicit
 review, regenerate the registry snapshot with `--registry --write`; do not rewrite
 the immutable transport v0.3 baseline to accept registry changes. Snapshot checks

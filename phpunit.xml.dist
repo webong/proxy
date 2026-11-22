@@ -12,8 +12,8 @@
     </testsuites>
     <source>
         <include>
-            <directory>php/src</directory>
-            <directory>adapters/laravel/src</directory>
+            <directory>src/php</directory>
+            <directory>pkg/laravel/src</directory>
         </include>
     </source>
     <php>

@@ -14,6 +14,6 @@ it('accepts application-defined destination types without adapter enums', functi
 it('keeps webhook execution types in the Laravel adapter without old enum aliases', function (): void {
     expect(enum_exists('Webong\\Proxy\\Enums\\WebhookProxyTargetType'))->toBeFalse();
     foreach ([Webong\Proxy\Enums\DestinationTargetType::class, Webong\Proxy\WebhookRoute::class] as $type) {
-        expect(str_replace('\\', '/', (new ReflectionClass($type))->getFileName()))->toContain('adapters/laravel/src/');
+        expect(str_replace('\\', '/', (new ReflectionClass($type))->getFileName()))->toContain('pkg/laravel/src/');
     }
 });

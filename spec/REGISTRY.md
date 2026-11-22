@@ -12,10 +12,10 @@ ports under `Webong\Proxy\Registry\Contracts`:
   query them by owner, registration and webhook group.
 - `ProfileRepository`: upsert and retrieve named endpoint profiles.
 
-Install with `composer require webong/proxy:^0.4`. This is an unreleased
-candidate: publish the package before installing that version from Packagist.
-The existing record names remain `Webong\Proxy\EndpointRecord`, etc. The Laravel
-adapter requires core ^0.4, preventing duplicate ownership with older releases.
+Use the [one-checkout Composer setup](COMPOSER.md) for version 0.5.0.
+The root core and optional Laravel adapter come from the same pinned checkout;
+there is no separate PHP distribution repository. The adapter requires core
+^0.5, preventing coexistence with older releases that owned its classes.
 
 An application implements the ports it needs and owns its schema, migrations,
 connection lifecycle, encryption, validation policy and transaction boundaries.

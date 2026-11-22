@@ -1,7 +1,7 @@
 # PHP setup and upgrades
 
-The repository root is `webong/proxy`. Its source lives in `php/src/` and its
-runtime dependencies are PHP and Guzzle. `adapters/laravel/` is the optional
+The repository root is `webong/proxy`. Its source lives in `src/php/` and its
+runtime dependencies are PHP and Guzzle. `pkg/laravel/` is the optional
 `webong/proxy-laravel` package, which requires the core and owns Laravel, Spatie,
 configuration, persistence and migrations. PHP namespaces and public APIs stay
 unchanged. There is no third workspace package.
@@ -27,7 +27,7 @@ Then add this configuration to the application's root `composer.json`:
     "extra": {
         "source-plugin": {
             "workspaces": {
-                "include": ["ext/proxy", "ext/proxy/adapters/laravel"],
+                "include": ["ext/proxy", "ext/proxy/pkg/laravel"],
                 "symlink": false
             }
         }
@@ -35,11 +35,11 @@ Then add this configuration to the application's root `composer.json`:
 }
 ```
 
-For the neutral library, require `webong/proxy:^0.4`. For Laravel integration,
-require `webong/proxy-laravel:^0.4`; it brings in the core:
+For the neutral library, require `webong/proxy:^0.5`. For Laravel integration,
+require `webong/proxy-laravel:^0.5`; it brings in the core:
 
 ```sh
-composer require webong/proxy-laravel:^0.4
+composer require webong/proxy-laravel:^0.5
 ```
 
 Neutral applications can omit the adapter workspace. The plugin reads workspace
@@ -57,6 +57,17 @@ With `symlink: false`, Composer copies the libraries into vendor. Reinstall them
 after changing the checkout. Use `symlink: true` for local development if you want
 source edits to take effect immediately.
 
+## Upgrade an existing checkout
+
+The source directories are now `src/php/`, `src/go/` and `pkg/laravel/`.
+Update consumer workspace entries from `ext/proxy/adapters/laravel` to
+`ext/proxy/pkg/laravel` before refreshing the lock. In Proxy itself, run
+`composer update --prefer-dist` to replace the old adapter path in the ignored
+root lock and regenerate the core autoloader. Consumers should update their
+Proxy requirements and reinstall copied packages after provisioning the new
+checkout. Preserve existing migration history and application data; only source
+paths change. Old release metadata and tags retain their original directories.
+
 ## Work on Proxy
 
 ```sh
@@ -67,13 +78,13 @@ make workspace-check
 ```
 
 The bootstrap seeds a compatible plugin before resolving the root project. The
-root supplies the core itself and links only `adapters/laravel`; there should be
+root supplies the core itself and links only `pkg/laravel`; there should be
 no `vendor/webong/proxy` dependency inside this repository. When upgrading an old
 checkout, run `composer update --prefer-dist` explicitly after bootstrap to refresh
 its existing root lock. Bootstrap repairs missing seed files and upgrades an
 incompatible plugin seed without silently replacing the root dependency lock.
 
-The root and adapter declare version 0.4.0 so provisioned checkouts without Git
+The root and adapter declare version 0.5.0 so provisioned checkouts without Git
 metadata satisfy their constraints. Validate these source manifests using
 `composer validate --strict --no-check-version`. This version field does not
 publish a release or change existing tags.
@@ -85,9 +96,10 @@ neutral core contains registry interfaces and records; custom stores implement
 those interfaces and own their own schema. The adapter continues to own its
 existing migrations and encrypted Eloquent store. This layout change does not
 move application data or require a new database migration. See the
-[Laravel guide](../adapters/laravel/README.md) for installation and upgrades.
+[Laravel guide](../pkg/laravel/README.md) for installation and upgrades.
 
-Go remains `github.com/webong/proxy/go`, with tags such as `go/v0.4.0`. Legacy
+Go uses `github.com/webong/proxy/src/go`, tagged `src/go/v0.5.0`.
+Existing `go/v0.4.0` stays unchanged. Legacy
 root Go versions remain immutable. Shared wire profiles retain JSON version 1.
 Canonical fixtures live under `spec/` and `tests/fixtures/tls`; run
 `python3 scripts/sync_go_testdata.py` after editing them. The checked-in Go copies
@@ -102,7 +114,7 @@ requirements. Bootstrap checks cover cold installs, old seeds and damaged files.
 
 The deleted PHP distribution repositories are still referenced by existing
 public 0.4.0 metadata. These checkout instructions avoid those download URLs;
-they do not repair them. No new repository, registry entry, release or catalog is
-created by this change. Historical tests use exact immutable monorepo trees and
+they do not repair them. Version 0.5.0 is tagged in this repository. No separate repository, package
+catalog or registry repair is required for the provisioned-checkout workflow. Historical tests use exact immutable monorepo trees and
 frozen metadata in `tests/fixtures/composer/history.json`; passing those fixtures
 is not evidence that old public download URLs work.

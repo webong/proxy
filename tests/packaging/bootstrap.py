@@ -34,7 +34,7 @@ def write(path, value):
 # vendor copy of the core or any preinstalled plugin.
 run('php', 'scripts/bootstrap-composer.php')
 assert not (ROOT/'vendor/webong/proxy').exists()
-assert (ROOT/'vendor/webong/proxy-laravel').resolve() == (ROOT/'adapters/laravel').resolve()
+assert (ROOT/'vendor/webong/proxy-laravel').resolve() == (ROOT/'pkg/laravel').resolve()
 run('php', '-r', "require 'vendor/autoload.php'; if (Composer\\InstalledVersions::getRootPackage()['name'] !== 'webong/proxy' || !class_exists(Webong\\Proxy\\Http\\HttpProfileNormalizer::class)) exit(1);")
 print('PASS cold checkout: root core and optional adapter install', flush=True)
 shutil.rmtree(ROOT/'vendor')
@@ -158,6 +158,14 @@ previous = {
 }
 '''),
 }
+# Retain the old adapter version/constraint alongside the historical core manifest.
+previous['adapters/laravel/composer.json'] = json.loads((ROOT/'pkg/laravel/composer.json').read_text())
+previous['adapters/laravel/composer.json']['version'] = '0.4.0'
+previous['adapters/laravel/composer.json']['require']['webong/proxy'] = '^0.4.0'
+# Supply historical source paths while installing the old manifest/lock.
+shutil.copytree(ROOT/'src/php', ROOT/'php/src')
+shutil.copytree(ROOT/'pkg/laravel', ROOT/'adapters/laravel')
+(ROOT/'php').mkdir(exist_ok=True)
 original = {name: (ROOT/name).read_bytes() if (ROOT/name).exists() else None
             for name in previous}
 for name, value in previous.items():
@@ -173,6 +181,8 @@ for name, value in original.items():
         (ROOT/name).unlink()
     else:
         (ROOT/name).write_bytes(value)
+shutil.rmtree(ROOT/'php')
+shutil.rmtree(ROOT/'adapters')
 run('php', 'scripts/bootstrap-composer.php', '--plugin-only')
 assert (ROOT/'composer.lock').read_bytes() == root_lock
 # The normal entry point must not silently rewrite the incompatible root lock.
@@ -180,7 +190,7 @@ run('php', 'scripts/bootstrap-composer.php', success=False)
 assert (ROOT/'composer.lock').read_bytes() == root_lock
 run('composer', 'update', '--prefer-dist', '--no-interaction')
 assert not (ROOT/'vendor/webong/proxy').exists(), 'Core must be supplied by the root package'
-assert (ROOT/'vendor/webong/proxy-laravel').resolve() == (ROOT/'adapters/laravel').resolve()
+assert (ROOT/'vendor/webong/proxy-laravel').resolve() == (ROOT/'pkg/laravel').resolve()
 run('php', '-r', "require 'vendor/autoload.php'; if (Composer\\InstalledVersions::getRootPackage()['name'] !== 'webong/proxy' || !class_exists(Webong\\Proxy\\Http\\HttpProfileNormalizer::class)) exit(1);")
 seed_lock = (ROOT/'composer.bootstrap.lock').read_bytes()
 root_lock = (ROOT/'composer.lock').read_bytes()

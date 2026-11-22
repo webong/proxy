@@ -44,22 +44,27 @@ def scenario(kind):
     run(root, "composer", "install", "--prefer-dist", "--no-interaction")
     include = ["ext/proxy"]
     if kind == "laravel":
-        include.append("ext/proxy/adapters/laravel")
+        include.append("ext/proxy/pkg/laravel")
     manifest["extra"] = {"source-plugin": {"workspaces": {
         "include": include, "symlink": kind == "core"}}}
-    manifest["require"] = {"webong/proxy-laravel" if kind == "laravel" else "webong/proxy": "^0.4"}
+    manifest["require"] = {"webong/proxy-laravel" if kind == "laravel" else "webong/proxy": "^0.5"}
     write(root, manifest)
     run(root, "composer", "update", "--prefer-dist", "--no-interaction")
     lock = json.loads((root / "composer.lock").read_text())
     packages = {p["name"]: p for p in lock["packages"]}
     assert packages["webong/proxy"]["dist"]["url"] == "ext/proxy"
     assert packages["webong/proxy"]["dist"]["type"] == "path"
-    assert not (root / "ext/proxy/php/composer.json").exists()
+    assert (root / "ext/proxy/src/php/Http/HttpProfile.php").is_file()
+    assert (root / "ext/proxy/src/go/go.mod").is_file()
+    assert (root / "ext/proxy/pkg/laravel/composer.json").is_file()
+    assert not (root / "ext/proxy/src/php/composer.json").exists()
+    for old in ["php", "go", "adapters"]:
+        assert not (root / "ext/proxy" / old).exists()
     assert "repositories" not in json.loads((root / "composer.json").read_text())
     assert "webong/proxy-workspace" not in packages
     assert "webong/proxy-workspace" not in manifest["require"]
     if kind == "laravel":
-        assert packages["webong/proxy-laravel"]["dist"]["url"] == "ext/proxy/adapters/laravel"
+        assert packages["webong/proxy-laravel"]["dist"]["url"] == "ext/proxy/pkg/laravel"
         assert not (root / "vendor/webong/proxy").is_symlink()
         assert not (root / "vendor/webong/proxy-laravel").is_symlink()
     else:
