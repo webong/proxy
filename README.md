@@ -18,8 +18,8 @@ Source Plugin. Follow the [PHP setup guide](spec/COMPOSER.md), then see the
 [PHP API](src/php/README.md) or [Laravel integration](pkg/laravel/README.md).
 Existing public PHP 0.4.0 download links need repair; use the checkout setup.
 
-The Go source now uses `github.com/webong/proxy/src/go`. This path has not yet
-been released; existing `go/v0.4.0` remains at its old module path.
+For Go, use `go get github.com/webong/proxy/src/go@v0.5.0`.
+The module is tagged `src/go/v0.5.0`; older versions keep their original paths.
 See the [Go guide](src/go/README.md) for examples.
 
 ## Repository

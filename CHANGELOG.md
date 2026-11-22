@@ -2,24 +2,24 @@
 
 ## Unreleased
 
-- Move neutral PHP source to `src/php/`, Go to `src/go/` and the Laravel package
-  to `pkg/laravel/`. Root remains the `webong/proxy` Composer package.
-- Change the Go module path to `github.com/webong/proxy/src/go`; future tags use
-  `src/go/vX.Y.Z`. Existing releases and tags remain immutable. Update imports
-  and provision the new Laravel workspace path before refreshing consumer locks.
+## v0.5.0 — 2026-11-22
 
-- Move destination execution types and `WebhookRoute` into the Laravel adapter.
-  Core uses string target types and `DestinationRoute`; remove the old enum name
-  without a compatibility alias. This changes registry API signatures.
-
-- Make the repository root the installable `webong/proxy` PHP core, with source
-  under `php/src/` and the optional `webong/proxy-laravel` adapter unchanged.
-- Use Composer Source Plugin ^0.5 to install both libraries from one provisioned
-  checkout, without a third package or a generated package catalog.
-- Test standalone installs, copied and linked workspaces, cold lock replay,
-  bootstrap upgrades, archive contents and historical compatibility.
-- Preserve PHP namespaces, APIs, migration ownership and Go module versions.
-  No package publication or public download repair is included.
+- Organize PHP source in `src/php/`, Go in `src/go/`, and Laravel/Spatie
+  integration in `pkg/laravel/`. The repository root is `webong/proxy`;
+  the optional adapter is `webong/proxy-laravel`. Both declare 0.5.0.
+- Install both PHP packages from one pinned checkout using Composer Source Plugin
+  ^0.5.1. No separate package repositories or catalog are needed. Existing public
+  PHP 0.4.0 download URLs remain unchanged; use the documented checkout setup.
+- Change Go imports to `github.com/webong/proxy/src/go`, tagged `src/go/v0.5.0`.
+  Existing module paths/tags remain available for older versions.
+- Move `WebhookRoute` and destination execution types into the Laravel adapter.
+  Core repositories use `DestinationRoute` and string target types. Replace
+  `WebhookProxyTargetType` with adapter `DestinationTargetType` and pass its
+  `->value` to core definitions. No old enum alias is retained.
+- Update workspace paths and refresh consumer locks/autoload files. Preserve
+  stored target values, registry data, encryption and migration history.
+- Verify isolated archives, independent Go consumers, Laravel 12/13 clean installs,
+  plugin-free lock replay, bootstrap upgrades and historical registry upgrades.
 
 ## v0.4.0 — 2026-11-15
 

@@ -2,7 +2,7 @@
 
 For the current PHP package layout, use [the Composer upgrade guide](COMPOSER.md).
 The Go module now lives in `src/go/` with import prefix `github.com/webong/proxy/src/go`
-and future tags such as `src/go/vX.Y.Z` (not yet released); [the Go guide](../src/go/README.md) describes that change.
+and tags such as `src/go/v0.5.0`; [the Go guide](../src/go/README.md) describes that change.
 The migration statements below apply to the historical v0.3.0 transport release.
 
 ## Why this guide exists

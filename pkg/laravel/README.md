@@ -153,10 +153,10 @@ not included in `proxy-migrations`.
 
 ## Upgrade from Proxy 0.3
 
-For version 0.4.0, change the application's Composer
-requirement from `webong/proxy:^0.3` to `webong/proxy-laravel:^0.4`. The adapter
-requires `webong/proxy:^0.4`, which now combines transports and registry contracts.
-If a direct core requirement is retained, update it to ^0.4 as well. Applications
+For version 0.5.0, change the application's Composer
+requirement from `webong/proxy:^0.3` to `webong/proxy-laravel:^0.5`. The adapter
+requires `webong/proxy:^0.5`, which now combines transports and registry contracts.
+If a direct core requirement is retained, update it to ^0.5 as well. Applications
 opting out of discovery must change `extra.laravel.dont-discover` from
 `webong/proxy` to `webong/proxy-laravel` (a wildcard opt-out remains effective). Existing PHP
 namespaces, provider classes, publish tags, configuration keys and migration
@@ -181,7 +181,8 @@ extraction to a different application is included.
 
 ## Development
 
-Run bootstrap and tests from the repository root; this package is linked as a
-development workspace. No Composer plugin is required by consumers. Public
-publication requires exposing the `pkg/laravel` subtree as an independent Composer repository
-or artifact package after the core 0.4.0 release is available.
+Run bootstrap and tests from the repository root; the adapter is linked from
+`pkg/laravel`. Consumers use the root application's Composer Source Plugin
+workspaces to install both libraries from one pinned checkout. See the
+[setup guide](https://github.com/webong/proxy/blob/main/spec/COMPOSER.md).
+Locked production installs can disable plugins once the checkout is provisioned.

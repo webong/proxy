@@ -17,7 +17,7 @@ Development, issue tracking and future distribution use the
 [Proxy monorepo](https://github.com/webong/proxy).
 
 For Laravel persistence and Spatie webhook integration, install
-`webong/proxy-laravel:^0.4` instead. That package requires this core and owns
+`webong/proxy-laravel:^0.5` instead. That package requires this core and owns
 Eloquent models, encryption, providers, configuration and migrations. See the
 [Laravel integration guide](https://github.com/webong/proxy/blob/main/pkg/laravel/README.md).
 
@@ -79,7 +79,7 @@ transport defaults and no overall request deadline. Caller-supplied clients own
 redirect and destination authorization policies. No queue or registry persistence is included in the Go library.
 
 Run Go checks from the repository root with `go -C src/go test -race ./...` and
-`go -C src/go vet ./...`. Go module release tags use `src/go/vX.Y.Z` (not yet released).
+`go -C src/go vet ./...`. Go module release tags use `src/go/v0.5.0`.
 
 ## TCP dialers and SOCKS5
 
@@ -192,16 +192,16 @@ control-connection lifetime, source filtering, and unsupported SOCKS fragmentati
 
 ## Development and upgrade
 
-This `php/` directory is the `webong/proxy` Composer package. The repository root
-is a development workspace linking both `php` and `pkg/laravel`. Ordinary
-consumers require no Composer plugin. Run bootstrap and tests from the repository
-root; see its README and the packaging guide.
+The repository root is the `webong/proxy` Composer package; `src/php/` holds
+its source and `pkg/laravel/` is the optional adapter. Consumers install both from
+one pinned checkout through Composer Source Plugin. Run bootstrap and tests from
+the repository root; see the setup guide for cold and plugin-free locked installs.
 
 PHP namespaces remain unchanged. Go now uses `github.com/webong/proxy/src/go`; its
 import paths and release tags change while transport APIs and JSON version 1
 remain compatible in shape.
 Existing Laravel consumers must replace their old direct `webong/proxy:^0.3`
-requirement with `webong/proxy-laravel:^0.4` (or update both constraints if retaining
+requirement with `webong/proxy-laravel:^0.5` (or update both constraints if retaining
 a direct core requirement). The package split does not convert registry data.
 The Laravel adapter still requires the subscription-lock migration introduced by
 the concurrency fix; publish/run it before using the new adapter.

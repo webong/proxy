@@ -47,7 +47,7 @@ def scenario(kind):
         include.append("ext/proxy/pkg/laravel")
     manifest["extra"] = {"source-plugin": {"workspaces": {
         "include": include, "symlink": kind == "core"}}}
-    manifest["require"] = {"webong/proxy-laravel" if kind == "laravel" else "webong/proxy": "^0.4"}
+    manifest["require"] = {"webong/proxy-laravel" if kind == "laravel" else "webong/proxy": "^0.5"}
     write(root, manifest)
     run(root, "composer", "update", "--prefer-dist", "--no-interaction")
     lock = json.loads((root / "composer.lock").read_text())

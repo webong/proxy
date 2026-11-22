@@ -4,8 +4,8 @@ Module: **`github.com/webong/proxy/src/go`**, Go 1.23+. HTTP profiles/client fac
 direct and SOCKS5 TCP dialers, HTTP/HTTPS CONNECT, direct UDP and SOCKS5 UDP
 ASSOCIATE. The module has no external Go dependencies and no registry store.
 
-This source layout is not yet released. Future releases use repository tags
-`src/go/vX.Y.Z`. Existing `go/v0.4.0` remains unchanged and installs the previous
+Install with `go get github.com/webong/proxy/src/go@v0.5.0`.
+Version 0.5.0 uses tag `src/go/v0.5.0`. Existing `go/v0.4.0` installs the previous
 `github.com/webong/proxy/go` module.
 
 ```go
@@ -29,8 +29,7 @@ document TLS, SOCKS authentication, UDP limits and supported PHP/Go asymmetries.
 ## Upgrade to this layout
 
 Change imports from `github.com/webong/proxy/go/` (or legacy
-`github.com/webong/proxy/`) to `github.com/webong/proxy/src/go/`. Once a version
-is released under `src/go/vX.Y.Z`, require that version and run `go mod tidy`.
+`github.com/webong/proxy/`) to `github.com/webong/proxy/src/go/`. Require v0.5.0 of the new module and run `go mod tidy`.
 For local development, use a consuming workspace or an explicit local replace
 pointing to this module. No compatibility wrappers or root Go module are added.
 Old versions and their tags remain unchanged.

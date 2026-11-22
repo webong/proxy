@@ -158,6 +158,10 @@ previous = {
 }
 '''),
 }
+# Retain the old adapter version/constraint alongside the historical core manifest.
+previous['adapters/laravel/composer.json'] = json.loads((ROOT/'pkg/laravel/composer.json').read_text())
+previous['adapters/laravel/composer.json']['version'] = '0.4.0'
+previous['adapters/laravel/composer.json']['require']['webong/proxy'] = '^0.4.0'
 # Supply historical source paths while installing the old manifest/lock.
 shutil.copytree(ROOT/'src/php', ROOT/'php/src')
 shutil.copytree(ROOT/'pkg/laravel', ROOT/'adapters/laravel')

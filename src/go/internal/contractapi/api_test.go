@@ -143,7 +143,7 @@ func TestIndependentModuleConsumer(t *testing.T) {
 		t.Fatal(err)
 	}
 	consumer := t.TempDir()
-	manifest := fmt.Sprintf("module proxy-consumer\n\ngo 1.23.0\n\nrequire github.com/webong/proxy/src/go v0.4.0\nreplace github.com/webong/proxy/src/go => %s\n", strconv.Quote(root))
+	manifest := fmt.Sprintf("module proxy-consumer\n\ngo 1.23.0\n\nrequire github.com/webong/proxy/src/go v0.5.0\nreplace github.com/webong/proxy/src/go => %s\n", strconv.Quote(root))
 	if err = os.WriteFile(filepath.Join(consumer, "go.mod"), []byte(manifest), 0600); err != nil {
 		t.Fatal(err)
 	}

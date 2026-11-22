@@ -120,7 +120,7 @@ foreach ($classes as $class) {
 ksort($api);
 // Enum cases in constants and defaults compare by their JSON wire value.
 $api = json_decode(json_encode($api, JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR), true, flags: JSON_THROW_ON_ERROR);
-$baseline = $registry ? 'php-registry-v0.4.json' : 'php-v0.3.json';
+$baseline = $registry ? 'php-registry-v0.5.json' : 'php-v0.3.json';
 $path = __DIR__.'/../spec/api/'.$baseline;
 if (in_array('--dump', $argv, true)) {
     echo json_encode($api, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR)."\n";
@@ -136,5 +136,5 @@ if (in_array('--dump', $argv, true)) {
     fwrite(STDERR, "Public PHP API changed; review spec/CONTRACT.md before updating spec/api/{$baseline}.\n");
     exit(1);
 } else {
-    echo $registry ? "PHP registry API matches v0.4 candidate baseline.\n" : "PHP transport API matches frozen v0.3 baseline.\n";
+    echo $registry ? "PHP registry API matches v0.5 baseline.\n" : "PHP transport API matches frozen v0.3 baseline.\n";
 }

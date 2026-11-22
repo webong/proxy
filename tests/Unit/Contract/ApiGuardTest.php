@@ -8,7 +8,7 @@ function withTransportApiFixture(callable $test): void
     $root = sys_get_temp_dir().'/proxy-api-fixture-'.bin2hex(random_bytes(8));
     mkdir($root, 0700);
     try {
-        foreach (['scripts/check_php_api.php', 'spec/api/php-v0.3.json', 'spec/api/php-registry-v0.4.json'] as $file) {
+        foreach (['scripts/check_php_api.php', 'spec/api/php-v0.3.json', 'spec/api/php-registry-v0.5.json'] as $file) {
             if (! is_dir(dirname($root.'/'.$file))) {
                 mkdir(dirname($root.'/'.$file), 0700, true);
             }

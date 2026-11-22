@@ -35,11 +35,11 @@ Then add this configuration to the application's root `composer.json`:
 }
 ```
 
-For the neutral library, require `webong/proxy:^0.4`. For Laravel integration,
-require `webong/proxy-laravel:^0.4`; it brings in the core:
+For the neutral library, require `webong/proxy:^0.5`. For Laravel integration,
+require `webong/proxy-laravel:^0.5`; it brings in the core:
 
 ```sh
-composer require webong/proxy-laravel:^0.4
+composer require webong/proxy-laravel:^0.5
 ```
 
 Neutral applications can omit the adapter workspace. The plugin reads workspace
@@ -84,7 +84,7 @@ checkout, run `composer update --prefer-dist` explicitly after bootstrap to refr
 its existing root lock. Bootstrap repairs missing seed files and upgrades an
 incompatible plugin seed without silently replacing the root dependency lock.
 
-The root and adapter declare version 0.4.0 so provisioned checkouts without Git
+The root and adapter declare version 0.5.0 so provisioned checkouts without Git
 metadata satisfy their constraints. Validate these source manifests using
 `composer validate --strict --no-check-version`. This version field does not
 publish a release or change existing tags.
@@ -98,8 +98,8 @@ existing migrations and encrypted Eloquent store. This layout change does not
 move application data or require a new database migration. See the
 [Laravel guide](../pkg/laravel/README.md) for installation and upgrades.
 
-Go now uses `github.com/webong/proxy/src/go`, with future tags `src/go/vX.Y.Z`.
-This module path is not yet released; existing `go/v0.4.0` stays unchanged. Legacy
+Go uses `github.com/webong/proxy/src/go`, tagged `src/go/v0.5.0`.
+Existing `go/v0.4.0` stays unchanged. Legacy
 root Go versions remain immutable. Shared wire profiles retain JSON version 1.
 Canonical fixtures live under `spec/` and `tests/fixtures/tls`; run
 `python3 scripts/sync_go_testdata.py` after editing them. The checked-in Go copies
@@ -114,7 +114,7 @@ requirements. Bootstrap checks cover cold installs, old seeds and damaged files.
 
 The deleted PHP distribution repositories are still referenced by existing
 public 0.4.0 metadata. These checkout instructions avoid those download URLs;
-they do not repair them. No new repository, registry entry, release or catalog is
-created by this change. Historical tests use exact immutable monorepo trees and
+they do not repair them. Version 0.5.0 is tagged in this repository. No separate repository, package
+catalog or registry repair is required for the provisioned-checkout workflow. Historical tests use exact immutable monorepo trees and
 frozen metadata in `tests/fixtures/composer/history.json`; passing those fixtures
 is not evidence that old public download URLs work.

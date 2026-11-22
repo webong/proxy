@@ -18,7 +18,7 @@ the existing Laravel registry/webhook APIs. See [adoption guide](ADOPTING.md) an
 | Schema identity | `api/schemas-v0.3.json`, checked by the schema CI job |
 
 The Go packages are `httpprofile`, `httpclient`, `socketprofile`, `tcpdial` and
-`udpdial` under `github.com/webong/proxy/src/go` (the new, unreleased source layout).
+`udpdial` under `github.com/webong/proxy/src/go` (the v0.5 module location).
 The pre-v0.4 module used `github.com/webong/proxy`; update import prefixes when
 upgrading. API shapes and the existing v0.3 snapshot remain unchanged. The snapshot also records the fields
 and methods of the internal types exposed through public Address/ReplyError
@@ -138,7 +138,7 @@ original three constructor arguments. Collection-returning compatibility APIs
 remain in the Laravel adapter; neutral selection returns a plain list.
 
 `php scripts/check_php_api.php --registry` checks the candidate snapshot in
-`spec/api/php-registry-v0.4.json`, including neutral types, ports, the Laravel store and the legacy
+`spec/api/php-registry-v0.5.json`, including neutral types, ports, the Laravel store and the legacy
 provider interface/facade. `composer test` runs both PHP guards. After an explicit
 review, regenerate the registry snapshot with `--registry --write`; do not rewrite
 the immutable transport v0.3 baseline to accept registry changes. Snapshot checks

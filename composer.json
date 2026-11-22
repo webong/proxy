@@ -29,7 +29,7 @@
             ]
         },
         "branch-alias": {
-            "dev-main": "0.4.x-dev"
+            "dev-main": "0.5.x-dev"
         }
     },
     "archive": {
@@ -52,7 +52,7 @@
             "/.git"
         ]
     },
-    "version": "0.4.0",
+    "version": "0.5.0",
     "conflict": {
         "webong/proxy-transport": "*",
         "webong/proxy-registry": "*"
@@ -62,7 +62,7 @@
         "pestphp/pest": "^4.0",
         "pestphp/pest-plugin-laravel": "^4.0",
         "webong/composer-source-plugin": "^0.5.0",
-        "webong/proxy-laravel": "^0.4.0"
+        "webong/proxy-laravel": "^0.5.0"
     },
     "autoload-dev": {
         "psr-4": {
